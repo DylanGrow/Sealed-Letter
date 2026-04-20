@@ -71,13 +71,27 @@
    .skip-link { position: absolute; top: -100px; left: 1rem; background: var(--accent); color: white; padding: 0.75rem 1.5rem; font-family: var(--font-mono); font-weight: bold; text-decoration: none; z-index: 10000; border-radius: 4px; transition: top 0.2s; }
    .skip-link:focus { top: 1rem; }
 
-    /* CUSTOM CURSOR - decorative only */
-   .cursor-core,.cursor-glow { position: fixed; pointer-events: none; will-change: transform; transform: translate(-50%, -50%); opacity: 0; }
-   .cursor-core { width: 14px; height: 14px; background: radial-gradient(circle, #c0392b 0%, #8b1a 60%, transparent 100%); border-radius: 50%; z-index: 10000; transition: width 0.15s, height 0.15s, opacity 0.2s; box-shadow: 0 0 12px 4px rgba(139,26,26,0.5); }
-   .cursor-glow { width: 32px; height: 32px; background: radial-gradient(circle, rgba(192,57,43,0.18) 0%, transparent 70%); border-radius: 50%; z-index: 9998; transition: width 0.3s, height 0.3s, opacity 0.2s; }
-   .cursor-core.hovering { width: 22px; height: 22px; }
-   .cursor-glow.hovering { width: 56px; height: 56px; }
-   .cursor-core.clicking { width: 8px; height: 8px; }
+    /* CUSTOM FLAME CURSOR */
+   .cursor-core, .cursor-glow { position: fixed; pointer-events: none; will-change: transform; transform: translate(-50%, -50%); opacity: 0; z-index: 9999; }
+   .cursor-core { 
+      width: 18px; height: 18px; 
+      background: radial-gradient(circle at 30% 70%, #fff 0%, #ffeb3b 30%, #ff9800 60%, #f44336 90%); 
+      border-radius: 0 50% 50% 50%; 
+      animation: flicker 0.12s infinite alternate;
+      box-shadow: 0 0 10px #ff9800;
+    }
+   .cursor-glow { 
+      width: 40px; height: 40px; 
+      background: radial-gradient(circle, rgba(255,152,0,0.4) 0%, transparent 70%); 
+      border-radius: 50%; 
+      animation: pulseGlow 1s infinite alternate;
+    }
+    @keyframes flicker { 
+      0% { transform: translate(-50%, -50%) rotate(-45deg) scale(0.9); opacity: 0.8; filter: brightness(1); } 
+      100% { transform: translate(-50%, -50%) rotate(-45deg) scale(1.1); opacity: 1; filter: brightness(1.2); } 
+    }
+    @keyframes pulseGlow { 0% { transform: translate(-50%, -50%) scale(1); } 100% { transform: translate(-50%, -50%) scale(1.3); } }
+
     @media (hover: hover) and (pointer: fine) {
       body.cursor-ready { cursor: none; }
       body.cursor-ready button, body.cursor-ready.tab-btn, body.cursor-ready a { cursor: none; }
@@ -94,31 +108,28 @@
    .wax-seal { display: inline-block; width: 72px; height: 72px; margin-bottom: 1.5rem; animation: fadeUp 0.6s both, sealPulse 4s ease-in-out infinite 1.5s; filter: drop-shadow(0 4px 12px rgba(139,26,0.5)); }
     @keyframes sealPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
 
-   .main-typewriter {
-      font-family: var(--font-display);
-      font-size: clamp(1.6rem, 4.5vw, 2.6rem);
-      font-weight: 700;
-      line-height: 1.3;
-      color: var(--text);
-      min-height: 4rem;
-      max-width: 580px;
-      margin: 0.5rem auto 0;
-      text-shadow: 1px 1px 0px rgba(139,94,60,0.15);
-    }
-   .typewriter-cursor { display: inline-block; width: 2px; height: 1.1em; background-color: var(--accent); margin-left: 2px; animation: blink 1.1s step-end infinite; vertical-align: baseline; }
-    @keyframes blink { 50% { opacity: 0; } }
-   .typewriter-cursor.done { display: none; }
-
    .nav-tabs { display: flex; margin-bottom: 0; border-radius: 8px 0 0; overflow: hidden; animation: fadeUp 0.9s 0.1s both; }
    .tab-btn { flex: 1; background: #e8d5b0; border: 2px solid var(--border); border-bottom: none; color: var(--muted); font-family: var(--font-display); font-size: clamp(0.9rem, 2.5vw, 1.15rem); font-weight: 700; font-style: italic; padding: clamp(0.8rem, 2vw, 1.1rem) 1rem; letter-spacing: 1px; transition: var(--transition); }
    .tab-btn[aria-selected="true"] { background: var(--card-bg); color: var(--card-text); border-color: var(--card-bg); }
    .tab-btn[aria-selected="false"]:hover { background: #d4c09a; color: var(--text); }
    .tab-btn:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: -3px; }
 
-   .card { background: var(--card-bg); border: 2px solid var(--border-card); border-top: none; padding: clamp(1.5rem, 4vw, 2.5rem); border-radius: 0 0 12px 12px; box-shadow: var(--card-shadow); position: relative; overflow: hidden; animation: fadeUp 1s 0.2s both; }
+   .card { background: var(--card-bg); border: 2px solid var(--border-card); border-top: none; padding: clamp(1.5rem, 4vw, 2.5rem); border-radius: 0 0 12px 12px; box-shadow: var(--card-shadow); position: relative; overflow: hidden; animation: fadeUp 1s 0.2s both; transition: transform 0.1s, filter 0.3s; }
    .card::before { content: ''; position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='leather'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.65' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23leather)' opacity='0.06'/%3E%3C/svg%3E"); pointer-events: none; }
    .card::after { content: '❧'; position: absolute; top: 1rem; right: 1.2rem; font-size: 1.5rem; color: rgba(245,200,154,0.2); }
    .card > * { position: relative; z-index: 1; }
+
+   /* Magic Seal Animation */
+   .card.magic-seal-active {
+     animation: magicShake 0.6s cubic-bezier(.36,.07,.19,.97) both;
+     filter: drop-shadow(0 0 30px #ff3300) brightness(1.2);
+   }
+   @keyframes magicShake {
+     10%, 90% { transform: translate3d(-2px, 0, 0); }
+     20%, 80% { transform: translate3d(4px, 0, 0); }
+     30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
+     40%, 60% { transform: translate3d(8px, 0, 0); }
+   }
 
    .view-section { display: none; }
    .view-section:not([hidden]) { display: block; animation: panelFadeIn 0.4s; }
@@ -133,17 +144,22 @@
     input:focus, textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,215,0.2); }
     textarea { resize: none; min-height: 180px; }
 
+    /* Highly visible requirement */
    .passkey-hint {
       margin-top: 0.8rem;
+      padding: 0.8rem;
+      border: 2px dashed #ff4444;
+      background: rgba(255,68,68,0.1);
+      border-radius: 6px;
       font-family: var(--font-mono);
-      font-size: clamp(0.95rem, 2.3vw, 1.15rem);
-      color: var(--gold-bright);
-      font-weight: 700;
-      letter-spacing: 0.8px;
-      text-shadow: 0 0 10px rgba(255,215,0,0.3), 0 1px 2px rgba(0,0,0,0.5);
-      min-height: 1.5rem;
+      font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+      color: #ff6b6b;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-align: center;
+      min-height: 2rem;
     }
-   .hint-cursor { display: inline-block; width: 2px; height: 1.1em; background: var(--gold-bright); margin-left: 3px; animation: blink 1s step-end infinite; vertical-align: text-bottom; box-shadow: 0 0 6px rgba(255,215,0,0.6); }
+   .hint-cursor { display: inline-block; width: 2px; height: 1.1em; background: #ff6b6b; margin-left: 3px; animation: blink 1s step-end infinite; vertical-align: text-bottom; }
 
    .ornamental-divider { text-align: center; color: rgba(245,200,154,0.3); font-size: 1.2rem; margin: 1.5rem 0; letter-spacing: 8px; }
 
@@ -166,6 +182,22 @@
 
    .retrieved-wrapper { margin-top: 1.5rem; animation: fadeUp 0.4s; }
    .retrieved-wrapper[hidden] { display: none; }
+   
+   /* Blockquote styling */
+   .retrieved-quote {
+     font-family: var(--font-body);
+     font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+     line-height: 1.8;
+     color: var(--card-text);
+     border-left: 4px solid var(--gold);
+     padding: 1rem 1.5rem;
+     background: rgba(0,0,0,0.2);
+     border-radius: 0 8px 8px 0;
+     margin-bottom: 1.5rem;
+     white-space: pre-wrap;
+     min-height: 100px;
+   }
+
    .retrieved-actions { display: flex; gap: 0.6rem; margin-top: 0.8rem; }
 
    .modal-overlay { position: fixed; inset: 0; background: rgba(26,15,0,0.75); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1rem; animation: overlayFadeIn 0.25s; }
@@ -185,9 +217,23 @@
     footer { margin-top: clamp(2.5rem, 6vw, 4rem); text-align: center; width: 100%; max-width: 680px; padding-top: 1.5rem; position: relative; z-index: 10; animation: fadeUp 1.1s 0.4s both; }
    .footer-ornament { color: var(--muted); font-size: 1.4rem; letter-spacing: 12px; margin-bottom: 0.8rem; opacity: 0.5; }
    .footer-line { width: 100%; height: 1px; background: linear-gradient(to right, transparent, var(--border), transparent); margin-bottom: 1.2rem; }
-   .bottom-title { font-family: var(--font-display); font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 900; letter-spacing: 5px; text-transform: uppercase; color: var(--muted); margin: 0.8rem 0 0.3rem; opacity: 0.7; }
+   
+   .main-typewriter {
+      font-family: var(--font-display);
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 700;
+      line-height: 1.3;
+      color: var(--muted);
+      min-height: 4rem;
+      max-width: 580px;
+      margin: 0.5rem auto 1rem;
+      text-shadow: 1px 1px 0px rgba(139,94,60,0.15);
+    }
+   .typewriter-cursor { display: inline-block; width: 2px; height: 1.1em; background-color: var(--accent); margin-left: 2px; animation: blink 1.1s step-end infinite; vertical-align: baseline; }
+    @keyframes blink { 50% { opacity: 0; } }
+   .typewriter-cursor.done { display: none; }
+
     footer p { font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted); letter-spacing: 1px; }
-    footer.footer-tagline { font-family: var(--font-body); font-style: italic; font-size: 0.95rem; color: #a07848; margin-bottom: 0.5rem; }
 
    .copy-toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(80px); background: #1a0f00; color: var(--gold-bright); font-family: var(--font-mono); font-size: 0.9rem; font-weight: 700; padding: 0.8rem 1.5rem; border-radius: 8px; border: 1px solid var(--gold); box-shadow: 0 8px 24px rgba(0,0,0,0.5); z-index: 9000; transition: transform 0.35s, opacity 0.35s; opacity: 0; pointer-events: none; }
    .copy-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
@@ -223,9 +269,6 @@
         <circle cx="50" cy="50" r="30" fill="none" stroke="rgba(255,244,214,0.25)" stroke-width="1.5"/>
         <text x="50" y="58" text-anchor="middle" font-family="Georgia, serif" font-size="28" font-weight="bold" fill="rgba(255,244,214,0.9)" font-style="italic">S</text>
       </svg>
-      <p class="main-typewriter" id="tagline-text" aria-live="polite">
-        <span id="typewriter-text"></span><span id="typewriter-cursor" class="typewriter-cursor" aria-hidden="true"></span>
-      </p>
     </header>
 
     <nav aria-label="Application modes">
@@ -235,7 +278,7 @@
       </div>
     </nav>
 
-    <div class="card">
+    <div class="card" id="main-card">
       <section id="panel-write" class="view-section" role="tabpanel" aria-labelledby="tab-write">
         <div class="form-group">
           <label for="note-content"><span>Your Private Message</span><span class="char-count" id="char-count">0 / 5000</span></label>
@@ -264,8 +307,8 @@
         <div id="read-status" class="status-message" role="alert" hidden></div>
         <div class="retrieved-wrapper" id="retrieved-wrapper" hidden>
           <div class="form-group" style="margin-bottom:0.8rem">
-            <label for="retrieved-content">Your Message</label>
-            <textarea id="retrieved-content" readonly></textarea>
+            <label>Your Message</label>
+            <blockquote id="retrieved-content" class="retrieved-quote"></blockquote>
           </div>
           <div class="retrieved-actions">
             <button class="secondary-btn" id="btn-copy">⊕ Copy Message</button>
@@ -279,8 +322,9 @@
   <footer>
     <div class="footer-ornament" aria-hidden="true">✦ ✦ ✦</div>
     <div class="footer-line"></div>
-    <h1 class="bottom-title">Sealed Letter</h1>
-    <p class="footer-tagline">Every secret deserves a seal.</p>
+    <p class="main-typewriter" id="tagline-text" aria-live="polite">
+      <span id="typewriter-text"></span><span id="typewriter-cursor" class="typewriter-cursor" aria-hidden="true"></span>
+    </p>
     <p>Crafted by <strong>Dylan Grow</strong> &copy; 2026</p>
   </footer>
 
@@ -362,12 +406,6 @@
         requestAnimationFrame(update);
       }
       requestAnimationFrame(update);
-      document.querySelectorAll('button,.tab-btn, a').forEach(el=>{
-        el.addEventListener('mouseenter', ()=>{cursorCore.classList.add('hovering');cursorGlow.classList.add('hovering');});
-        el.addEventListener('mouseleave', ()=>{cursorCore.classList.remove('hovering');cursorGlow.classList.remove('hovering');});
-      });
-      document.addEventListener('mousedown', ()=>cursorCore.classList.add('clicking'));
-      document.addEventListener('mouseup', ()=>cursorCore.classList.remove('clicking'));
     }
 
     // Tabs
@@ -394,27 +432,52 @@
 
     // Seal
     const sealModal=document.getElementById('sealModal');
+    const mainCard=document.getElementById('main-card');
     document.getElementById('btn-seal').addEventListener('click',()=>{ const note=noteArea.value.trim(); const pk=passkeyCreate.value; if(!note){showStatus('write-status','error','✕','Your letter is empty.');return;} if(!pk||pk.length<6){showStatus('write-status','error','✕','Passkey must be at least 6 characters.');return;} sealModal.removeAttribute('hidden'); });
     document.getElementById('modalCancel').addEventListener('click',()=>sealModal.setAttribute('hidden','true'));
+    
     document.getElementById('modalConfirm').addEventListener('click', async ()=>{
       sealModal.setAttribute('hidden','true');
+      
+      // Magic Effect Trigger
+      mainCard.classList.add('magic-seal-active');
+      setTimeout(() => mainCard.classList.remove('magic-seal-active'), 600);
+
       const note=noteArea.value.trim(); const pk=passkeyCreate.value;
       showStatus('write-status','loading','','Encrypting and sealing...');
       try{ const h=await hashString(pk); const enc=await encryptNote(note,pk); await set(ref(db,'notes/'+h),{payload:enc,ts:Date.now()}); showStatus('write-status','success','✦','Sealed. Guard your passkey — it cannot be recovered.'); noteArea.value=''; passkeyCreate.value=''; charCount.textContent='0 / 5000'; overwriteWarning.classList.remove('visible'); hintIdx=0; hintStarted=false; hintEl.textContent=''; if(hintCursor) hintCursor.style.display='inline-block'; setTimeout(typeHint,400); }catch(e){ showStatus('write-status','error','✕','Vault unreachable.'); }
     });
 
-    // Open
+    // Open & Blockquote Typewriter
     let currentHash=null;
     document.getElementById('btn-break').addEventListener('click', async ()=>{
       const pk=document.getElementById('passkey-enter').value; const wrap=document.getElementById('retrieved-wrapper'); const out=document.getElementById('retrieved-content');
-      wrap.setAttribute('hidden','true'); out.value=''; if(!pk){showStatus('read-status','error','✕','Enter your passkey.');return;}
+      wrap.setAttribute('hidden','true'); out.textContent=''; if(!pk){showStatus('read-status','error','✕','Enter your passkey.');return;}
       showStatus('read-status','loading','','Searching...');
-      try{ const h=await hashString(pk); const snap=await get(ref(db,'notes/'+h)); if(snap.exists()){ const dec=await decryptNote(snap.val().payload,pk); out.value=dec; currentHash=h; showStatus('read-status','success','❧','The seal is broken.'); wrap.removeAttribute('hidden'); document.getElementById('passkey-enter').value=''; } else { showStatus('read-status','error','✕','No letter found.'); } }catch(e){ showStatus('read-status','error','✕','Could not open.'); }
+      try{ 
+        const h=await hashString(pk); const snap=await get(ref(db,'notes/'+h)); 
+        if(snap.exists()){ 
+          const dec=await decryptNote(snap.val().payload,pk); 
+          currentHash=h; showStatus('read-status','success','❧','The seal is broken.'); 
+          wrap.removeAttribute('hidden'); document.getElementById('passkey-enter').value=''; 
+          
+          // Typewriter reveal logic
+          let i = 0;
+          function typeReveal() {
+            if (i < dec.length) {
+              out.textContent += dec.charAt(i++);
+              setTimeout(typeReveal, 15);
+            }
+          }
+          typeReveal();
+
+        } else { showStatus('read-status','error','✕','No letter found.'); } 
+      }catch(e){ showStatus('read-status','error','✕','Could not open.'); }
     });
 
     // Copy / Burn
     const toast=document.getElementById('copyToast');
-    document.getElementById('btn-copy').addEventListener('click', async ()=>{ const t=document.getElementById('retrieved-content').value; if(!t)return; try{ await navigator.clipboard.writeText(t); toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2200);}catch{} });
+    document.getElementById('btn-copy').addEventListener('click', async ()=>{ const t=document.getElementById('retrieved-content').textContent; if(!t)return; try{ await navigator.clipboard.writeText(t); toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2200);}catch{} });
     document.getElementById('btn-delete').addEventListener('click', async ()=>{ if(!currentHash||!db)return; if(!confirm('Burn this letter permanently?'))return; await remove(ref(db,'notes/'+currentHash)); document.getElementById('retrieved-wrapper').setAttribute('hidden','true'); showStatus('read-status','success','✦','Letter burned.'); currentHash=null; });
   </script>
 </body>
