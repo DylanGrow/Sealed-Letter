@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sealed Letter — Private Notes</title>
   <style>
-    /* Warm, light retro theme with pop-art brutalist elements */
+    /* High-contrast dark retro terminal theme */
     :root {
-      --bg: #FDF9F1; 
-      --text: #1A1A1A; 
-      --accent: #E63946; 
-      --accent-hover: #D62828;
-      --border: #1A1A1A;
-      --focus-ring: #457B9D; 
-      --card-bg: #FFFFFF;
+      --bg: #0a0a0a;
+      --text: #f0f0f0;
+      --accent: #ff2a4b; /* Vibrant wax seal red */
+      --accent-hover: #ff526e;
+      --border: #333333;
+      --focus-ring: #00e5ff; /* Cyan focus for high visibility */
+      --card-bg: #141414;
     }
 
     * {
@@ -24,75 +24,74 @@
 
     /* Accessibility: Respect reduced motion */
     @media (prefers-reduced-motion: reduce) {
-      .custom-cursor-element {
-        display: none !important;
-      }
-      * {
-        animation: none !important;
-        transition: none !important;
-      }
+      .retro-cursor { display: none !important; }
+      * { animation: none !important; transition: none !important; }
     }
 
     body {
-      font-family: "Georgia", "Times New Roman", serif;
+      font-family: "Courier New", Courier, monospace;
       background-color: var(--bg);
       color: var(--text);
-      font-size: 18px; 
+      font-size: 20px; /* Senior-friendly base size */
       line-height: 1.6;
       display: flex;
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
       padding: 2rem 1rem;
-      overflow-x: hidden;
-      /* We hide the default cursor on the body, but restore it for text */
-      cursor: none; 
+      cursor: none; /* Hide default cursor */
     }
 
     .container {
       width: 100%;
-      max-width: 650px;
+      max-width: 700px;
       flex: 1;
       position: relative;
-      z-index: 10; 
+      z-index: 10;
     }
 
-    .sr-only {
-      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;
-    }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
 
     header {
       text-align: center;
-      margin-bottom: 3rem;
+      margin-bottom: 2.5rem;
     }
 
     h1 {
-      font-family: "Arial Black", "Impact", sans-serif;
       font-size: 3rem;
       text-transform: uppercase;
-      letter-spacing: -1px;
+      letter-spacing: 4px;
       color: var(--text);
-      text-shadow: 4px 4px 0px var(--accent);
-      margin-bottom: 1rem;
+      border-bottom: 4px solid var(--accent);
+      display: inline-block;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
     }
 
-    .subtitle {
+    blockquote {
       font-size: 1.2rem;
       font-weight: bold;
-      background: var(--text);
-      color: var(--bg);
-      display: inline-block;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
+      color: #aaaaaa;
+      min-height: 3rem; /* Prevent layout shift during typing */
     }
 
-    /* Retro Card Styling */
+    .typewriter-cursor {
+      display: inline-block;
+      width: 10px;
+      height: 1.2rem;
+      background-color: var(--accent);
+      vertical-align: bottom;
+      margin-left: 4px;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink { 50% { opacity: 0; } }
+    .typewriter-cursor.finished { display: none; }
+
     .card {
       background: var(--card-bg);
-      border: 4px solid var(--border);
-      box-shadow: 8px 8px 0px var(--border);
+      border: 2px solid var(--border);
       padding: 2rem;
-      margin-bottom: 2rem;
       border-radius: 8px;
     }
 
@@ -104,199 +103,153 @@
 
     .tab-btn {
       flex: 1;
-      background: var(--card-bg);
-      border: 3px solid var(--border);
+      background: var(--bg);
+      border: 2px solid var(--border);
       color: var(--text);
-      font-family: "Verdana", "Tahoma", sans-serif;
-      font-size: 1.1rem;
+      font-family: inherit;
+      font-size: 1.2rem;
       font-weight: bold;
       padding: 1rem;
-      box-shadow: 4px 4px 0px var(--border);
-      transition: transform 0.1s, box-shadow 0.1s;
-      border-radius: 6px;
-      cursor: none; /* Hide default pointer, use custom */
+      transition: all 0.2s;
+      cursor: none;
     }
 
     .tab-btn[aria-selected="true"] {
-      background: var(--accent);
-      color: white;
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
     }
 
-    .tab-btn:hover {
-      transform: translate(-2px, -2px);
-      box-shadow: 6px 6px 0px var(--border);
-    }
-
-    .tab-btn:active {
-      transform: translate(2px, 2px);
-      box-shadow: 2px 2px 0px var(--border);
-    }
-
-    .tab-btn:focus-visible,
-    input:focus-visible,
-    textarea:focus-visible,
-    button:focus-visible {
+    .tab-btn:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible {
       outline: 4px solid var(--focus-ring);
       outline-offset: 4px;
     }
 
     .view-section { display: none; }
-    .view-section:not([hidden]) { display: block; animation: slideUp 0.3s ease-out; }
+    .view-section:not([hidden]) { display: block; animation: fadeIn 0.4s ease-in; }
 
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    .form-group { margin-bottom: 1.5rem; }
+    .form-group { margin-bottom: 2rem; }
 
     label {
       display: block;
-      font-family: "Verdana", sans-serif;
       font-weight: bold;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
-    /* Restore native text cursor for inputs! */
-    input[type="text"],
-    textarea {
+    input[type="text"], textarea {
       width: 100%;
       padding: 1rem;
-      font-family: "Courier New", Courier, monospace;
+      font-family: inherit;
       font-size: 1.2rem;
-      font-weight: bold;
       background: var(--bg);
-      border: 3px solid var(--border);
-      color: var(--text);
-      border-radius: 6px;
-      cursor: text !important; 
+      border: 2px solid var(--border);
+      color: var(--focus-ring); /* Makes input text pop */
+      border-radius: 4px;
+      cursor: text !important; /* Force native text caret */
     }
 
-    textarea { resize: vertical; min-height: 180px; }
+    textarea { resize: vertical; min-height: 200px; }
 
     .action-btn {
       width: 100%;
       padding: 1.2rem;
       background: var(--accent);
       color: white;
-      border: 3px solid var(--border);
-      font-family: "Verdana", sans-serif;
-      font-size: 1.3rem;
+      border: none;
+      font-family: inherit;
+      font-size: 1.4rem;
       font-weight: bold;
       text-transform: uppercase;
-      box-shadow: 5px 5px 0px var(--border);
-      transition: transform 0.1s, box-shadow 0.1s;
-      border-radius: 6px;
-      cursor: none; 
+      letter-spacing: 2px;
+      border-radius: 4px;
+      cursor: none;
     }
 
-    .action-btn:hover {
-      background: var(--accent-hover);
-      transform: translate(-2px, -2px);
-      box-shadow: 7px 7px 0px var(--border);
-    }
-
-    .action-btn:active {
-      transform: translate(3px, 3px);
-      box-shadow: 2px 2px 0px var(--border);
-    }
+    .action-btn:hover { background: var(--accent-hover); }
 
     .status-message {
       margin-top: 1.5rem;
       padding: 1.5rem;
-      border: 3px solid var(--border);
-      font-family: "Verdana", sans-serif;
+      border: 2px solid;
       font-weight: bold;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       text-align: center;
-      border-radius: 6px;
     }
 
     .status-message[hidden] { display: none; }
-    .status-success { background: #D8F3DC; border-color: #1B4332; color: #081C15; box-shadow: 4px 4px 0px #1B4332; }
-    .status-error { background: #FFD6D6; border-color: #780000; color: #780000; box-shadow: 4px 4px 0px #780000; }
+    .status-success { border-color: #00ff00; color: #00ff00; background: rgba(0, 255, 0, 0.1); }
+    .status-error { border-color: #ff0000; color: #ff0000; background: rgba(255, 0, 0, 0.1); }
 
     footer {
-      margin-top: 3rem;
+      margin-top: 4rem;
       text-align: center;
-      font-family: "Verdana", sans-serif;
       font-weight: bold;
-      font-size: 1rem;
-      padding-top: 1.5rem;
-      border-top: 4px solid var(--border);
+      font-size: 1.1rem;
+      padding-top: 2rem;
+      border-top: 2px dashed var(--border);
       width: 100%;
-      max-width: 650px;
+      max-width: 700px;
     }
 
-    /* --- Improved Custom Cursor --- */
-    .custom-cursor-element {
+    /* Ultra-Visible X-Ray Cursor */
+    .retro-cursor {
       position: fixed;
-      top: 0; 
-      left: 0;
-      pointer-events: none; /* Let clicks pass through */
+      top: 0; left: 0;
+      width: 30px; height: 30px;
+      background-color: white; /* Combined with difference mode, this makes it perfectly inverted against anything */
+      mix-blend-mode: difference;
+      pointer-events: none;
       z-index: 9999;
-      will-change: transform;
+      transform: translate(-50%, -50%);
+      border-radius: 4px;
+      transition: width 0.1s, height 0.1s, border-radius 0.1s;
     }
 
-    #cursor-dot {
-      width: 10px;
-      height: 10px;
-      background-color: var(--accent);
+    .retro-cursor.hovering {
+      width: 45px; height: 45px;
       border-radius: 50%;
     }
 
-    #cursor-halo {
-      width: 40px;
-      height: 40px;
-      border: 2px solid var(--text);
-      border-radius: 50%;
-      transition: width 0.2s ease, height 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
-    }
-
-    /* When hovering over buttons/tabs */
-    #cursor-halo.hovering {
-      width: 60px;
-      height: 60px;
-      background-color: rgba(230, 57, 70, 0.15); /* Light red tint */
-      border-color: var(--accent);
-    }
-
-    /* Hidden entirely on touch devices */
+    /* Fallback for touch devices */
     @media (hover: none) and (pointer: coarse) {
-      body { cursor: auto; }
-      .tab-btn, .action-btn { cursor: pointer; }
-      .custom-cursor-element { display: none !important; }
+      body, .tab-btn, .action-btn { cursor: auto; }
+      .retro-cursor { display: none !important; }
     }
   </style>
 </head>
 <body>
 
-  <div id="cursor-dot" class="custom-cursor-element" aria-hidden="true"></div>
-  <div id="cursor-halo" class="custom-cursor-element" aria-hidden="true"></div>
+  <div id="retro-cursor" class="retro-cursor" aria-hidden="true"></div>
 
   <main class="container">
     <header>
       <h1>Sealed Letter</h1>
-      <div class="subtitle">Write once. Seal it. Read anywhere.</div>
+      <blockquote>
+        <span id="typewriter-text"></span><span id="typewriter-cursor" class="typewriter-cursor"></span>
+      </blockquote>
     </header>
 
     <nav aria-label="Application modes">
       <div class="nav-tabs" role="tablist">
-        <button id="tab-write" class="tab-btn" role="tab" aria-selected="true" aria-controls="panel-write">Write Note</button>
-        <button id="tab-read" class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-read">Read Note</button>
+        <button id="tab-write" class="tab-btn" role="tab" aria-selected="true" aria-controls="panel-write">Compose Note</button>
+        <button id="tab-read" class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-read">Retrieve Note</button>
       </div>
     </nav>
 
     <section id="panel-write" class="view-section card" role="tabpanel" aria-labelledby="tab-write">
       <div class="form-group">
-        <label for="note-content">1. Type Your Message</label>
-        <textarea id="note-content" placeholder="Type your secrets here... Everything is encrypted." aria-required="true"></textarea>
+        <label for="note-content">Private Message</label>
+        <textarea id="note-content" placeholder="Enter your text here..." aria-required="true"></textarea>
       </div>
 
       <div class="form-group">
-        <label for="passkey-create">2. Create a Passkey</label>
-        <input type="text" id="passkey-create" placeholder="Example: Blue Bird 42" aria-required="true" autocomplete="off">
+        <label for="passkey-create">Master Passkey</label>
+        <input type="text" id="passkey-create" placeholder="E.g., Alpha Bravo 99" aria-required="true" autocomplete="off">
       </div>
 
       <button id="btn-seal" class="action-btn">Seal Letter</button>
@@ -306,17 +259,17 @@
 
     <section id="panel-read" class="view-section card" role="tabpanel" aria-labelledby="tab-read" hidden>
       <div class="form-group">
-        <label for="passkey-enter">Enter Your Passkey</label>
-        <input type="text" id="passkey-enter" placeholder="Type it exactly as you saved it..." aria-required="true" autocomplete="off">
+        <label for="passkey-enter">Enter Passkey</label>
+        <input type="text" id="passkey-enter" placeholder="Exact passkey required..." aria-required="true" autocomplete="off">
       </div>
 
-      <button id="btn-break" class="action-btn">Open Letter</button>
+      <button id="btn-break" class="action-btn">Break Seal</button>
 
       <div id="read-status" class="status-message" role="alert" aria-live="assertive" hidden></div>
       
       <div class="form-group" style="margin-top: 2rem;">
         <label for="retrieved-content" class="sr-only">Retrieved Message</label>
-        <textarea id="retrieved-content" readonly placeholder="Your message will appear here..." aria-label="Retrieved encrypted message"></textarea>
+        <textarea id="retrieved-content" readonly placeholder="Decrypted message appears here..." aria-label="Retrieved encrypted message"></textarea>
       </div>
     </section>
   </main>
@@ -342,61 +295,51 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // ---- Smooth Physics Cursor Logic ----
-    const dot = document.getElementById('cursor-dot');
-    const halo = document.getElementById('cursor-halo');
-    
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
-    let haloX = mouseX;
-    let haloY = mouseY;
+    // ---- Typewriter Effect ----
+    const targetText = "A private ledger for your thoughts. Type your message, set your passkey, and leave no trace behind.";
+    const textContainer = document.getElementById('typewriter-text');
+    const cursorEl = document.getElementById('typewriter-cursor');
+    let typeIndex = 0;
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+      textContainer.textContent = targetText;
+      cursorEl.classList.add('finished');
+    } else {
+      function typeWriter() {
+        if (typeIndex < targetText.length) {
+          textContainer.textContent += targetText.charAt(typeIndex);
+          typeIndex++;
+          setTimeout(typeWriter, 35); // typing speed
+        } else {
+          setTimeout(() => cursorEl.classList.add('finished'), 2000); // Stop blinking after 2 seconds
+        }
+      }
+      setTimeout(typeWriter, 500); // Start delay
+    }
+
+    // ---- X-Ray Cursor Logic ----
+    const customCursor = document.getElementById('retro-cursor');
     const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
     if (!prefersReducedMotion && !isTouchDevice) {
       document.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        // Dot follows mouse instantly
-        dot.style.transform = `translate3d(calc(${mouseX}px - 50%), calc(${mouseY}px - 50%), 0)`;
+        customCursor.style.transform = `translate(calc(${e.clientX}px - 50%), calc(${e.clientY}px - 50%))`;
       });
 
-      // Halo follows with smooth linear interpolation (lerp)
-      function renderHalo() {
-        haloX += (mouseX - haloX) * 0.15; // The smaller the decimal, the more it trails
-        haloY += (mouseY - haloY) * 0.15;
-        halo.style.transform = `translate3d(calc(${haloX}px - 50%), calc(${haloY}px - 50%), 0)`;
-        requestAnimationFrame(renderHalo);
-      }
-      requestAnimationFrame(renderHalo);
+      // Expand on interactive elements
+      const interactives = document.querySelectorAll('button, .tab-btn');
+      interactives.forEach(el => {
+        el.addEventListener('mouseenter', () => customCursor.classList.add('hovering'));
+        el.addEventListener('mouseleave', () => customCursor.classList.remove('hovering'));
+      });
 
-      // Interactive Hover States
-      const buttons = document.querySelectorAll('button');
+      // Hide custom cursor over text fields to allow native caret
       const textInputs = document.querySelectorAll('input, textarea');
-
-      // Expand halo on buttons
-      buttons.forEach(btn => {
-        btn.addEventListener('mouseenter', () => {
-          halo.classList.add('hovering');
-          dot.style.opacity = '0'; // Hide dot while hovering over button
-        });
-        btn.addEventListener('mouseleave', () => {
-          halo.classList.remove('hovering');
-          dot.style.opacity = '1';
-        });
-      });
-
-      // Hide custom cursor elements entirely when over text inputs so the native caret works!
       textInputs.forEach(input => {
-        input.addEventListener('mouseenter', () => {
-          dot.style.display = 'none';
-          halo.style.display = 'none';
-        });
-        input.addEventListener('mouseleave', () => {
-          dot.style.display = 'block';
-          halo.style.display = 'block';
-        });
+        input.addEventListener('mouseenter', () => customCursor.style.opacity = '0');
+        input.addEventListener('mouseleave', () => customCursor.style.opacity = '1');
       });
     }
 
@@ -417,7 +360,6 @@
       tab.addEventListener('keydown', e => {
         let index = Array.prototype.indexOf.call(tabs, e.target);
         let dir = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : null;
-
         if (dir !== null) {
           e.preventDefault();
           let nextIndex = (index + dir + tabs.length) % tabs.length;
@@ -443,13 +385,13 @@
       
       if (!note || !passkey) {
         statusDiv.className = 'status-message status-error';
-        statusDiv.textContent = 'Please fill out both the message and passkey.';
+        statusDiv.textContent = 'SYSTEM ERR: Message and passkey required.';
         statusDiv.removeAttribute('hidden');
         return;
       }
 
       statusDiv.className = 'status-message';
-      statusDiv.textContent = 'Sealing letter...';
+      statusDiv.textContent = 'Encrypting & Sealing...';
       statusDiv.removeAttribute('hidden');
 
       try {
@@ -458,13 +400,13 @@
         await set(ref(db, 'notes/' + hash), { payload: encodedNote });
         
         statusDiv.className = 'status-message status-success';
-        statusDiv.innerHTML = '<strong>Success!</strong> Letter sealed. Write down your passkey.';
+        statusDiv.textContent = 'SEALED. DO NOT LOSE YOUR PASSKEY.';
         
         document.getElementById('note-content').value = '';
         document.getElementById('passkey-create').value = '';
       } catch (e) {
         statusDiv.className = 'status-message status-error';
-        statusDiv.textContent = 'Connection Error. Could not seal letter.';
+        statusDiv.textContent = 'SYSTEM ERR: Database connection failed.';
       }
     });
 
@@ -476,13 +418,13 @@
 
       if (!passkey) {
         statusDiv.className = 'status-message status-error';
-        statusDiv.textContent = 'Please enter your passkey.';
+        statusDiv.textContent = 'SYSTEM ERR: Passkey required.';
         statusDiv.removeAttribute('hidden');
         return;
       }
 
       statusDiv.className = 'status-message';
-      statusDiv.textContent = 'Searching...';
+      statusDiv.textContent = 'Scanning database...';
       statusDiv.removeAttribute('hidden');
 
       try {
@@ -494,16 +436,16 @@
           contentArea.value = decodedNote;
           
           statusDiv.className = 'status-message status-success';
-          statusDiv.innerHTML = '<strong>Seal Broken.</strong> Message below.';
+          statusDiv.textContent = 'SEAL BROKEN. MESSAGE DECRYPTED.';
           document.getElementById('passkey-enter').value = '';
         } else {
           statusDiv.className = 'status-message status-error';
-          statusDiv.textContent = 'Incorrect passkey or no message found.';
+          statusDiv.textContent = 'ACCESS DENIED: Incorrect passkey or no record found.';
           contentArea.value = '';
         }
       } catch (e) {
         statusDiv.className = 'status-message status-error';
-        statusDiv.textContent = 'Connection Error. Could not search database.';
+        statusDiv.textContent = 'SYSTEM ERR: Database connection failed.';
       }
     });
   </script>
