@@ -1,0 +1,21 @@
+{
+  "name": "Sealed Letter",
+  "short_name": "Sealed Letter",
+  "description": "Write a private note, lock it with your own passkey, and retrieve it on any device.",
+  "start_url": "/Sealed-Letter/",
+  "display": "standalone",
+  "background_color": "#f8f8f6",
+  "theme_color": "#0f0a04",
+  "icons": [
+    {
+      "src": "/Sealed-Letter/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/Sealed-Letter/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
