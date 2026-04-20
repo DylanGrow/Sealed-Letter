@@ -7,15 +7,11 @@
   <meta name="description" content="A private ledger for your thoughts. Write, seal, and retrieve secret letters with a passkey.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔴</text></svg>">
 
-  <!-- Google Fonts: Playfair Display + IM Fell English -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IM+Fell+English:ital@0;1&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
   <style>
-    /* ===========================
-       CSS CUSTOM PROPERTIES
-    =========================== */
     :root {
       --bg: #fdf6e3;
       --bg-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
@@ -27,7 +23,6 @@
       --card-muted: #c9a07a;
       --accent: #8b1a1a;
       --accent-hover: #c0392b;
-      --accent-glow: rgba(139,26,26,0.4);
       --gold: #c8962c;
       --gold-bright: #ffd700;
       --input-bg: #3d2008;
@@ -37,40 +32,23 @@
       --border-card: #7a4520;
       --focus-ring: #ffd700;
       --muted: #6b4c2a;
-      --success: #2d6a2d;
-      --success-bg: rgba(45,106,45,0.15);
-      --error: #8b1a1a;
-      --error-bg: rgba(139,26,26,0.15);
       --font-display: 'Playfair Display', Georgia, serif;
       --font-body: 'IM Fell English', Georgia, serif;
       --font-mono: 'Courier Prime', 'Courier New', monospace;
       --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* ===========================
-       REDUCED MOTION
-    =========================== */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms!important;
+        animation-iteration-count: 1!important;
+        transition-duration: 0.01ms!important;
       }
-      .cursor { display: none !important; }
+     .cursor { display: none!important; }
     }
 
-    /* ===========================
-       RESET & BASE
-    =========================== */
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
 
     body {
       font-family: var(--font-body);
@@ -80,860 +58,151 @@
       font-size: clamp(16px, 2vw, 20px);
       line-height: 1.7;
       -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
       display: flex;
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
       min-height: 100dvh;
       padding: clamp(1.5rem, 4vw, 3rem) 1rem;
-      cursor: none;
       overflow-x: hidden;
     }
 
-    /* ===========================
-       ACCESSIBILITY
-    =========================== */
-    .sr-only {
-      position: absolute;
-      width: 1px; height: 1px;
-      padding: 0; margin: -1px;
-      overflow: hidden;
-      clip: rect(0,0,0,0);
-      border: 0;
-    }
+   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+   .skip-link { position: absolute; top: -100px; left: 1rem; background: var(--accent); color: white; padding: 0.75rem 1.5rem; font-family: var(--font-mono); font-weight: bold; text-decoration: none; z-index: 10000; border-radius: 4px; transition: top 0.2s; }
+   .skip-link:focus { top: 1rem; }
 
-    .skip-link {
-      position: absolute;
-      top: -100px;
-      left: 1rem;
-      background: var(--accent);
-      color: white;
-      padding: 0.75rem 1.5rem;
-      font-family: var(--font-mono);
-      font-size: 1rem;
-      font-weight: bold;
-      text-decoration: none;
-      z-index: 10000;
-      border-radius: 4px;
-      transition: top 0.2s;
+    /* CUSTOM CURSOR - decorative only */
+   .cursor-core,.cursor-glow { position: fixed; pointer-events: none; will-change: transform; transform: translate(-50%, -50%); opacity: 0; }
+   .cursor-core { width: 14px; height: 14px; background: radial-gradient(circle, #c0392b 0%, #8b1a 60%, transparent 100%); border-radius: 50%; z-index: 10000; transition: width 0.15s, height 0.15s, opacity 0.2s; box-shadow: 0 0 12px 4px rgba(139,26,26,0.5); }
+   .cursor-glow { width: 32px; height: 32px; background: radial-gradient(circle, rgba(192,57,43,0.18) 0%, transparent 70%); border-radius: 50%; z-index: 9998; transition: width 0.3s, height 0.3s, opacity 0.2s; }
+   .cursor-core.hovering { width: 22px; height: 22px; }
+   .cursor-glow.hovering { width: 56px; height: 56px; }
+   .cursor-core.clicking { width: 8px; height: 8px; }
+    @media (hover: hover) and (pointer: fine) {
+      body.cursor-ready { cursor: none; }
+      body.cursor-ready button, body.cursor-ready.tab-btn, body.cursor-ready a { cursor: none; }
+      body.cursor-ready input, body.cursor-ready textarea { cursor: text!important; }
     }
+    @media (hover: none), (prefers-reduced-motion: reduce) {.cursor-core,.cursor-glow { display: none!important; } }
 
-    .skip-link:focus {
-      top: 1rem;
-    }
+    body::before { content: ''; position: fixed; inset: 0; background-image: repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(139,94,60,0.04) 28px, rgba(139,94,60,0.04) 29px); pointer-events: none; z-index: 0; }
 
-    /* ===========================
-       CUSTOM CURSOR
-    =========================== */
-    .cursor {
-      position: fixed;
-      pointer-events: none;
-      z-index: 9999;
-      will-change: transform;
-      mix-blend-mode: multiply;
-    }
+   .container { width: 100%; max-width: 680px; flex: 1; position: relative; z-index: 10; }
 
-    .cursor-core {
-      position: fixed;
-      width: 14px;
-      height: 14px;
-      background: radial-gradient(circle, #c0392b 0%, #8b1a1a 60%, transparent 100%);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-      z-index: 10000;
-      will-change: transform;
-      transition: width 0.15s ease, height 0.15s ease;
-      box-shadow: 0 0 12px 4px rgba(139,26,26,0.5), 0 0 24px 8px rgba(192,57,43,0.2);
-    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    header { text-align: center; margin-bottom: clamp(2rem, 5vw, 3.5rem); animation: fadeUp 0.8s cubic-bezier(0.4,0,0.2,1) both; }
+   .wax-seal { display: inline-block; width: 72px; height: 72px; margin-bottom: 1.5rem; animation: fadeUp 0.6s both, sealPulse 4s ease-in-out infinite 1.5s; filter: drop-shadow(0 4px 12px rgba(139,26,0.5)); }
+    @keyframes sealPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
 
-    .cursor-glow {
-      position: fixed;
-      width: 40px;
-      height: 40px;
-      background: radial-gradient(circle, rgba(192,57,43,0.25) 0%, rgba(139,26,26,0.08) 50%, transparent 70%);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-      z-index: 9998;
-      will-change: transform;
-      transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
-    }
-
-    .cursor-core.hovering {
-      width: 22px;
-      height: 22px;
-      box-shadow: 0 0 20px 8px rgba(139,26,26,0.6), 0 0 40px 16px rgba(192,57,43,0.3);
-    }
-
-    .cursor-glow.hovering {
-      width: 70px;
-      height: 70px;
-    }
-
-    .cursor-core.clicking {
-      width: 8px;
-      height: 8px;
-      box-shadow: 0 0 6px 2px rgba(139,26,26,0.8);
-    }
-
-    @media (hover: none) and (pointer: coarse) {
-      body { cursor: auto; }
-      .cursor-core, .cursor-glow { display: none !important; }
-    }
-
-    /* ===========================
-       PARCHMENT TEXTURE OVERLAY
-    =========================== */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        repeating-linear-gradient(
-          0deg,
-          transparent,
-          transparent 28px,
-          rgba(139,94,60,0.04) 28px,
-          rgba(139,94,60,0.04) 29px
-        );
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ===========================
-       LAYOUT
-    =========================== */
-    .container {
-      width: 100%;
-      max-width: 680px;
-      flex: 1;
-      position: relative;
-      z-index: 10;
-    }
-
-    /* ===========================
-       PAGE LOAD ANIMATION
-    =========================== */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    header {
-      text-align: center;
-      margin-bottom: clamp(2rem, 5vw, 3.5rem);
-      animation: fadeUp 0.8s cubic-bezier(0.4,0,0.2,1) both;
-    }
-
-    .wax-seal {
-      display: inline-block;
-      width: 72px;
-      height: 72px;
-      margin-bottom: 1.5rem;
-      animation: fadeUp 0.6s cubic-bezier(0.4,0,0.2,1) both, sealPulse 4s ease-in-out infinite 1.5s;
-      filter: drop-shadow(0 4px 12px rgba(139,26,26,0.5));
-    }
-
-    @keyframes sealPulse {
-      0%, 100% { filter: drop-shadow(0 4px 12px rgba(139,26,26,0.5)); transform: scale(1); }
-      50% { filter: drop-shadow(0 6px 20px rgba(192,57,43,0.7)); transform: scale(1.04); }
-    }
-
-    h1 {
+   .main-typewriter {
       font-family: var(--font-display);
-      font-size: clamp(2.4rem, 7vw, 4rem);
-      font-weight: 900;
-      letter-spacing: 6px;
-      text-transform: uppercase;
+      font-size: clamp(1.6rem, 4.5vw, 2.6rem);
+      font-weight: 700;
+      line-height: 1.3;
       color: var(--text);
-      text-shadow: 2px 2px 0px rgba(139,94,60,0.2), 0 0 40px rgba(139,26,26,0.08);
-      margin-bottom: 1.2rem;
-      position: relative;
-      display: inline-block;
+      min-height: 4rem;
+      max-width: 580px;
+      margin: 0.5rem auto 0;
+      text-shadow: 1px 1px 0px rgba(139,94,60,0.15);
     }
-
-    h1::after {
-      content: '';
-      display: block;
-      width: 60%;
-      height: 3px;
-      background: linear-gradient(to right, transparent, var(--accent), transparent);
-      margin: 0.6rem auto 0;
-      border-radius: 2px;
-    }
-
-    .tagline {
-      font-family: var(--font-body);
-      font-style: italic;
-      font-size: clamp(1rem, 2.5vw, 1.2rem);
-      color: var(--muted);
-      min-height: 2.5rem;
-      letter-spacing: 0.3px;
-    }
-
-    .typewriter-cursor {
-      display: inline-block;
-      width: 2px;
-      height: 1.1em;
-      background-color: var(--accent);
-      vertical-align: middle;
-      margin-left: 2px;
-      animation: blink 1.1s step-end infinite;
-    }
-
+   .typewriter-cursor { display: inline-block; width: 2px; height: 1.1em; background-color: var(--accent); margin-left: 2px; animation: blink 1.1s step-end infinite; vertical-align: baseline; }
     @keyframes blink { 50% { opacity: 0; } }
-    .typewriter-cursor.done { display: none; }
+   .typewriter-cursor.done { display: none; }
 
-    /* ===========================
-       NAVIGATION TABS
-    =========================== */
-    .nav-tabs {
-      display: flex;
-      gap: 0;
-      margin-bottom: 0;
-      border-radius: 8px 8px 0 0;
-      overflow: hidden;
-      animation: fadeUp 0.9s cubic-bezier(0.4,0,0.2,1) 0.1s both;
-    }
+   .nav-tabs { display: flex; margin-bottom: 0; border-radius: 8px 0 0; overflow: hidden; animation: fadeUp 0.9s 0.1s both; }
+   .tab-btn { flex: 1; background: #e8d5b0; border: 2px solid var(--border); border-bottom: none; color: var(--muted); font-family: var(--font-display); font-size: clamp(0.9rem, 2.5vw, 1.15rem); font-weight: 700; font-style: italic; padding: clamp(0.8rem, 2vw, 1.1rem) 1rem; letter-spacing: 1px; transition: var(--transition); }
+   .tab-btn[aria-selected="true"] { background: var(--card-bg); color: var(--card-text); border-color: var(--card-bg); }
+   .tab-btn[aria-selected="false"]:hover { background: #d4c09a; color: var(--text); }
+   .tab-btn:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: -3px; }
 
-    .tab-btn {
-      flex: 1;
-      background: #e8d5b0;
-      border: 2px solid var(--border);
-      border-bottom: none;
-      color: var(--muted);
-      font-family: var(--font-display);
-      font-size: clamp(0.9rem, 2.5vw, 1.15rem);
-      font-weight: 700;
-      font-style: italic;
-      padding: clamp(0.8rem, 2vw, 1.1rem) 1rem;
-      cursor: none;
-      letter-spacing: 1px;
-      transition: var(--transition);
-      position: relative;
-      overflow: hidden;
-    }
+   .card { background: var(--card-bg); border: 2px solid var(--border-card); border-top: none; padding: clamp(1.5rem, 4vw, 2.5rem); border-radius: 0 0 12px 12px; box-shadow: var(--card-shadow); position: relative; overflow: hidden; animation: fadeUp 1s 0.2s both; }
+   .card::before { content: ''; position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='leather'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.65' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23leather)' opacity='0.06'/%3E%3C/svg%3E"); pointer-events: none; }
+   .card::after { content: '❧'; position: absolute; top: 1rem; right: 1.2rem; font-size: 1.5rem; color: rgba(245,200,154,0.2); }
+   .card > * { position: relative; z-index: 1; }
 
-    .tab-btn::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: var(--accent);
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-      z-index: 0;
-    }
+   .view-section { display: none; }
+   .view-section:not([hidden]) { display: block; animation: panelFadeIn 0.4s; }
+    @keyframes panelFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; } }
 
-    .tab-btn span { position: relative; z-index: 1; }
+   .form-group { margin-bottom: 1.8rem; }
+    label { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--font-mono); font-weight: 700; font-size: clamp(0.75rem, 2vw, 0.9rem); margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 2px; color: var(--card-label); }
+   .char-count { font-size: 0.75rem; color: var(--card-muted); transition: color 0.2s; }
+   .char-count.warning { color: #ffaa44; }.char-count.danger { color: #ff6b; }
 
-    .tab-btn[aria-selected="true"] {
-      background: var(--card-bg);
-      color: var(--card-text);
-      border-color: var(--card-bg);
-    }
+    input[type="text"], textarea { width: 100%; padding: clamp(0.8rem, 2vw, 1rem); font-family: var(--font-mono); font-size: clamp(0.95rem, 2vw, 1.1rem); background: var(--input-bg); border: 2px solid var(--border-card); color: var(--input-text); border-radius: 6px; line-height: 1.6; transition: border-color 0.25s, box-shadow 0.25s; }
+    input:focus, textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,215,0.2); }
+    textarea { resize: none; min-height: 180px; }
 
-    .tab-btn[aria-selected="false"]:hover {
-      color: var(--text);
-      background: #d4c09a;
-    }
-
-    .tab-btn:focus-visible {
-      outline: 4px solid var(--focus-ring);
-      outline-offset: -4px;
-    }
-
-    /* ===========================
-       CARD
-    =========================== */
-    .card {
-      background: var(--card-bg);
-      border: 2px solid var(--border-card);
-      border-top: none;
-      padding: clamp(1.5rem, 4vw, 2.5rem);
-      border-radius: 0 0 12px 12px;
-      box-shadow: var(--card-shadow);
-      position: relative;
-      overflow: hidden;
-      animation: fadeUp 1s cubic-bezier(0.4,0,0.2,1) 0.2s both;
-    }
-
-    /* Leather grain texture on card */
-    .card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='leather'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23leather)' opacity='0.06'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-      border-radius: 0 0 12px 12px;
-    }
-
-    /* Decorative corner flourishes */
-    .card::after {
-      content: '❧';
-      position: absolute;
-      top: 1rem;
-      right: 1.2rem;
-      font-size: 1.5rem;
-      color: rgba(245,200,154,0.2);
-      pointer-events: none;
-    }
-
-    .card > * { position: relative; z-index: 1; }
-
-    /* ===========================
-       PANELS
-    =========================== */
-    .view-section { display: none; }
-    .view-section:not([hidden]) {
-      display: block;
-      animation: panelFadeIn 0.4s cubic-bezier(0.4,0,0.2,1);
-    }
-
-    @keyframes panelFadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ===========================
-       FORM ELEMENTS
-    =========================== */
-    .form-group {
-      margin-bottom: 1.8rem;
-    }
-
-    label {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      font-family: var(--font-mono);
-      font-weight: 700;
-      font-size: clamp(0.75rem, 2vw, 0.9rem);
-      margin-bottom: 0.6rem;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: var(--card-label);
-      font-variant: small-caps;
-    }
-
-    .char-count {
-      font-size: 0.75rem;
-      color: var(--card-muted);
-      font-variant: normal;
-      letter-spacing: 0;
-      transition: color 0.2s;
-    }
-
-    .char-count.warning { color: #ffaa44; }
-    .char-count.danger { color: #ff6b6b; }
-
-    input[type="text"],
-    textarea {
-      width: 100%;
-      padding: clamp(0.8rem, 2vw, 1rem) clamp(0.8rem, 2vw, 1.1rem);
-      font-family: var(--font-mono);
-      font-size: clamp(0.95rem, 2vw, 1.1rem);
-      background: var(--input-bg);
-      border: 2px solid var(--border-card);
-      color: var(--input-text);
-      border-radius: 6px;
-      cursor: text !important;
-      transition: border-color 0.25s, box-shadow 0.25s;
-      line-height: 1.6;
-      font-feature-settings: "liga" 1, "kern" 1;
-    }
-
-    input[type="text"]::placeholder,
-    textarea::placeholder {
-      color: var(--input-placeholder);
-      font-style: italic;
-    }
-
-    input[type="text"]:focus,
-    textarea:focus {
-      outline: none;
-      border-color: var(--gold);
-      box-shadow: 0 0 0 3px rgba(255,215,0,0.2), inset 0 1px 3px rgba(0,0,0,0.3);
-    }
-
-    input[type="text"]:focus-visible,
-    textarea:focus-visible,
-    button:focus-visible {
-      outline: 3px solid var(--focus-ring);
-      outline-offset: 3px;
-    }
-
-    textarea {
-      resize: none;
-      min-height: 180px;
-    }
-
-    .passkey-hint {
-      margin-top: 0.5rem;
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      color: var(--card-muted);
-      font-style: italic;
-    }
-
-    /* ===========================
-       DIVIDER
-    =========================== */
-    .ornamental-divider {
-      text-align: center;
-      color: rgba(245,200,154,0.3);
-      font-size: 1.2rem;
-      margin: 1.5rem 0;
-      letter-spacing: 8px;
-    }
-
-    /* ===========================
-       BUTTONS
-    =========================== */
-    .action-btn {
-      width: 100%;
-      padding: clamp(0.9rem, 2.5vw, 1.2rem);
-      background: linear-gradient(135deg, var(--accent) 0%, #6b1212 100%);
-      color: #fff4d6;
-      border: 2px solid rgba(255,244,214,0.15);
-      font-family: var(--font-display);
-      font-size: clamp(1rem, 2.5vw, 1.25rem);
-      font-weight: 700;
-      font-style: italic;
-      letter-spacing: 3px;
-      border-radius: 6px;
-      cursor: none;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.15s ease, box-shadow 0.25s ease, background 0.25s ease;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.4);
-      box-shadow: 0 4px 16px rgba(139,26,26,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
-    }
-
-    .action-btn::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
-      pointer-events: none;
-    }
-
-    .action-btn:hover {
-      background: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent) 100%);
-      box-shadow: 0 6px 24px rgba(139,26,26,0.55), inset 0 1px 0 rgba(255,255,255,0.15);
-      transform: translateY(-1px);
-    }
-
-    .action-btn:active {
-      transform: scale(0.98) translateY(0);
-      box-shadow: 0 2px 8px rgba(139,26,26,0.4);
-    }
-
-    .btn-row {
-      display: flex;
-      gap: 0.8rem;
-      margin-top: 0.5rem;
-    }
-
-    .secondary-btn {
-      flex: 1;
-      padding: clamp(0.7rem, 2vw, 0.9rem);
-      background: transparent;
-      color: var(--card-label);
-      border: 2px solid var(--border-card);
-      font-family: var(--font-mono);
-      font-size: clamp(0.8rem, 2vw, 0.95rem);
-      font-weight: 700;
-      letter-spacing: 1px;
-      border-radius: 6px;
-      cursor: none;
-      transition: var(--transition);
-    }
-
-    .secondary-btn:hover {
-      background: rgba(245,200,154,0.1);
-      border-color: var(--card-label);
-      color: var(--card-text);
-    }
-
-    .secondary-btn:active { transform: scale(0.97); }
-
-    /* ===========================
-       STATUS MESSAGES
-    =========================== */
-    .status-message {
-      margin-top: 1.2rem;
-      padding: 1rem 1.2rem;
-      border-left: 4px solid;
-      font-family: var(--font-mono);
-      font-weight: 700;
-      font-size: clamp(0.85rem, 2vw, 1rem);
-      border-radius: 0 6px 6px 0;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      animation: statusSlideIn 0.3s cubic-bezier(0.4,0,0.2,1);
-    }
-
-    @keyframes statusSlideIn {
-      from { opacity: 0; transform: translateX(-8px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-
-    @keyframes shakeError {
-      0%, 100% { transform: translateX(0); }
-      20% { transform: translateX(-6px); }
-      40% { transform: translateX(6px); }
-      60% { transform: translateX(-4px); }
-      80% { transform: translateX(4px); }
-    }
-
-    .status-message[hidden] { display: none; }
-
-    .status-success {
-      border-color: #5a9e5a;
-      color: #a8e6a8;
-      background: rgba(90,158,90,0.12);
-    }
-
-    .status-error {
-      border-color: var(--accent-hover);
-      color: #ffaaaa;
-      background: rgba(192,57,43,0.12);
-      animation: statusSlideIn 0.3s cubic-bezier(0.4,0,0.2,1), shakeError 0.4s 0.1s ease;
-    }
-
-    .status-loading {
-      border-color: var(--gold);
-      color: var(--gold-bright);
-      background: rgba(200,150,44,0.1);
-    }
-
-    .status-icon { font-size: 1.1rem; flex-shrink: 0; }
-
-    /* ===========================
-       RETRIEVED NOTE AREA
-    =========================== */
-    .retrieved-wrapper {
-      margin-top: 1.5rem;
-      animation: fadeUp 0.4s cubic-bezier(0.4,0,0.2,1);
-    }
-
-    .retrieved-wrapper[hidden] { display: none; }
-
-    .retrieved-actions {
-      display: flex;
-      gap: 0.6rem;
+   .passkey-hint {
       margin-top: 0.8rem;
-    }
-
-    /* ===========================
-       CONFIRMATION MODAL
-    =========================== */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(26,15,0,0.75);
-      backdrop-filter: blur(4px);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-      animation: overlayFadeIn 0.25s ease;
-    }
-
-    @keyframes overlayFadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .modal-overlay[hidden] { display: none; }
-
-    .modal-box {
-      background: var(--card-bg);
-      border: 2px solid var(--border-card);
-      border-radius: 12px;
-      padding: 2rem;
-      max-width: 420px;
-      width: 100%;
-      box-shadow: 0 24px 64px rgba(0,0,0,0.6);
-      animation: modalSlideIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
-    }
-
-    @keyframes modalSlideIn {
-      from { opacity: 0; transform: scale(0.9) translateY(16px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
-    }
-
-    .modal-title {
-      font-family: var(--font-display);
-      font-size: 1.4rem;
-      font-weight: 700;
-      font-style: italic;
-      color: var(--card-text);
-      margin-bottom: 0.8rem;
-    }
-
-    .modal-body {
-      font-family: var(--font-body);
-      font-size: 1rem;
-      color: var(--card-muted);
-      margin-bottom: 1.5rem;
-      line-height: 1.6;
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 0.8rem;
-    }
-
-    .modal-confirm {
-      flex: 1;
-      padding: 0.8rem;
-      background: linear-gradient(135deg, var(--accent), #6b1212);
-      color: var(--card-text);
-      border: none;
       font-family: var(--font-mono);
-      font-size: 0.95rem;
+      font-size: clamp(0.95rem, 2.3vw, 1.15rem);
+      color: var(--gold-bright);
       font-weight: 700;
-      letter-spacing: 1px;
-      border-radius: 6px;
-      cursor: none;
-      transition: var(--transition);
+      letter-spacing: 0.8px;
+      text-shadow: 0 0 10px rgba(255,215,0,0.3), 0 1px 2px rgba(0,0,0,0.5);
+      min-height: 1.5rem;
     }
+   .hint-cursor { display: inline-block; width: 2px; height: 1.1em; background: var(--gold-bright); margin-left: 3px; animation: blink 1s step-end infinite; vertical-align: text-bottom; box-shadow: 0 0 6px rgba(255,215,0,0.6); }
 
-    .modal-confirm:hover { background: linear-gradient(135deg, var(--accent-hover), var(--accent)); }
+   .ornamental-divider { text-align: center; color: rgba(245,200,154,0.3); font-size: 1.2rem; margin: 1.5rem 0; letter-spacing: 8px; }
 
-    .modal-cancel {
-      flex: 1;
-      padding: 0.8rem;
-      background: transparent;
-      color: var(--card-label);
-      border: 2px solid var(--border-card);
-      font-family: var(--font-mono);
-      font-size: 0.95rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      border-radius: 6px;
-      cursor: none;
-      transition: var(--transition);
-    }
+   .action-btn { width: 100%; padding: clamp(0.9rem, 2.5vw, 1.2rem); background: linear-gradient(135deg, var(--accent) 0%, #6b1212 100%); color: #fff4d6; border: 2px solid rgba(255,244,214,0.15); font-family: var(--font-display); font-size: clamp(1rem, 2.5vw, 1.25rem); font-weight: 700; font-style: italic; letter-spacing: 3px; border-radius: 6px; transition: transform 0.15s, box-shadow 0.25s; text-shadow: 0 1px 3px rgba(0,0,0,0.4); box-shadow: 0 4px 16px rgba(139,26,26,0.4); }
+   .action-btn:hover { background: linear-gradient(135deg, var(--accent-hover), var(--accent)); transform: translateY(-1px); box-shadow: 0 6px 24px rgba(139,26,26,0.55); }
+   .action-btn:active { transform: scale(0.98); }
 
-    .modal-cancel:hover { background: rgba(245,200,154,0.1); color: var(--card-text); }
+   .btn-row { display: flex; gap: 0.8rem; margin-top: 0.5rem; }
+   .secondary-btn { flex: 1; padding: clamp(0.7rem, 2vw, 0.9rem); background: transparent; color: var(--card-label); border: 2px solid var(--border-card); font-family: var(--font-mono); font-size: clamp(0.8rem, 2vw, 0.95rem); font-weight: 700; letter-spacing: 1px; border-radius: 6px; transition: var(--transition); }
+   .secondary-btn:hover { background: rgba(245,200,154,0.1); border-color: var(--card-label); color: var(--card-text); }
 
-    /* ===========================
-       LOADING SPINNER
-    =========================== */
-    .spinner {
-      display: inline-block;
-      width: 14px;
-      height: 14px;
-      border: 2px solid rgba(200,150,44,0.3);
-      border-top-color: var(--gold-bright);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      flex-shrink: 0;
-    }
-
+   .status-message { margin-top: 1.2rem; padding: 1rem 1.2rem; border-left: 4px solid; font-family: var(--font-mono); font-weight: 700; font-size: clamp(0.85rem, 2vw, 1rem); border-radius: 0 6px 6px 0; display: flex; gap: 0.6rem; animation: statusSlideIn 0.3s; }
+    @keyframes statusSlideIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; } }
+   .status-message[hidden] { display: none; }
+   .status-success { border-color: #5a9e5a; color: #a8e6a8; background: rgba(90,158,90,0.12); }
+   .status-error { border-color: var(--accent-hover); color: #ffaaaa; background: rgba(192,57,43,0.12); }
+   .status-loading { border-color: var(--gold); color: var(--gold-bright); background: rgba(200,150,44,0.1); }
+   .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(200,150,44,0.3); border-top-color: var(--gold-bright); border-radius: 50%; animation: spin 0.7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ===========================
-       TOOLTIP
-    =========================== */
-    .tooltip-wrap {
-      position: relative;
-      display: inline-block;
-      margin-left: 0.4rem;
-    }
+   .retrieved-wrapper { margin-top: 1.5rem; animation: fadeUp 0.4s; }
+   .retrieved-wrapper[hidden] { display: none; }
+   .retrieved-actions { display: flex; gap: 0.6rem; margin-top: 0.8rem; }
 
-    .tooltip-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 18px;
-      height: 18px;
-      background: rgba(245,200,154,0.2);
-      border-radius: 50%;
-      font-size: 0.7rem;
-      color: var(--card-label);
-      cursor: help;
-      font-style: normal;
-      font-variant: normal;
-      font-family: var(--font-mono);
-      border: 1px solid rgba(245,200,154,0.3);
-    }
+   .modal-overlay { position: fixed; inset: 0; background: rgba(26,15,0,0.75); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1rem; animation: overlayFadeIn 0.25s; }
+   .modal-overlay[hidden] { display: none; }
+    @keyframes overlayFadeIn { from { opacity: 0; } to { opacity: 1; } }
+   .modal-box { background: var(--card-bg); border: 2px solid var(--border-card); border-radius: 12px; padding: 2rem; max-width: 420px; width: 100%; box-shadow: 0 24px 64px rgba(0,0,0,0.6); animation: modalSlideIn 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+    @keyframes modalSlideIn { from { opacity: 0; transform: scale(0.9) translateY(16px); } to { opacity: 1; } }
+   .modal-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; font-style: italic; color: var(--card-text); margin-bottom: 0.8rem; }
+   .modal-body { font-family: var(--font-body); font-size: 1rem; color: var(--card-muted); margin-bottom: 1.5rem; line-height: 1.6; }
+   .modal-actions { display: flex; gap: 0.8rem; }
+   .modal-confirm { flex: 1; padding: 0.8rem; background: linear-gradient(135deg, var(--accent), #6b1212); color: var(--card-text); border: none; font-family: var(--font-mono); font-weight: 700; letter-spacing: 1px; border-radius: 6px; }
+   .modal-cancel { flex: 1; padding: 0.8rem; background: transparent; color: var(--card-label); border: 2px solid var(--border-card); font-family: var(--font-mono); font-weight: 700; letter-spacing: 1px; border-radius: 6px; }
 
-    .tooltip-text {
-      position: absolute;
-      bottom: 130%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #1a0f00;
-      color: var(--card-label);
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      font-style: normal;
-      font-variant: normal;
-      letter-spacing: 0;
-      text-transform: none;
-      padding: 0.6rem 0.9rem;
-      border-radius: 6px;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s;
-      border: 1px solid var(--border-card);
-      z-index: 100;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    }
+   .overwrite-warning { display: none; margin-top: 0.5rem; padding: 0.6rem 0.9rem; background: rgba(255,170,68,0.12); border-left: 3px solid #ffaa44; border-radius: 0 4px 4px 0; font-family: var(--font-mono); font-size: 0.82rem; color: #ffaa44; }
+   .overwrite-warning.visible { display: block; animation: statusSlideIn 0.3s; }
 
-    .tooltip-text::after {
-      content: '';
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      border: 5px solid transparent;
-      border-top-color: var(--border-card);
-    }
+    footer { margin-top: clamp(2.5rem, 6vw, 4rem); text-align: center; width: 100%; max-width: 680px; padding-top: 1.5rem; position: relative; z-index: 10; animation: fadeUp 1.1s 0.4s both; }
+   .footer-ornament { color: var(--muted); font-size: 1.4rem; letter-spacing: 12px; margin-bottom: 0.8rem; opacity: 0.5; }
+   .footer-line { width: 100%; height: 1px; background: linear-gradient(to right, transparent, var(--border), transparent); margin-bottom: 1.2rem; }
+   .bottom-title { font-family: var(--font-display); font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 900; letter-spacing: 5px; text-transform: uppercase; color: var(--muted); margin: 0.8rem 0 0.3rem; opacity: 0.7; }
+    footer p { font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted); letter-spacing: 1px; }
+    footer.footer-tagline { font-family: var(--font-body); font-style: italic; font-size: 0.95rem; color: #a07848; margin-bottom: 0.5rem; }
 
-    .tooltip-wrap:hover .tooltip-text,
-    .tooltip-wrap:focus-within .tooltip-text {
-      opacity: 1;
-    }
-
-    /* ===========================
-       OVERWRITE WARNING
-    =========================== */
-    .overwrite-warning {
-      display: none;
-      margin-top: 0.5rem;
-      padding: 0.6rem 0.9rem;
-      background: rgba(255,170,68,0.12);
-      border-left: 3px solid #ffaa44;
-      border-radius: 0 4px 4px 0;
-      font-family: var(--font-mono);
-      font-size: 0.82rem;
-      color: #ffaa44;
-    }
-
-    .overwrite-warning.visible { display: block; animation: statusSlideIn 0.3s ease; }
-
-    /* ===========================
-       FOOTER
-    =========================== */
-    footer {
-      margin-top: clamp(2.5rem, 6vw, 4rem);
-      text-align: center;
-      width: 100%;
-      max-width: 680px;
-      padding-top: 1.5rem;
-      position: relative;
-      z-index: 10;
-      animation: fadeUp 1.1s cubic-bezier(0.4,0,0.2,1) 0.4s both;
-    }
-
-    .footer-ornament {
-      color: var(--muted);
-      font-size: 1.4rem;
-      letter-spacing: 12px;
-      margin-bottom: 0.8rem;
-      opacity: 0.5;
-    }
-
-    .footer-line {
-      width: 100%;
-      height: 1px;
-      background: linear-gradient(to right, transparent, var(--border), transparent);
-      margin-bottom: 1.2rem;
-    }
-
-    footer p {
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-      color: var(--muted);
-      letter-spacing: 1px;
-    }
-
-    footer .footer-tagline {
-      font-family: var(--font-body);
-      font-style: italic;
-      font-size: 0.95rem;
-      color: #a07848;
-      margin-bottom: 0.5rem;
-    }
-
-    footer a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    footer a:hover { text-decoration: underline; }
-
-    /* ===========================
-       COPY TOAST
-    =========================== */
-    .copy-toast {
-      position: fixed;
-      bottom: 2rem;
-      left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: #1a0f00;
-      color: var(--gold-bright);
-      font-family: var(--font-mono);
-      font-size: 0.9rem;
-      font-weight: 700;
-      padding: 0.8rem 1.5rem;
-      border-radius: 8px;
-      border: 1px solid var(--gold);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-      z-index: 9000;
-      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.35s ease;
-      opacity: 0;
-      pointer-events: none;
-      letter-spacing: 1px;
-    }
-
-    .copy-toast.show {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
-    }
-
-    /* ===========================
-       RESPONSIVE
-    =========================== */
-    @media (max-width: 480px) {
-      .nav-tabs { flex-direction: column; border-radius: 8px 8px 0 0; }
-      .tab-btn { border-bottom: 1px solid var(--border); }
-      .tab-btn[aria-selected="true"] { border-bottom-color: var(--card-bg); }
-      .btn-row { flex-direction: column; }
-      .modal-actions { flex-direction: column; }
-    }
+   .copy-toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(80px); background: #1a0f00; color: var(--gold-bright); font-family: var(--font-mono); font-size: 0.9rem; font-weight: 700; padding: 0.8rem 1.5rem; border-radius: 8px; border: 1px solid var(--gold); box-shadow: 0 8px 24px rgba(0,0,0,0.5); z-index: 9000; transition: transform 0.35s, opacity 0.35s; opacity: 0; pointer-events: none; }
+   .copy-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
   </style>
 </head>
 <body>
-
-  <!-- Skip link for keyboard users -->
   <a href="#main-content" class="skip-link">Skip to content</a>
-
-  <!-- Custom Cursor -->
   <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
   <div class="cursor-core" id="cursorCore" aria-hidden="true"></div>
+  <div class="copy-toast" id="copyToast" aria-live="polite">✦ Copied to clipboard</div>
 
-  <!-- Copy Toast -->
-  <div class="copy-toast" id="copyToast" aria-live="polite" aria-atomic="true">✦ Copied to clipboard</div>
-
-  <!-- Confirmation Modal -->
   <div class="modal-overlay" id="sealModal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-box">
       <div class="modal-title" id="modalTitle">Press the seal?</div>
-      <div class="modal-body">
-        Once sealed, your letter will only be retrievable with your exact passkey. There is no recovery. Are you certain?
-      </div>
+      <div class="modal-body">Once sealed, your letter will only be retrievable with your exact passkey. There is no recovery. Are you certain?</div>
       <div class="modal-actions">
         <button class="modal-cancel" id="modalCancel">Go back</button>
         <button class="modal-confirm" id="modalConfirm">Seal it</button>
@@ -943,137 +212,60 @@
 
   <main class="container" id="main-content">
     <header>
-      <!-- Wax Seal SVG -->
       <svg class="wax-seal" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <defs>
-          <radialGradient id="sealGrad" cx="40%" cy="35%">
-            <stop offset="0%" stop-color="#e84c3d"/>
-            <stop offset="60%" stop-color="#8b1a1a"/>
-            <stop offset="100%" stop-color="#5c0f0f"/>
-          </radialGradient>
-          <filter id="sealShadow">
-            <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#5c0f0f" flood-opacity="0.6"/>
-          </filter>
+          <radialGradient id="sealGrad" cx="40%" cy="35%"><stop offset="0%" stop-color="#e84c3d"/><stop offset="60%" stop-color="#8b1a1a"/><stop offset="100%" stop-color="#5c0f0f"/></radialGradient>
         </defs>
-        <!-- Drip drops -->
         <ellipse cx="20" cy="82" rx="7" ry="5" fill="#6b1212" opacity="0.6"/>
         <ellipse cx="80" cy="78" rx="5" ry="4" fill="#6b1212" opacity="0.5"/>
         <ellipse cx="50" cy="88" rx="6" ry="4" fill="#6b1212" opacity="0.55"/>
-        <!-- Main seal -->
-        <circle cx="50" cy="50" r="38" fill="url(#sealGrad)" filter="url(#sealShadow)"/>
-        <!-- Inner ring -->
+        <circle cx="50" cy="50" r="38" fill="url(#sealGrad)"/>
         <circle cx="50" cy="50" r="30" fill="none" stroke="rgba(255,244,214,0.25)" stroke-width="1.5"/>
-        <!-- S letterform -->
         <text x="50" y="58" text-anchor="middle" font-family="Georgia, serif" font-size="28" font-weight="bold" fill="rgba(255,244,214,0.9)" font-style="italic">S</text>
-        <!-- Star points -->
-        <g stroke="rgba(255,244,214,0.2)" stroke-width="1" fill="none">
-          <line x1="50" y1="12" x2="50" y2="20"/>
-          <line x1="50" y1="80" x2="50" y2="88"/>
-          <line x1="12" y1="50" x2="20" y2="50"/>
-          <line x1="80" y1="50" x2="88" y2="50"/>
-          <line x1="23" y1="23" x2="29" y2="29"/>
-          <line x1="71" y1="71" x2="77" y2="77"/>
-          <line x1="77" y1="23" x2="71" y2="29"/>
-          <line x1="23" y1="77" x2="29" y2="71"/>
-        </g>
       </svg>
-
-      <h1>Sealed Letter</h1>
-      <p class="tagline" id="tagline-text" aria-live="polite">
+      <p class="main-typewriter" id="tagline-text" aria-live="polite">
         <span id="typewriter-text"></span><span id="typewriter-cursor" class="typewriter-cursor" aria-hidden="true"></span>
       </p>
     </header>
 
     <nav aria-label="Application modes">
       <div class="nav-tabs" role="tablist">
-        <button id="tab-write" class="tab-btn" role="tab" aria-selected="true" aria-controls="panel-write">
-          <span>✦ Write a Letter</span>
-        </button>
-        <button id="tab-read" class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-read">
-          <span>❧ Open a Letter</span>
-        </button>
+        <button id="tab-write" class="tab-btn" role="tab" aria-selected="true" aria-controls="panel-write"><span>✦ Write a Letter</span></button>
+        <button id="tab-read" class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-read"><span>❧ Open a Letter</span></button>
       </div>
     </nav>
 
     <div class="card">
-      <!-- WRITE PANEL -->
       <section id="panel-write" class="view-section" role="tabpanel" aria-labelledby="tab-write">
         <div class="form-group">
-          <label for="note-content">
-            <span>Your Private Message</span>
-            <span class="char-count" id="char-count" aria-live="polite">0 / 5000</span>
-          </label>
-          <textarea
-            id="note-content"
-            placeholder="Write what no one else should read..."
-            aria-required="true"
-            maxlength="5000"
-            aria-describedby="char-count"
-          ></textarea>
+          <label for="note-content"><span>Your Private Message</span><span class="char-count" id="char-count">0 / 5000</span></label>
+          <textarea id="note-content" placeholder="Write what no one else should read..." maxlength="5000"></textarea>
         </div>
-
         <div class="form-group">
-          <label for="passkey-create">
-            <span>
-              Your Secret Word
-              <span class="tooltip-wrap">
-                <span class="tooltip-icon" tabindex="0" role="tooltip" aria-label="Passkey tips">?</span>
-                <span class="tooltip-text">Use a phrase only you'd remember. Min. 6 characters. There is no recovery if lost.</span>
-              </span>
-            </span>
-          </label>
-          <input
-            type="text"
-            id="passkey-create"
-            placeholder="A phrase only you would remember..."
-            aria-required="true"
-            autocomplete="off"
-            spellcheck="false"
-            minlength="6"
-            aria-describedby="passkey-hint overwrite-warning"
-          >
-          <div class="passkey-hint" id="passkey-hint">Minimum 6 characters. There is no recovery if lost.</div>
-          <div class="overwrite-warning" id="overwrite-warning" role="alert">
-            ⚠ A letter already exists with this passkey. Sealing will overwrite it permanently.
+          <label for="passkey-create"><span>Your Secret Word</span></label>
+          <input type="text" id="passkey-create" placeholder="A phrase only you would remember..." autocomplete="off" spellcheck="false" minlength="6">
+          <div class="passkey-hint" id="passkey-hint" aria-live="polite">
+            <span id="hint-typewriter"></span><span class="hint-cursor" aria-hidden="true"></span>
           </div>
+          <div class="overwrite-warning" id="overwrite-warning" role="alert">⚠ A letter already exists with this passkey. Sealing will overwrite it permanently.</div>
         </div>
-
         <div class="ornamental-divider" aria-hidden="true">· · ✦ · ·</div>
-
         <button id="btn-seal" class="action-btn">Press the Seal</button>
-
-        <div id="write-status" class="status-message" role="alert" aria-live="assertive" hidden></div>
+        <div id="write-status" class="status-message" role="alert" hidden></div>
       </section>
 
-      <!-- READ PANEL -->
       <section id="panel-read" class="view-section" role="tabpanel" aria-labelledby="tab-read" hidden>
         <div class="form-group">
           <label for="passkey-enter">Enter Your Passkey</label>
-          <input
-            type="text"
-            id="passkey-enter"
-            placeholder="The exact phrase you sealed it with..."
-            aria-required="true"
-            autocomplete="off"
-            spellcheck="false"
-          >
+          <input type="text" id="passkey-enter" placeholder="The exact phrase you sealed it with..." autocomplete="off" spellcheck="false">
         </div>
-
         <div class="ornamental-divider" aria-hidden="true">· · ❧ · ·</div>
-
         <button id="btn-break" class="action-btn">Open the Letter</button>
-
-        <div id="read-status" class="status-message" role="alert" aria-live="assertive" hidden></div>
-
+        <div id="read-status" class="status-message" role="alert" hidden></div>
         <div class="retrieved-wrapper" id="retrieved-wrapper" hidden>
-          <div class="form-group" style="margin-top: 0; margin-bottom: 0.8rem;">
+          <div class="form-group" style="margin-bottom:0.8rem">
             <label for="retrieved-content">Your Message</label>
-            <textarea
-              id="retrieved-content"
-              readonly
-              aria-label="Your retrieved message"
-              aria-readonly="true"
-            ></textarea>
+            <textarea id="retrieved-content" readonly></textarea>
           </div>
           <div class="retrieved-actions">
             <button class="secondary-btn" id="btn-copy">⊕ Copy Message</button>
@@ -1087,6 +279,7 @@
   <footer>
     <div class="footer-ornament" aria-hidden="true">✦ ✦ ✦</div>
     <div class="footer-line"></div>
+    <h1 class="bottom-title">Sealed Letter</h1>
     <p class="footer-tagline">Every secret deserves a seal.</p>
     <p>Crafted by <strong>Dylan Grow</strong> &copy; 2026</p>
   </footer>
@@ -1095,12 +288,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    // ============================================================
-    // FIREBASE INIT
-    // The API key here is a client-side read/write key gated by
-    // Firebase security rules — move sensitive ops server-side
-    // for production use.
-    // ============================================================
     const firebaseConfig = {
       apiKey: "AIzaSyADPRoMDwuS_U1DcY_3N2UjVyKn8pBFv3s",
       authDomain: "sealed-letter-f3af5.firebaseapp.com",
@@ -1110,25 +297,10 @@
       messagingSenderId: "778056799822",
       appId: "1:778056799822:web:7a8b9c0d1e2f3a4b"
     };
-
     let app, db;
-    try {
-      app = initializeApp(firebaseConfig);
-      db = getDatabase(app);
-    } catch (e) {
-      console.error("Firebase failed to initialize:", e);
-    }
+    try { app = initializeApp(firebaseConfig); db = getDatabase(app); } catch(e) { console.error(e); }
 
-    // ============================================================
-    // TYPEWRITER — rotating phrases, variable speed, human feel
-    // ============================================================
-    const phrases = [
-      "A private ledger for your thoughts. Write, seal, and leave no trace behind.",
-      "Some words are only meant for one pair of eyes.",
-      "Fold it. Seal it. Trust no one else with the key.",
-      "The oldest secret is a letter never found."
-    ];
-
+    const phrases = ["A private ledger for your thoughts. Write, seal, and leave no trace behind."];
     const textEl = document.getElementById('typewriter-text');
     const cursorEl = document.getElementById('typewriter-cursor');
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1137,437 +309,113 @@
       textEl.textContent = phrases[0];
       cursorEl.classList.add('done');
     } else {
-      let phraseIndex = 0;
       let charIndex = 0;
-      let isDeleting = false;
-      let isPausing = false;
-
-      // Variable speed: slightly randomized per char, slower at punctuation
-      function getTypeSpeed() {
-        const ch = phrases[phraseIndex][charIndex] ?? '';
-        if (['.', ',', '!', '?'].includes(ch)) return 180 + Math.random() * 80;
-        return isDeleting ? 35 + Math.random() * 20 : 55 + Math.random() * 40;
-      }
-
       function typeLoop() {
-        const current = phrases[phraseIndex];
-        if (isDeleting) {
-          textEl.textContent = current.substring(0, charIndex - 1);
-          charIndex--;
+        const current = phrases[0];
+        textEl.textContent = current.substring(0, charIndex + 1);
+        charIndex++;
+        if (charIndex < current.length) {
+          const ch = current[charIndex-1];
+          const delay = ['.',',','!','?'].includes(ch)? 180 : 55 + Math.random()*40;
+          setTimeout(typeLoop, delay);
         } else {
-          textEl.textContent = current.substring(0, charIndex + 1);
-          charIndex++;
+          cursorEl.classList.add('done');
         }
-
-        if (!isDeleting && charIndex === current.length) {
-          // Pause at end of phrase
-          isPausing = true;
-          setTimeout(() => {
-            isPausing = false;
-            isDeleting = true;
-            requestAnimationFrame(() => setTimeout(typeLoop, getTypeSpeed()));
-          }, 3200);
-          return;
-        }
-
-        if (isDeleting && charIndex === 0) {
-          isDeleting = false;
-          phraseIndex = (phraseIndex + 1) % phrases.length;
-          setTimeout(typeLoop, 500);
-          return;
-        }
-
-        setTimeout(typeLoop, getTypeSpeed());
       }
-
       setTimeout(typeLoop, 900);
     }
 
-    // ============================================================
-    // CUSTOM CURSOR — RAF throttled, wax-drip glow
-    // ============================================================
+    // Passkey hint typewriter
+    const hintFullText = "Minimum 6 characters. There is no recovery if lost.";
+    const hintEl = document.getElementById('hint-typewriter');
+    const hintCursor = document.querySelector('.hint-cursor');
+    let hintIdx = 0, hintStarted = false;
+    function typeHint() {
+      if (!hintEl || hintStarted) return;
+      if (prefersReduced) { hintEl.textContent = hintFullText; if(hintCursor) hintCursor.style.display='none'; return; }
+      hintStarted = true;
+      function step() {
+        if (hintIdx < hintFullText.length) {
+          hintEl.textContent += hintFullText.charAt(hintIdx++);
+          setTimeout(step, 38 + Math.random()*22);
+        } else if (hintCursor) hintCursor.style.display = 'none';
+      }
+      step();
+    }
+    if (!prefersReduced) setTimeout(typeHint, 1400);
+    document.getElementById('tab-write')?.addEventListener('click', () => setTimeout(typeHint, 200));
+
+    // Custom cursor
     const cursorCore = document.getElementById('cursorCore');
     const cursorGlow = document.getElementById('cursorGlow');
-    const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-
-    if (!prefersReduced && !isTouchDevice) {
-      let mouseX = 0, mouseY = 0;
-      let glowX = 0, glowY = 0;
-      let rafPending = false;
-
-      document.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        if (!rafPending) {
-          rafPending = true;
-          requestAnimationFrame(updateCursor);
-        }
-      });
-
-      function updateCursor() {
-        rafPending = false;
-        cursorCore.style.left = mouseX + 'px';
-        cursorCore.style.top = mouseY + 'px';
-        // Glow lags slightly behind for fluid feel
-        glowX += (mouseX - glowX) * 0.18;
-        glowY += (mouseY - glowY) * 0.18;
-        cursorGlow.style.left = glowX + 'px';
-        cursorGlow.style.top = glowY + 'px';
-        if (Math.abs(mouseX - glowX) > 0.5 || Math.abs(mouseY - glowY) > 0.5) {
-          rafPending = true;
-          requestAnimationFrame(updateCursor);
-        }
+    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    if (!prefersReduced &&!isTouch) {
+      let mouseX=0, mouseY=0, glowX=0, glowY=0, first=true;
+      document.addEventListener('mousemove', e => {
+        mouseX = e.clientX; mouseY = e.clientY;
+        if (first) { document.body.classList.add('cursor-ready'); cursorCore.style.opacity='1'; cursorGlow.style.opacity='1'; first=false; }
+      }, {passive:true});
+      function update() {
+        cursorCore.style.transform = `translate3d(${mouseX}px,${mouseY}px,0) translate(-50%,-50%)`;
+        glowX += (mouseX-glowX)*0.15; glowY += (mouseY-glowY)*0.15;
+        cursorGlow.style.transform = `translate3d(${glowX}px,${glowY}px,0) translate(-50%,-50%)`;
+        requestAnimationFrame(update);
       }
-
-      // Hover expansion on interactives
-      document.querySelectorAll('button, .tab-btn, a').forEach(el => {
-        el.addEventListener('mouseenter', () => {
-          cursorCore.classList.add('hovering');
-          cursorGlow.classList.add('hovering');
-        });
-        el.addEventListener('mouseleave', () => {
-          cursorCore.classList.remove('hovering');
-          cursorGlow.classList.remove('hovering');
-        });
+      requestAnimationFrame(update);
+      document.querySelectorAll('button,.tab-btn, a').forEach(el=>{
+        el.addEventListener('mouseenter', ()=>{cursorCore.classList.add('hovering');cursorGlow.classList.add('hovering');});
+        el.addEventListener('mouseleave', ()=>{cursorCore.classList.remove('hovering');cursorGlow.classList.remove('hovering');});
       });
-
-      // Click compression
-      document.addEventListener('mousedown', () => cursorCore.classList.add('clicking'));
-      document.addEventListener('mouseup', () => cursorCore.classList.remove('clicking'));
-
-      // Hide over text inputs
-      document.querySelectorAll('input, textarea').forEach(el => {
-        el.addEventListener('mouseenter', () => {
-          cursorCore.style.opacity = '0';
-          cursorGlow.style.opacity = '0';
-        });
-        el.addEventListener('mouseleave', () => {
-          cursorCore.style.opacity = '1';
-          cursorGlow.style.opacity = '1';
-        });
-      });
-
-      // Hide when leaving window
-      document.addEventListener('mouseleave', () => {
-        cursorCore.style.opacity = '0';
-        cursorGlow.style.opacity = '0';
-      });
-      document.addEventListener('mouseenter', () => {
-        cursorCore.style.opacity = '1';
-        cursorGlow.style.opacity = '1';
-      });
+      document.addEventListener('mousedown', ()=>cursorCore.classList.add('clicking'));
+      document.addEventListener('mouseup', ()=>cursorCore.classList.remove('clicking'));
     }
 
-    // ============================================================
-    // TAB NAVIGATION — with title updates + keyboard arrows
-    // ============================================================
+    // Tabs
     const tabs = document.querySelectorAll('[role="tab"]');
     const panels = document.querySelectorAll('[role="tabpanel"]');
+    function activateTab(tab){ tabs.forEach(t=>t.setAttribute('aria-selected','false')); panels.forEach(p=>p.setAttribute('hidden','true')); tab.setAttribute('aria-selected','true'); document.getElementById(tab.getAttribute('aria-controls')).removeAttribute('hidden'); }
+    tabs.forEach(tab=>{ tab.addEventListener('click', ()=>activateTab(tab)); });
 
-    function activateTab(tab) {
-      tabs.forEach(t => t.setAttribute('aria-selected', 'false'));
-      panels.forEach(p => p.setAttribute('hidden', 'true'));
-      tab.setAttribute('aria-selected', 'true');
-      document.getElementById(tab.getAttribute('aria-controls')).removeAttribute('hidden');
-      // Update page title
-      const label = tab.textContent.replace(/[✦❧·]/g, '').trim();
-      document.title = `Sealed Letter — ${label}`;
-    }
+    // Crypto helpers
+    async function hashString(str){ const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str)); return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join(''); }
+    async function deriveKey(passkey){ const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(passkey), {name:'PBKDF2'}, false, ['deriveKey']); return crypto.subtle.deriveKey({name:'PBKDF2', salt: new TextEncoder().encode('sealed-letter-salt'), iterations:100000, hash:'SHA-256'}, km, {name:'AES-GCM',length:256}, false, ['encrypt','decrypt']); }
+    async function encryptNote(text, passkey){ const key=await deriveKey(passkey); const iv=crypto.getRandomValues(new Uint8Array(12)); const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv}, key, new TextEncoder().encode(text)); const combined=new Uint8Array([...iv,...new Uint8Array(ct)]); return btoa(String.fromCharCode(...combined)); }
+    async function decryptNote(enc, passkey){ const key=await deriveKey(passkey); const combined=Uint8Array.from(atob(enc),c=>c.charCodeAt(0)); const iv=combined.slice(0,12); const ct=combined.slice(12); const dec=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct); return new TextDecoder().decode(dec); }
 
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => activateTab(tab));
-      tab.addEventListener('keydown', e => {
-        const idx = [...tabs].indexOf(e.target);
-        let dir = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : null;
-        if (dir !== null) {
-          e.preventDefault();
-          const next = tabs[(idx + dir + tabs.length) % tabs.length];
-          next.focus();
-          activateTab(next);
-        }
-      });
+    function showStatus(id,type,icon,msg){ const el=document.getElementById(id); el.className=`status-message status-${type}`; el.innerHTML=type==='loading'?`<span class="spinner"></span><span>${msg}</span>`:`<span>${icon}</span><span>${msg}</span>`; el.removeAttribute('hidden'); if(type!=='loading') setTimeout(()=>el.setAttribute('hidden','true'),5000); }
+
+    // Char count
+    const noteArea=document.getElementById('note-content'); const charCount=document.getElementById('char-count');
+    noteArea.addEventListener('input',()=>{ const len=noteArea.value.length; charCount.textContent=`${len} / 5000`; charCount.className='char-count'+(len>4250?' warning':'')+(len>4750?' danger':''); });
+
+    // Overwrite check
+    const passkeyCreate=document.getElementById('passkey-create'); const overwriteWarning=document.getElementById('overwrite-warning'); let owTimer;
+    passkeyCreate.addEventListener('input',()=>{ overwriteWarning.classList.remove('visible'); clearTimeout(owTimer); if(passkeyCreate.value.length>=6&&db){ owTimer=setTimeout(async()=>{ const h=await hashString(passkeyCreate.value); const s=await get(ref(db,'notes/'+h)); if(s.exists()) overwriteWarning.classList.add('visible'); },600); }});
+
+    // Seal
+    const sealModal=document.getElementById('sealModal');
+    document.getElementById('btn-seal').addEventListener('click',()=>{ const note=noteArea.value.trim(); const pk=passkeyCreate.value; if(!note){showStatus('write-status','error','✕','Your letter is empty.');return;} if(!pk||pk.length<6){showStatus('write-status','error','✕','Passkey must be at least 6 characters.');return;} sealModal.removeAttribute('hidden'); });
+    document.getElementById('modalCancel').addEventListener('click',()=>sealModal.setAttribute('hidden','true'));
+    document.getElementById('modalConfirm').addEventListener('click', async ()=>{
+      sealModal.setAttribute('hidden','true');
+      const note=noteArea.value.trim(); const pk=passkeyCreate.value;
+      showStatus('write-status','loading','','Encrypting and sealing...');
+      try{ const h=await hashString(pk); const enc=await encryptNote(note,pk); await set(ref(db,'notes/'+h),{payload:enc,ts:Date.now()}); showStatus('write-status','success','✦','Sealed. Guard your passkey — it cannot be recovered.'); noteArea.value=''; passkeyCreate.value=''; charCount.textContent='0 / 5000'; overwriteWarning.classList.remove('visible'); hintIdx=0; hintStarted=false; hintEl.textContent=''; if(hintCursor) hintCursor.style.display='inline-block'; setTimeout(typeHint,400); }catch(e){ showStatus('write-status','error','✕','Vault unreachable.'); }
     });
 
-    // ============================================================
-    // HASH UTILITY
-    // The passkey is hashed client-side with SHA-256.
-    // The hash becomes the Firebase key — your actual passkey
-    // never leaves your device in plaintext.
-    // ============================================================
-    async function hashString(str) {
-      const utf8 = new TextEncoder().encode(str);
-      const buf = await crypto.subtle.digest('SHA-256', utf8);
-      return Array.from(new Uint8Array(buf))
-        .map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
-    // ============================================================
-    // AES-GCM ENCRYPTION
-    // Notes are encrypted before storing — btoa alone is NOT encryption.
-    // The passkey itself is used as the encryption key material.
-    // ============================================================
-    async function deriveKey(passkey) {
-      const enc = new TextEncoder();
-      const keyMaterial = await crypto.subtle.importKey(
-        'raw', enc.encode(passkey), { name: 'PBKDF2' }, false, ['deriveKey']
-      );
-      return crypto.subtle.deriveKey(
-        { name: 'PBKDF2', salt: enc.encode('sealed-letter-salt'), iterations: 100000, hash: 'SHA-256' },
-        keyMaterial,
-        { name: 'AES-GCM', length: 256 },
-        false,
-        ['encrypt', 'decrypt']
-      );
-    }
-
-    async function encryptNote(text, passkey) {
-      const key = await deriveKey(passkey);
-      const iv = crypto.getRandomValues(new Uint8Array(12));
-      const enc = new TextEncoder();
-      const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(text));
-      const combined = new Uint8Array([...iv, ...new Uint8Array(ciphertext)]);
-      return btoa(String.fromCharCode(...combined));
-    }
-
-    async function decryptNote(encoded, passkey) {
-      const key = await deriveKey(passkey);
-      const combined = Uint8Array.from(atob(encoded), c => c.charCodeAt(0));
-      const iv = combined.slice(0, 12);
-      const ciphertext = combined.slice(12);
-      const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
-      return new TextDecoder().decode(dec);
-    }
-
-    // ============================================================
-    // STATUS HELPER
-    // ============================================================
-    const statusTimers = {};
-
-    function showStatus(id, type, icon, message, autoDismiss = true) {
-      const el = document.getElementById(id);
-      el.className = `status-message status-${type}`;
-      el.innerHTML = type === 'loading'
-        ? `<span class="spinner"></span><span>${message}</span>`
-        : `<span class="status-icon">${icon}</span><span>${message}</span>`;
-      el.removeAttribute('hidden');
-
-      clearTimeout(statusTimers[id]);
-      if (autoDismiss && type !== 'loading') {
-        statusTimers[id] = setTimeout(() => {
-          el.setAttribute('hidden', 'true');
-        }, 5000);
-      }
-    }
-
-    function hideStatus(id) {
-      document.getElementById(id).setAttribute('hidden', 'true');
-    }
-
-    // ============================================================
-    // CHARACTER COUNTER
-    // ============================================================
-    const noteArea = document.getElementById('note-content');
-    const charCount = document.getElementById('char-count');
-    const maxChars = 5000;
-
-    noteArea.addEventListener('input', () => {
-      const len = noteArea.value.length;
-      charCount.textContent = `${len.toLocaleString()} / ${maxChars.toLocaleString()}`;
-      charCount.className = 'char-count';
-      if (len > maxChars * 0.85) charCount.classList.add('warning');
-      if (len > maxChars * 0.95) charCount.classList.add('danger');
+    // Open
+    let currentHash=null;
+    document.getElementById('btn-break').addEventListener('click', async ()=>{
+      const pk=document.getElementById('passkey-enter').value; const wrap=document.getElementById('retrieved-wrapper'); const out=document.getElementById('retrieved-content');
+      wrap.setAttribute('hidden','true'); out.value=''; if(!pk){showStatus('read-status','error','✕','Enter your passkey.');return;}
+      showStatus('read-status','loading','','Searching...');
+      try{ const h=await hashString(pk); const snap=await get(ref(db,'notes/'+h)); if(snap.exists()){ const dec=await decryptNote(snap.val().payload,pk); out.value=dec; currentHash=h; showStatus('read-status','success','❧','The seal is broken.'); wrap.removeAttribute('hidden'); document.getElementById('passkey-enter').value=''; } else { showStatus('read-status','error','✕','No letter found.'); } }catch(e){ showStatus('read-status','error','✕','Could not open.'); }
     });
 
-    // ============================================================
-    // OVERWRITE DETECTION
-    // Checks if a note already exists for a given passkey
-    // ============================================================
-    let overwriteCheckTimer;
-    const passkeyCreate = document.getElementById('passkey-create');
-    const overwriteWarning = document.getElementById('overwrite-warning');
-
-    passkeyCreate.addEventListener('input', () => {
-      overwriteWarning.classList.remove('visible');
-      clearTimeout(overwriteCheckTimer);
-      if (passkeyCreate.value.length >= 6 && db) {
-        overwriteCheckTimer = setTimeout(async () => {
-          try {
-            const hash = await hashString(passkeyCreate.value);
-            const snap = await get(ref(db, 'notes/' + hash));
-            if (snap.exists()) overwriteWarning.classList.add('visible');
-          } catch {}
-        }, 600);
-      }
-    });
-
-    // ============================================================
-    // SEAL LETTER — with confirmation modal
-    // ============================================================
-    const sealModal = document.getElementById('sealModal');
-    const modalConfirm = document.getElementById('modalConfirm');
-    const modalCancel = document.getElementById('modalCancel');
-
-    function openModal() {
-      sealModal.removeAttribute('hidden');
-      modalConfirm.focus();
-    }
-
-    function closeModal() {
-      sealModal.setAttribute('hidden', 'true');
-      document.getElementById('btn-seal').focus();
-    }
-
-    modalCancel.addEventListener('click', closeModal);
-    sealModal.addEventListener('click', e => { if (e.target === sealModal) closeModal(); });
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && !sealModal.hasAttribute('hidden')) closeModal();
-    });
-
-    document.getElementById('btn-seal').addEventListener('click', () => {
-      const note = noteArea.value.trim();
-      const passkey = passkeyCreate.value;
-
-      if (!note) {
-        showStatus('write-status', 'error', '✕', 'Your letter is empty. Write something first.');
-        noteArea.focus();
-        return;
-      }
-      if (!passkey || passkey.length < 6) {
-        showStatus('write-status', 'error', '✕', 'Your passkey must be at least 6 characters.');
-        passkeyCreate.focus();
-        return;
-      }
-      openModal();
-    });
-
-    modalConfirm.addEventListener('click', async () => {
-      closeModal();
-      const note = noteArea.value.trim();
-      const passkey = passkeyCreate.value;
-
-      showStatus('write-status', 'loading', '', 'Encrypting and sealing your letter...', false);
-
-      if (!db) {
-        showStatus('write-status', 'error', '✕', 'Cannot reach the vault. Check your connection.');
-        return;
-      }
-
-      try {
-        const hash = await hashString(passkey);
-        const encrypted = await encryptNote(note, passkey);
-        await set(ref(db, 'notes/' + hash), { payload: encrypted, ts: Date.now() });
-
-        showStatus('write-status', 'success', '✦', 'Sealed. Guard your passkey — it cannot be recovered.');
-        noteArea.value = '';
-        passkeyCreate.value = '';
-        charCount.textContent = `0 / ${maxChars.toLocaleString()}`;
-        charCount.className = 'char-count';
-        overwriteWarning.classList.remove('visible');
-      } catch (e) {
-        console.error(e);
-        showStatus('write-status', 'error', '✕', 'The vault is unreachable. Please try again.');
-      }
-    });
-
-    // ============================================================
-    // OPEN LETTER
-    // ============================================================
-    let currentHash = null;
-
-    document.getElementById('btn-break').addEventListener('click', async () => {
-      const passkey = document.getElementById('passkey-enter').value;
-      const wrapper = document.getElementById('retrieved-wrapper');
-      const contentArea = document.getElementById('retrieved-content');
-
-      wrapper.setAttribute('hidden', 'true');
-      contentArea.value = '';
-
-      if (!passkey) {
-        showStatus('read-status', 'error', '✕', 'Enter your passkey to open the letter.');
-        return;
-      }
-
-      showStatus('read-status', 'loading', '', 'Searching the vault...', false);
-
-      if (!db) {
-        showStatus('read-status', 'error', '✕', 'Cannot reach the vault. Check your connection.');
-        return;
-      }
-
-      try {
-        const hash = await hashString(passkey);
-        const snap = await get(ref(db, 'notes/' + hash));
-
-        if (snap.exists()) {
-          const decrypted = await decryptNote(snap.val().payload, passkey);
-          contentArea.value = decrypted;
-          currentHash = hash;
-
-          showStatus('read-status', 'success', '❧', 'The seal is broken. Your letter has been revealed.');
-          wrapper.removeAttribute('hidden');
-          document.getElementById('passkey-enter').value = '';
-        } else {
-          showStatus('read-status', 'error', '✕', 'No letter found. Check your passkey and try again.');
-          currentHash = null;
-        }
-      } catch (e) {
-        console.error(e);
-        showStatus('read-status', 'error', '✕', 'Could not open the letter. The vault may be unreachable.');
-        currentHash = null;
-      }
-    });
-
-    // ============================================================
-    // COPY TO CLIPBOARD
-    // ============================================================
-    const copyToast = document.getElementById('copyToast');
-    let toastTimer;
-
-    document.getElementById('btn-copy').addEventListener('click', async () => {
-      const text = document.getElementById('retrieved-content').value;
-      if (!text) return;
-
-      try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(text);
-        } else {
-          // Fallback for older browsers
-          const ta = document.createElement('textarea');
-          ta.value = text;
-          ta.style.position = 'fixed';
-          ta.style.opacity = '0';
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand('copy');
-          document.body.removeChild(ta);
-        }
-        clearTimeout(toastTimer);
-        copyToast.classList.add('show');
-        toastTimer = setTimeout(() => copyToast.classList.remove('show'), 2500);
-      } catch {
-        showStatus('read-status', 'error', '✕', 'Could not copy — please select and copy manually.');
-      }
-    });
-
-    // ============================================================
-    // DELETE / BURN LETTER
-    // ============================================================
-    document.getElementById('btn-delete').addEventListener('click', async () => {
-      if (!currentHash || !db) return;
-      const confirmed = confirm('Burn this letter permanently? This cannot be undone.');
-      if (!confirmed) return;
-
-      try {
-        await remove(ref(db, 'notes/' + currentHash));
-        document.getElementById('retrieved-wrapper').setAttribute('hidden', 'true');
-        document.getElementById('retrieved-content').value = '';
-        showStatus('read-status', 'success', '✦', 'The letter has been burned. No trace remains.');
-        currentHash = null;
-      } catch {
-        showStatus('read-status', 'error', '✕', 'Could not burn the letter. Try again.');
-      }
-    });
-
+    // Copy / Burn
+    const toast=document.getElementById('copyToast');
+    document.getElementById('btn-copy').addEventListener('click', async ()=>{ const t=document.getElementById('retrieved-content').value; if(!t)return; try{ await navigator.clipboard.writeText(t); toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2200);}catch{} });
+    document.getElementById('btn-delete').addEventListener('click', async ()=>{ if(!currentHash||!db)return; if(!confirm('Burn this letter permanently?'))return; await remove(ref(db,'notes/'+currentHash)); document.getElementById('retrieved-wrapper').setAttribute('hidden','true'); showStatus('read-status','success','✦','Letter burned.'); currentHash=null; });
   </script>
 </body>
 </html>
