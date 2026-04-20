@@ -2,286 +2,1105 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Sealed Letter — Private Notes</title>
+  <meta name="description" content="A private ledger for your thoughts. Write, seal, and retrieve secret letters with a passkey.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔴</text></svg>">
+
+  <!-- Google Fonts: Playfair Display + IM Fell English -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IM+Fell+English:ital@0;1&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
   <style>
-    /* High-contrast dark retro terminal theme */
+    /* ===========================
+       CSS CUSTOM PROPERTIES
+    =========================== */
     :root {
-      --bg: #0a0a0a;
-      --text: #f0f0f0;
-      --accent: #ff2a4b; /* Vibrant wax seal red */
-      --accent-hover: #ff526e;
-      --border: #333333;
-      --focus-ring: #00e5ff; /* Cyan focus for high visibility */
-      --card-bg: #141414;
+      --bg: #fdf6e3;
+      --bg-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      --card-bg: #5c3317;
+      --card-shadow: 0 20px 60px rgba(92,51,23,0.35), 0 4px 16px rgba(92,51,23,0.2);
+      --text: #1a0f00;
+      --card-text: #fff4d6;
+      --card-label: #f5c89a;
+      --card-muted: #c9a07a;
+      --accent: #8b1a1a;
+      --accent-hover: #c0392b;
+      --accent-glow: rgba(139,26,26,0.4);
+      --gold: #c8962c;
+      --gold-bright: #ffd700;
+      --input-bg: #3d2008;
+      --input-text: #ffe066;
+      --input-placeholder: #a0743a;
+      --border: #8b5e3c;
+      --border-card: #7a4520;
+      --focus-ring: #ffd700;
+      --muted: #6b4c2a;
+      --success: #2d6a2d;
+      --success-bg: rgba(45,106,45,0.15);
+      --error: #8b1a1a;
+      --error-bg: rgba(139,26,26,0.15);
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'IM Fell English', Georgia, serif;
+      --font-mono: 'Courier Prime', 'Courier New', monospace;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    * {
+    /* ===========================
+       REDUCED MOTION
+    =========================== */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .cursor { display: none !important; }
+    }
+
+    /* ===========================
+       RESET & BASE
+    =========================== */
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
-    /* Accessibility: Respect reduced motion */
-    @media (prefers-reduced-motion: reduce) {
-      .retro-cursor { display: none !important; }
-      * { animation: none !important; transition: none !important; }
+    html {
+      scroll-behavior: smooth;
     }
 
     body {
-      font-family: "Courier New", Courier, monospace;
+      font-family: var(--font-body);
       background-color: var(--bg);
+      background-image: var(--bg-texture);
       color: var(--text);
-      font-size: 20px; /* Senior-friendly base size */
-      line-height: 1.6;
+      font-size: clamp(16px, 2vw, 20px);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
       display: flex;
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
-      padding: 2rem 1rem;
-      cursor: none; /* Hide default cursor */
+      min-height: 100dvh;
+      padding: clamp(1.5rem, 4vw, 3rem) 1rem;
+      cursor: none;
+      overflow-x: hidden;
     }
 
+    /* ===========================
+       ACCESSIBILITY
+    =========================== */
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      border: 0;
+    }
+
+    .skip-link {
+      position: absolute;
+      top: -100px;
+      left: 1rem;
+      background: var(--accent);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      font-weight: bold;
+      text-decoration: none;
+      z-index: 10000;
+      border-radius: 4px;
+      transition: top 0.2s;
+    }
+
+    .skip-link:focus {
+      top: 1rem;
+    }
+
+    /* ===========================
+       CUSTOM CURSOR
+    =========================== */
+    .cursor {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      will-change: transform;
+      mix-blend-mode: multiply;
+    }
+
+    .cursor-core {
+      position: fixed;
+      width: 14px;
+      height: 14px;
+      background: radial-gradient(circle, #c0392b 0%, #8b1a1a 60%, transparent 100%);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 10000;
+      will-change: transform;
+      transition: width 0.15s ease, height 0.15s ease;
+      box-shadow: 0 0 12px 4px rgba(139,26,26,0.5), 0 0 24px 8px rgba(192,57,43,0.2);
+    }
+
+    .cursor-glow {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      background: radial-gradient(circle, rgba(192,57,43,0.25) 0%, rgba(139,26,26,0.08) 50%, transparent 70%);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 9998;
+      will-change: transform;
+      transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+    }
+
+    .cursor-core.hovering {
+      width: 22px;
+      height: 22px;
+      box-shadow: 0 0 20px 8px rgba(139,26,26,0.6), 0 0 40px 16px rgba(192,57,43,0.3);
+    }
+
+    .cursor-glow.hovering {
+      width: 70px;
+      height: 70px;
+    }
+
+    .cursor-core.clicking {
+      width: 8px;
+      height: 8px;
+      box-shadow: 0 0 6px 2px rgba(139,26,26,0.8);
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+      body { cursor: auto; }
+      .cursor-core, .cursor-glow { display: none !important; }
+    }
+
+    /* ===========================
+       PARCHMENT TEXTURE OVERLAY
+    =========================== */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 28px,
+          rgba(139,94,60,0.04) 28px,
+          rgba(139,94,60,0.04) 29px
+        );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ===========================
+       LAYOUT
+    =========================== */
     .container {
       width: 100%;
-      max-width: 700px;
+      max-width: 680px;
       flex: 1;
       position: relative;
       z-index: 10;
     }
 
-    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+    /* ===========================
+       PAGE LOAD ANIMATION
+    =========================== */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
     header {
       text-align: center;
-      margin-bottom: 2.5rem;
+      margin-bottom: clamp(2rem, 5vw, 3.5rem);
+      animation: fadeUp 0.8s cubic-bezier(0.4,0,0.2,1) both;
+    }
+
+    .wax-seal {
+      display: inline-block;
+      width: 72px;
+      height: 72px;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.6s cubic-bezier(0.4,0,0.2,1) both, sealPulse 4s ease-in-out infinite 1.5s;
+      filter: drop-shadow(0 4px 12px rgba(139,26,26,0.5));
+    }
+
+    @keyframes sealPulse {
+      0%, 100% { filter: drop-shadow(0 4px 12px rgba(139,26,26,0.5)); transform: scale(1); }
+      50% { filter: drop-shadow(0 6px 20px rgba(192,57,43,0.7)); transform: scale(1.04); }
     }
 
     h1 {
-      font-size: 3rem;
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 7vw, 4rem);
+      font-weight: 900;
+      letter-spacing: 6px;
       text-transform: uppercase;
-      letter-spacing: 4px;
       color: var(--text);
-      border-bottom: 4px solid var(--accent);
+      text-shadow: 2px 2px 0px rgba(139,94,60,0.2), 0 0 40px rgba(139,26,26,0.08);
+      margin-bottom: 1.2rem;
+      position: relative;
       display: inline-block;
-      padding-bottom: 0.5rem;
-      margin-bottom: 1.5rem;
     }
 
-    blockquote {
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: #aaaaaa;
-      min-height: 3rem; /* Prevent layout shift during typing */
+    h1::after {
+      content: '';
+      display: block;
+      width: 60%;
+      height: 3px;
+      background: linear-gradient(to right, transparent, var(--accent), transparent);
+      margin: 0.6rem auto 0;
+      border-radius: 2px;
+    }
+
+    .tagline {
+      font-family: var(--font-body);
+      font-style: italic;
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--muted);
+      min-height: 2.5rem;
+      letter-spacing: 0.3px;
     }
 
     .typewriter-cursor {
       display: inline-block;
-      width: 10px;
-      height: 1.2rem;
+      width: 2px;
+      height: 1.1em;
       background-color: var(--accent);
-      vertical-align: bottom;
-      margin-left: 4px;
-      animation: blink 1s step-end infinite;
+      vertical-align: middle;
+      margin-left: 2px;
+      animation: blink 1.1s step-end infinite;
     }
 
     @keyframes blink { 50% { opacity: 0; } }
-    .typewriter-cursor.finished { display: none; }
+    .typewriter-cursor.done { display: none; }
 
-    .card {
-      background: var(--card-bg);
-      border: 2px solid var(--border);
-      padding: 2rem;
-      border-radius: 8px;
-    }
-
+    /* ===========================
+       NAVIGATION TABS
+    =========================== */
     .nav-tabs {
       display: flex;
-      gap: 1rem;
-      margin-bottom: 2rem;
+      gap: 0;
+      margin-bottom: 0;
+      border-radius: 8px 8px 0 0;
+      overflow: hidden;
+      animation: fadeUp 0.9s cubic-bezier(0.4,0,0.2,1) 0.1s both;
     }
 
     .tab-btn {
       flex: 1;
-      background: var(--bg);
+      background: #e8d5b0;
       border: 2px solid var(--border);
-      color: var(--text);
-      font-family: inherit;
-      font-size: 1.2rem;
-      font-weight: bold;
-      padding: 1rem;
-      transition: all 0.2s;
+      border-bottom: none;
+      color: var(--muted);
+      font-family: var(--font-display);
+      font-size: clamp(0.9rem, 2.5vw, 1.15rem);
+      font-weight: 700;
+      font-style: italic;
+      padding: clamp(0.8rem, 2vw, 1.1rem) 1rem;
       cursor: none;
+      letter-spacing: 1px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
     }
+
+    .tab-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      z-index: 0;
+    }
+
+    .tab-btn span { position: relative; z-index: 1; }
 
     .tab-btn[aria-selected="true"] {
-      background: var(--text);
-      color: var(--bg);
-      border-color: var(--text);
+      background: var(--card-bg);
+      color: var(--card-text);
+      border-color: var(--card-bg);
     }
 
-    .tab-btn:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible {
+    .tab-btn[aria-selected="false"]:hover {
+      color: var(--text);
+      background: #d4c09a;
+    }
+
+    .tab-btn:focus-visible {
       outline: 4px solid var(--focus-ring);
-      outline-offset: 4px;
+      outline-offset: -4px;
     }
 
+    /* ===========================
+       CARD
+    =========================== */
+    .card {
+      background: var(--card-bg);
+      border: 2px solid var(--border-card);
+      border-top: none;
+      padding: clamp(1.5rem, 4vw, 2.5rem);
+      border-radius: 0 0 12px 12px;
+      box-shadow: var(--card-shadow);
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 1s cubic-bezier(0.4,0,0.2,1) 0.2s both;
+    }
+
+    /* Leather grain texture on card */
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='leather'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23leather)' opacity='0.06'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      border-radius: 0 0 12px 12px;
+    }
+
+    /* Decorative corner flourishes */
+    .card::after {
+      content: '❧';
+      position: absolute;
+      top: 1rem;
+      right: 1.2rem;
+      font-size: 1.5rem;
+      color: rgba(245,200,154,0.2);
+      pointer-events: none;
+    }
+
+    .card > * { position: relative; z-index: 1; }
+
+    /* ===========================
+       PANELS
+    =========================== */
     .view-section { display: none; }
-    .view-section:not([hidden]) { display: block; animation: fadeIn 0.4s ease-in; }
+    .view-section:not([hidden]) {
+      display: block;
+      animation: panelFadeIn 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
 
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes panelFadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-    .form-group { margin-bottom: 2rem; }
+    /* ===========================
+       FORM ELEMENTS
+    =========================== */
+    .form-group {
+      margin-bottom: 1.8rem;
+    }
 
     label {
-      display: block;
-      font-weight: bold;
-      font-size: 1.2rem;
-      margin-bottom: 0.5rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    input[type="text"], textarea {
-      width: 100%;
-      padding: 1rem;
-      font-family: inherit;
-      font-size: 1.2rem;
-      background: var(--bg);
-      border: 2px solid var(--border);
-      color: var(--focus-ring); /* Makes input text pop */
-      border-radius: 4px;
-      cursor: text !important; /* Force native text caret */
-    }
-
-    textarea { resize: vertical; min-height: 200px; }
-
-    .action-btn {
-      width: 100%;
-      padding: 1.2rem;
-      background: var(--accent);
-      color: white;
-      border: none;
-      font-family: inherit;
-      font-size: 1.4rem;
-      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: clamp(0.75rem, 2vw, 0.9rem);
+      margin-bottom: 0.6rem;
       text-transform: uppercase;
       letter-spacing: 2px;
-      border-radius: 4px;
-      cursor: none;
+      color: var(--card-label);
+      font-variant: small-caps;
     }
 
-    .action-btn:hover { background: var(--accent-hover); }
+    .char-count {
+      font-size: 0.75rem;
+      color: var(--card-muted);
+      font-variant: normal;
+      letter-spacing: 0;
+      transition: color 0.2s;
+    }
 
-    .status-message {
-      margin-top: 1.5rem;
-      padding: 1.5rem;
-      border: 2px solid;
-      font-weight: bold;
-      font-size: 1.2rem;
+    .char-count.warning { color: #ffaa44; }
+    .char-count.danger { color: #ff6b6b; }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: clamp(0.8rem, 2vw, 1rem) clamp(0.8rem, 2vw, 1.1rem);
+      font-family: var(--font-mono);
+      font-size: clamp(0.95rem, 2vw, 1.1rem);
+      background: var(--input-bg);
+      border: 2px solid var(--border-card);
+      color: var(--input-text);
+      border-radius: 6px;
+      cursor: text !important;
+      transition: border-color 0.25s, box-shadow 0.25s;
+      line-height: 1.6;
+      font-feature-settings: "liga" 1, "kern" 1;
+    }
+
+    input[type="text"]::placeholder,
+    textarea::placeholder {
+      color: var(--input-placeholder);
+      font-style: italic;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(255,215,0,0.2), inset 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    input[type="text"]:focus-visible,
+    textarea:focus-visible,
+    button:focus-visible {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 3px;
+    }
+
+    textarea {
+      resize: none;
+      min-height: 180px;
+    }
+
+    .passkey-hint {
+      margin-top: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--card-muted);
+      font-style: italic;
+    }
+
+    /* ===========================
+       DIVIDER
+    =========================== */
+    .ornamental-divider {
       text-align: center;
+      color: rgba(245,200,154,0.3);
+      font-size: 1.2rem;
+      margin: 1.5rem 0;
+      letter-spacing: 8px;
+    }
+
+    /* ===========================
+       BUTTONS
+    =========================== */
+    .action-btn {
+      width: 100%;
+      padding: clamp(0.9rem, 2.5vw, 1.2rem);
+      background: linear-gradient(135deg, var(--accent) 0%, #6b1212 100%);
+      color: #fff4d6;
+      border: 2px solid rgba(255,244,214,0.15);
+      font-family: var(--font-display);
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      font-weight: 700;
+      font-style: italic;
+      letter-spacing: 3px;
+      border-radius: 6px;
+      cursor: none;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s ease, box-shadow 0.25s ease, background 0.25s ease;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      box-shadow: 0 4px 16px rgba(139,26,26,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+
+    .action-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .action-btn:hover {
+      background: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent) 100%);
+      box-shadow: 0 6px 24px rgba(139,26,26,0.55), inset 0 1px 0 rgba(255,255,255,0.15);
+      transform: translateY(-1px);
+    }
+
+    .action-btn:active {
+      transform: scale(0.98) translateY(0);
+      box-shadow: 0 2px 8px rgba(139,26,26,0.4);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 0.5rem;
+    }
+
+    .secondary-btn {
+      flex: 1;
+      padding: clamp(0.7rem, 2vw, 0.9rem);
+      background: transparent;
+      color: var(--card-label);
+      border: 2px solid var(--border-card);
+      font-family: var(--font-mono);
+      font-size: clamp(0.8rem, 2vw, 0.95rem);
+      font-weight: 700;
+      letter-spacing: 1px;
+      border-radius: 6px;
+      cursor: none;
+      transition: var(--transition);
+    }
+
+    .secondary-btn:hover {
+      background: rgba(245,200,154,0.1);
+      border-color: var(--card-label);
+      color: var(--card-text);
+    }
+
+    .secondary-btn:active { transform: scale(0.97); }
+
+    /* ===========================
+       STATUS MESSAGES
+    =========================== */
+    .status-message {
+      margin-top: 1.2rem;
+      padding: 1rem 1.2rem;
+      border-left: 4px solid;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: clamp(0.85rem, 2vw, 1rem);
+      border-radius: 0 6px 6px 0;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      animation: statusSlideIn 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    @keyframes statusSlideIn {
+      from { opacity: 0; transform: translateX(-8px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes shakeError {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
     }
 
     .status-message[hidden] { display: none; }
-    .status-success { border-color: #00ff00; color: #00ff00; background: rgba(0, 255, 0, 0.1); }
-    .status-error { border-color: #ff0000; color: #ff0000; background: rgba(255, 0, 0, 0.1); }
 
-    footer {
-      margin-top: 4rem;
-      text-align: center;
-      font-weight: bold;
-      font-size: 1.1rem;
-      padding-top: 2rem;
-      border-top: 2px dashed var(--border);
-      width: 100%;
-      max-width: 700px;
+    .status-success {
+      border-color: #5a9e5a;
+      color: #a8e6a8;
+      background: rgba(90,158,90,0.12);
     }
 
-    /* Ultra-Visible X-Ray Cursor */
-    .retro-cursor {
+    .status-error {
+      border-color: var(--accent-hover);
+      color: #ffaaaa;
+      background: rgba(192,57,43,0.12);
+      animation: statusSlideIn 0.3s cubic-bezier(0.4,0,0.2,1), shakeError 0.4s 0.1s ease;
+    }
+
+    .status-loading {
+      border-color: var(--gold);
+      color: var(--gold-bright);
+      background: rgba(200,150,44,0.1);
+    }
+
+    .status-icon { font-size: 1.1rem; flex-shrink: 0; }
+
+    /* ===========================
+       RETRIEVED NOTE AREA
+    =========================== */
+    .retrieved-wrapper {
+      margin-top: 1.5rem;
+      animation: fadeUp 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .retrieved-wrapper[hidden] { display: none; }
+
+    .retrieved-actions {
+      display: flex;
+      gap: 0.6rem;
+      margin-top: 0.8rem;
+    }
+
+    /* ===========================
+       CONFIRMATION MODAL
+    =========================== */
+    .modal-overlay {
       position: fixed;
-      top: 0; left: 0;
-      width: 30px; height: 30px;
-      background-color: white; /* Combined with difference mode, this makes it perfectly inverted against anything */
-      mix-blend-mode: difference;
-      pointer-events: none;
-      z-index: 9999;
-      transform: translate(-50%, -50%);
-      border-radius: 4px;
-      transition: width 0.1s, height 0.1s, border-radius 0.1s;
+      inset: 0;
+      background: rgba(26,15,0,0.75);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      animation: overlayFadeIn 0.25s ease;
     }
 
-    .retro-cursor.hovering {
-      width: 45px; height: 45px;
+    @keyframes overlayFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-overlay[hidden] { display: none; }
+
+    .modal-box {
+      background: var(--card-bg);
+      border: 2px solid var(--border-card);
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+      animation: modalSlideIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    @keyframes modalSlideIn {
+      from { opacity: 0; transform: scale(0.9) translateY(16px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      font-style: italic;
+      color: var(--card-text);
+      margin-bottom: 0.8rem;
+    }
+
+    .modal-body {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      color: var(--card-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.8rem;
+    }
+
+    .modal-confirm {
+      flex: 1;
+      padding: 0.8rem;
+      background: linear-gradient(135deg, var(--accent), #6b1212);
+      color: var(--card-text);
+      border: none;
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      border-radius: 6px;
+      cursor: none;
+      transition: var(--transition);
+    }
+
+    .modal-confirm:hover { background: linear-gradient(135deg, var(--accent-hover), var(--accent)); }
+
+    .modal-cancel {
+      flex: 1;
+      padding: 0.8rem;
+      background: transparent;
+      color: var(--card-label);
+      border: 2px solid var(--border-card);
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      border-radius: 6px;
+      cursor: none;
+      transition: var(--transition);
+    }
+
+    .modal-cancel:hover { background: rgba(245,200,154,0.1); color: var(--card-text); }
+
+    /* ===========================
+       LOADING SPINNER
+    =========================== */
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(200,150,44,0.3);
+      border-top-color: var(--gold-bright);
       border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
     }
 
-    /* Fallback for touch devices */
-    @media (hover: none) and (pointer: coarse) {
-      body, .tab-btn, .action-btn { cursor: auto; }
-      .retro-cursor { display: none !important; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===========================
+       TOOLTIP
+    =========================== */
+    .tooltip-wrap {
+      position: relative;
+      display: inline-block;
+      margin-left: 0.4rem;
+    }
+
+    .tooltip-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      background: rgba(245,200,154,0.2);
+      border-radius: 50%;
+      font-size: 0.7rem;
+      color: var(--card-label);
+      cursor: help;
+      font-style: normal;
+      font-variant: normal;
+      font-family: var(--font-mono);
+      border: 1px solid rgba(245,200,154,0.3);
+    }
+
+    .tooltip-text {
+      position: absolute;
+      bottom: 130%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1a0f00;
+      color: var(--card-label);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-style: normal;
+      font-variant: normal;
+      letter-spacing: 0;
+      text-transform: none;
+      padding: 0.6rem 0.9rem;
+      border-radius: 6px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      border: 1px solid var(--border-card);
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    .tooltip-text::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: var(--border-card);
+    }
+
+    .tooltip-wrap:hover .tooltip-text,
+    .tooltip-wrap:focus-within .tooltip-text {
+      opacity: 1;
+    }
+
+    /* ===========================
+       OVERWRITE WARNING
+    =========================== */
+    .overwrite-warning {
+      display: none;
+      margin-top: 0.5rem;
+      padding: 0.6rem 0.9rem;
+      background: rgba(255,170,68,0.12);
+      border-left: 3px solid #ffaa44;
+      border-radius: 0 4px 4px 0;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: #ffaa44;
+    }
+
+    .overwrite-warning.visible { display: block; animation: statusSlideIn 0.3s ease; }
+
+    /* ===========================
+       FOOTER
+    =========================== */
+    footer {
+      margin-top: clamp(2.5rem, 6vw, 4rem);
+      text-align: center;
+      width: 100%;
+      max-width: 680px;
+      padding-top: 1.5rem;
+      position: relative;
+      z-index: 10;
+      animation: fadeUp 1.1s cubic-bezier(0.4,0,0.2,1) 0.4s both;
+    }
+
+    .footer-ornament {
+      color: var(--muted);
+      font-size: 1.4rem;
+      letter-spacing: 12px;
+      margin-bottom: 0.8rem;
+      opacity: 0.5;
+    }
+
+    .footer-line {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--border), transparent);
+      margin-bottom: 1.2rem;
+    }
+
+    footer p {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+
+    footer .footer-tagline {
+      font-family: var(--font-body);
+      font-style: italic;
+      font-size: 0.95rem;
+      color: #a07848;
+      margin-bottom: 0.5rem;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    /* ===========================
+       COPY TOAST
+    =========================== */
+    .copy-toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1a0f00;
+      color: var(--gold-bright);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      border: 1px solid var(--gold);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      z-index: 9000;
+      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.35s ease;
+      opacity: 0;
+      pointer-events: none;
+      letter-spacing: 1px;
+    }
+
+    .copy-toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ===========================
+       RESPONSIVE
+    =========================== */
+    @media (max-width: 480px) {
+      .nav-tabs { flex-direction: column; border-radius: 8px 8px 0 0; }
+      .tab-btn { border-bottom: 1px solid var(--border); }
+      .tab-btn[aria-selected="true"] { border-bottom-color: var(--card-bg); }
+      .btn-row { flex-direction: column; }
+      .modal-actions { flex-direction: column; }
     }
   </style>
 </head>
 <body>
 
-  <div id="retro-cursor" class="retro-cursor" aria-hidden="true"></div>
+  <!-- Skip link for keyboard users -->
+  <a href="#main-content" class="skip-link">Skip to content</a>
 
-  <main class="container">
+  <!-- Custom Cursor -->
+  <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+  <div class="cursor-core" id="cursorCore" aria-hidden="true"></div>
+
+  <!-- Copy Toast -->
+  <div class="copy-toast" id="copyToast" aria-live="polite" aria-atomic="true">✦ Copied to clipboard</div>
+
+  <!-- Confirmation Modal -->
+  <div class="modal-overlay" id="sealModal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-box">
+      <div class="modal-title" id="modalTitle">Press the seal?</div>
+      <div class="modal-body">
+        Once sealed, your letter will only be retrievable with your exact passkey. There is no recovery. Are you certain?
+      </div>
+      <div class="modal-actions">
+        <button class="modal-cancel" id="modalCancel">Go back</button>
+        <button class="modal-confirm" id="modalConfirm">Seal it</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="container" id="main-content">
     <header>
+      <!-- Wax Seal SVG -->
+      <svg class="wax-seal" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <radialGradient id="sealGrad" cx="40%" cy="35%">
+            <stop offset="0%" stop-color="#e84c3d"/>
+            <stop offset="60%" stop-color="#8b1a1a"/>
+            <stop offset="100%" stop-color="#5c0f0f"/>
+          </radialGradient>
+          <filter id="sealShadow">
+            <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#5c0f0f" flood-opacity="0.6"/>
+          </filter>
+        </defs>
+        <!-- Drip drops -->
+        <ellipse cx="20" cy="82" rx="7" ry="5" fill="#6b1212" opacity="0.6"/>
+        <ellipse cx="80" cy="78" rx="5" ry="4" fill="#6b1212" opacity="0.5"/>
+        <ellipse cx="50" cy="88" rx="6" ry="4" fill="#6b1212" opacity="0.55"/>
+        <!-- Main seal -->
+        <circle cx="50" cy="50" r="38" fill="url(#sealGrad)" filter="url(#sealShadow)"/>
+        <!-- Inner ring -->
+        <circle cx="50" cy="50" r="30" fill="none" stroke="rgba(255,244,214,0.25)" stroke-width="1.5"/>
+        <!-- S letterform -->
+        <text x="50" y="58" text-anchor="middle" font-family="Georgia, serif" font-size="28" font-weight="bold" fill="rgba(255,244,214,0.9)" font-style="italic">S</text>
+        <!-- Star points -->
+        <g stroke="rgba(255,244,214,0.2)" stroke-width="1" fill="none">
+          <line x1="50" y1="12" x2="50" y2="20"/>
+          <line x1="50" y1="80" x2="50" y2="88"/>
+          <line x1="12" y1="50" x2="20" y2="50"/>
+          <line x1="80" y1="50" x2="88" y2="50"/>
+          <line x1="23" y1="23" x2="29" y2="29"/>
+          <line x1="71" y1="71" x2="77" y2="77"/>
+          <line x1="77" y1="23" x2="71" y2="29"/>
+          <line x1="23" y1="77" x2="29" y2="71"/>
+        </g>
+      </svg>
+
       <h1>Sealed Letter</h1>
-      <blockquote>
-        <span id="typewriter-text"></span><span id="typewriter-cursor" class="typewriter-cursor"></span>
-      </blockquote>
+      <p class="tagline" id="tagline-text" aria-live="polite">
+        <span id="typewriter-text"></span><span id="typewriter-cursor" class="typewriter-cursor" aria-hidden="true"></span>
+      </p>
     </header>
 
     <nav aria-label="Application modes">
       <div class="nav-tabs" role="tablist">
-        <button id="tab-write" class="tab-btn" role="tab" aria-selected="true" aria-controls="panel-write">Compose Note</button>
-        <button id="tab-read" class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-read">Retrieve Note</button>
+        <button id="tab-write" class="tab-btn" role="tab" aria-selected="true" aria-controls="panel-write">
+          <span>✦ Write a Letter</span>
+        </button>
+        <button id="tab-read" class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-read">
+          <span>❧ Open a Letter</span>
+        </button>
       </div>
     </nav>
 
-    <section id="panel-write" class="view-section card" role="tabpanel" aria-labelledby="tab-write">
-      <div class="form-group">
-        <label for="note-content">Private Message</label>
-        <textarea id="note-content" placeholder="Enter your text here..." aria-required="true"></textarea>
-      </div>
+    <div class="card">
+      <!-- WRITE PANEL -->
+      <section id="panel-write" class="view-section" role="tabpanel" aria-labelledby="tab-write">
+        <div class="form-group">
+          <label for="note-content">
+            <span>Your Private Message</span>
+            <span class="char-count" id="char-count" aria-live="polite">0 / 5000</span>
+          </label>
+          <textarea
+            id="note-content"
+            placeholder="Write what no one else should read..."
+            aria-required="true"
+            maxlength="5000"
+            aria-describedby="char-count"
+          ></textarea>
+        </div>
 
-      <div class="form-group">
-        <label for="passkey-create">Master Passkey</label>
-        <input type="text" id="passkey-create" placeholder="E.g., Alpha Bravo 99" aria-required="true" autocomplete="off">
-      </div>
+        <div class="form-group">
+          <label for="passkey-create">
+            <span>
+              Your Secret Word
+              <span class="tooltip-wrap">
+                <span class="tooltip-icon" tabindex="0" role="tooltip" aria-label="Passkey tips">?</span>
+                <span class="tooltip-text">Use a phrase only you'd remember. Min. 6 characters. There is no recovery if lost.</span>
+              </span>
+            </span>
+          </label>
+          <input
+            type="text"
+            id="passkey-create"
+            placeholder="A phrase only you would remember..."
+            aria-required="true"
+            autocomplete="off"
+            spellcheck="false"
+            minlength="6"
+            aria-describedby="passkey-hint overwrite-warning"
+          >
+          <div class="passkey-hint" id="passkey-hint">Minimum 6 characters. There is no recovery if lost.</div>
+          <div class="overwrite-warning" id="overwrite-warning" role="alert">
+            ⚠ A letter already exists with this passkey. Sealing will overwrite it permanently.
+          </div>
+        </div>
 
-      <button id="btn-seal" class="action-btn">Seal Letter</button>
+        <div class="ornamental-divider" aria-hidden="true">· · ✦ · ·</div>
 
-      <div id="write-status" class="status-message" role="alert" aria-live="assertive" hidden></div>
-    </section>
+        <button id="btn-seal" class="action-btn">Press the Seal</button>
 
-    <section id="panel-read" class="view-section card" role="tabpanel" aria-labelledby="tab-read" hidden>
-      <div class="form-group">
-        <label for="passkey-enter">Enter Passkey</label>
-        <input type="text" id="passkey-enter" placeholder="Exact passkey required..." aria-required="true" autocomplete="off">
-      </div>
+        <div id="write-status" class="status-message" role="alert" aria-live="assertive" hidden></div>
+      </section>
 
-      <button id="btn-break" class="action-btn">Break Seal</button>
+      <!-- READ PANEL -->
+      <section id="panel-read" class="view-section" role="tabpanel" aria-labelledby="tab-read" hidden>
+        <div class="form-group">
+          <label for="passkey-enter">Enter Your Passkey</label>
+          <input
+            type="text"
+            id="passkey-enter"
+            placeholder="The exact phrase you sealed it with..."
+            aria-required="true"
+            autocomplete="off"
+            spellcheck="false"
+          >
+        </div>
 
-      <div id="read-status" class="status-message" role="alert" aria-live="assertive" hidden></div>
-      
-      <div class="form-group" style="margin-top: 2rem;">
-        <label for="retrieved-content" class="sr-only">Retrieved Message</label>
-        <textarea id="retrieved-content" readonly placeholder="Decrypted message appears here..." aria-label="Retrieved encrypted message"></textarea>
-      </div>
-    </section>
+        <div class="ornamental-divider" aria-hidden="true">· · ❧ · ·</div>
+
+        <button id="btn-break" class="action-btn">Open the Letter</button>
+
+        <div id="read-status" class="status-message" role="alert" aria-live="assertive" hidden></div>
+
+        <div class="retrieved-wrapper" id="retrieved-wrapper" hidden>
+          <div class="form-group" style="margin-top: 0; margin-bottom: 0.8rem;">
+            <label for="retrieved-content">Your Message</label>
+            <textarea
+              id="retrieved-content"
+              readonly
+              aria-label="Your retrieved message"
+              aria-readonly="true"
+            ></textarea>
+          </div>
+          <div class="retrieved-actions">
+            <button class="secondary-btn" id="btn-copy">⊕ Copy Message</button>
+            <button class="secondary-btn" id="btn-delete">✕ Burn Letter</button>
+          </div>
+        </div>
+      </section>
+    </div>
   </main>
 
   <footer>
-    <p>Made By Dylan Grow &copy; 2026</p>
+    <div class="footer-ornament" aria-hidden="true">✦ ✦ ✦</div>
+    <div class="footer-line"></div>
+    <p class="footer-tagline">Every secret deserves a seal.</p>
+    <p>Crafted by <strong>Dylan Grow</strong> &copy; 2026</p>
   </footer>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
+    // ============================================================
+    // FIREBASE INIT
+    // The API key here is a client-side read/write key gated by
+    // Firebase security rules — move sensitive ops server-side
+    // for production use.
+    // ============================================================
     const firebaseConfig = {
       apiKey: "AIzaSyADPRoMDwuS_U1DcY_3N2UjVyKn8pBFv3s",
       authDomain: "sealed-letter-f3af5.firebaseapp.com",
@@ -289,165 +1108,466 @@
       projectId: "sealed-letter-f3af5",
       storageBucket: "sealed-letter-f3af5.firebasestorage.app",
       messagingSenderId: "778056799822",
-      appId: "1:778056799822:web:7a8b9c0d1e2f3a4b" 
+      appId: "1:778056799822:web:7a8b9c0d1e2f3a4b"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    // ---- Typewriter Effect ----
-    const targetText = "A private ledger for your thoughts. Type your message, set your passkey, and leave no trace behind.";
-    const textContainer = document.getElementById('typewriter-text');
-    const cursorEl = document.getElementById('typewriter-cursor');
-    let typeIndex = 0;
-
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    if (prefersReducedMotion) {
-      textContainer.textContent = targetText;
-      cursorEl.classList.add('finished');
-    } else {
-      function typeWriter() {
-        if (typeIndex < targetText.length) {
-          textContainer.textContent += targetText.charAt(typeIndex);
-          typeIndex++;
-          setTimeout(typeWriter, 35); // typing speed
-        } else {
-          setTimeout(() => cursorEl.classList.add('finished'), 2000); // Stop blinking after 2 seconds
-        }
-      }
-      setTimeout(typeWriter, 500); // Start delay
+    let app, db;
+    try {
+      app = initializeApp(firebaseConfig);
+      db = getDatabase(app);
+    } catch (e) {
+      console.error("Firebase failed to initialize:", e);
     }
 
-    // ---- X-Ray Cursor Logic ----
-    const customCursor = document.getElementById('retro-cursor');
+    // ============================================================
+    // TYPEWRITER — rotating phrases, variable speed, human feel
+    // ============================================================
+    const phrases = [
+      "A private ledger for your thoughts. Write, seal, and leave no trace behind.",
+      "Some words are only meant for one pair of eyes.",
+      "Fold it. Seal it. Trust no one else with the key.",
+      "The oldest secret is a letter never found."
+    ];
+
+    const textEl = document.getElementById('typewriter-text');
+    const cursorEl = document.getElementById('typewriter-cursor');
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReduced) {
+      textEl.textContent = phrases[0];
+      cursorEl.classList.add('done');
+    } else {
+      let phraseIndex = 0;
+      let charIndex = 0;
+      let isDeleting = false;
+      let isPausing = false;
+
+      // Variable speed: slightly randomized per char, slower at punctuation
+      function getTypeSpeed() {
+        const ch = phrases[phraseIndex][charIndex] ?? '';
+        if (['.', ',', '!', '?'].includes(ch)) return 180 + Math.random() * 80;
+        return isDeleting ? 35 + Math.random() * 20 : 55 + Math.random() * 40;
+      }
+
+      function typeLoop() {
+        const current = phrases[phraseIndex];
+        if (isDeleting) {
+          textEl.textContent = current.substring(0, charIndex - 1);
+          charIndex--;
+        } else {
+          textEl.textContent = current.substring(0, charIndex + 1);
+          charIndex++;
+        }
+
+        if (!isDeleting && charIndex === current.length) {
+          // Pause at end of phrase
+          isPausing = true;
+          setTimeout(() => {
+            isPausing = false;
+            isDeleting = true;
+            requestAnimationFrame(() => setTimeout(typeLoop, getTypeSpeed()));
+          }, 3200);
+          return;
+        }
+
+        if (isDeleting && charIndex === 0) {
+          isDeleting = false;
+          phraseIndex = (phraseIndex + 1) % phrases.length;
+          setTimeout(typeLoop, 500);
+          return;
+        }
+
+        setTimeout(typeLoop, getTypeSpeed());
+      }
+
+      setTimeout(typeLoop, 900);
+    }
+
+    // ============================================================
+    // CUSTOM CURSOR — RAF throttled, wax-drip glow
+    // ============================================================
+    const cursorCore = document.getElementById('cursorCore');
+    const cursorGlow = document.getElementById('cursorGlow');
     const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
-    if (!prefersReducedMotion && !isTouchDevice) {
+    if (!prefersReduced && !isTouchDevice) {
+      let mouseX = 0, mouseY = 0;
+      let glowX = 0, glowY = 0;
+      let rafPending = false;
+
       document.addEventListener('mousemove', (e) => {
-        customCursor.style.transform = `translate(calc(${e.clientX}px - 50%), calc(${e.clientY}px - 50%))`;
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        if (!rafPending) {
+          rafPending = true;
+          requestAnimationFrame(updateCursor);
+        }
       });
 
-      // Expand on interactive elements
-      const interactives = document.querySelectorAll('button, .tab-btn');
-      interactives.forEach(el => {
-        el.addEventListener('mouseenter', () => customCursor.classList.add('hovering'));
-        el.addEventListener('mouseleave', () => customCursor.classList.remove('hovering'));
+      function updateCursor() {
+        rafPending = false;
+        cursorCore.style.left = mouseX + 'px';
+        cursorCore.style.top = mouseY + 'px';
+        // Glow lags slightly behind for fluid feel
+        glowX += (mouseX - glowX) * 0.18;
+        glowY += (mouseY - glowY) * 0.18;
+        cursorGlow.style.left = glowX + 'px';
+        cursorGlow.style.top = glowY + 'px';
+        if (Math.abs(mouseX - glowX) > 0.5 || Math.abs(mouseY - glowY) > 0.5) {
+          rafPending = true;
+          requestAnimationFrame(updateCursor);
+        }
+      }
+
+      // Hover expansion on interactives
+      document.querySelectorAll('button, .tab-btn, a').forEach(el => {
+        el.addEventListener('mouseenter', () => {
+          cursorCore.classList.add('hovering');
+          cursorGlow.classList.add('hovering');
+        });
+        el.addEventListener('mouseleave', () => {
+          cursorCore.classList.remove('hovering');
+          cursorGlow.classList.remove('hovering');
+        });
       });
 
-      // Hide custom cursor over text fields to allow native caret
-      const textInputs = document.querySelectorAll('input, textarea');
-      textInputs.forEach(input => {
-        input.addEventListener('mouseenter', () => customCursor.style.opacity = '0');
-        input.addEventListener('mouseleave', () => customCursor.style.opacity = '1');
+      // Click compression
+      document.addEventListener('mousedown', () => cursorCore.classList.add('clicking'));
+      document.addEventListener('mouseup', () => cursorCore.classList.remove('clicking'));
+
+      // Hide over text inputs
+      document.querySelectorAll('input, textarea').forEach(el => {
+        el.addEventListener('mouseenter', () => {
+          cursorCore.style.opacity = '0';
+          cursorGlow.style.opacity = '0';
+        });
+        el.addEventListener('mouseleave', () => {
+          cursorCore.style.opacity = '1';
+          cursorGlow.style.opacity = '1';
+        });
+      });
+
+      // Hide when leaving window
+      document.addEventListener('mouseleave', () => {
+        cursorCore.style.opacity = '0';
+        cursorGlow.style.opacity = '0';
+      });
+      document.addEventListener('mouseenter', () => {
+        cursorCore.style.opacity = '1';
+        cursorGlow.style.opacity = '1';
       });
     }
 
-    // ---- Tab Navigation ----
+    // ============================================================
+    // TAB NAVIGATION — with title updates + keyboard arrows
+    // ============================================================
     const tabs = document.querySelectorAll('[role="tab"]');
     const panels = document.querySelectorAll('[role="tabpanel"]');
 
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => t.setAttribute('aria-selected', 'false'));
-        panels.forEach(p => p.setAttribute('hidden', 'true'));
-        
-        const targetPanel = document.getElementById(tab.getAttribute('aria-controls'));
-        tab.setAttribute('aria-selected', 'true');
-        targetPanel.removeAttribute('hidden');
-      });
+    function activateTab(tab) {
+      tabs.forEach(t => t.setAttribute('aria-selected', 'false'));
+      panels.forEach(p => p.setAttribute('hidden', 'true'));
+      tab.setAttribute('aria-selected', 'true');
+      document.getElementById(tab.getAttribute('aria-controls')).removeAttribute('hidden');
+      // Update page title
+      const label = tab.textContent.replace(/[✦❧·]/g, '').trim();
+      document.title = `Sealed Letter — ${label}`;
+    }
 
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => activateTab(tab));
       tab.addEventListener('keydown', e => {
-        let index = Array.prototype.indexOf.call(tabs, e.target);
+        const idx = [...tabs].indexOf(e.target);
         let dir = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : null;
         if (dir !== null) {
           e.preventDefault();
-          let nextIndex = (index + dir + tabs.length) % tabs.length;
-          tabs[nextIndex].focus();
-          tabs[nextIndex].click();
+          const next = tabs[(idx + dir + tabs.length) % tabs.length];
+          next.focus();
+          activateTab(next);
         }
       });
     });
 
-    // ---- App Logic ----
-    async function hashString(string) {
-      const utf8 = new TextEncoder().encode(string);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
-      return Array.from(new Uint8Array(hashBuffer))
+    // ============================================================
+    // HASH UTILITY
+    // The passkey is hashed client-side with SHA-256.
+    // The hash becomes the Firebase key — your actual passkey
+    // never leaves your device in plaintext.
+    // ============================================================
+    async function hashString(str) {
+      const utf8 = new TextEncoder().encode(str);
+      const buf = await crypto.subtle.digest('SHA-256', utf8);
+      return Array.from(new Uint8Array(buf))
         .map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    // Write Note
-    document.getElementById('btn-seal').addEventListener('click', async () => {
-      const note = document.getElementById('note-content').value;
-      const passkey = document.getElementById('passkey-create').value;
-      const statusDiv = document.getElementById('write-status');
-      
-      if (!note || !passkey) {
-        statusDiv.className = 'status-message status-error';
-        statusDiv.textContent = 'SYSTEM ERR: Message and passkey required.';
-        statusDiv.removeAttribute('hidden');
-        return;
+    // ============================================================
+    // AES-GCM ENCRYPTION
+    // Notes are encrypted before storing — btoa alone is NOT encryption.
+    // The passkey itself is used as the encryption key material.
+    // ============================================================
+    async function deriveKey(passkey) {
+      const enc = new TextEncoder();
+      const keyMaterial = await crypto.subtle.importKey(
+        'raw', enc.encode(passkey), { name: 'PBKDF2' }, false, ['deriveKey']
+      );
+      return crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt: enc.encode('sealed-letter-salt'), iterations: 100000, hash: 'SHA-256' },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['encrypt', 'decrypt']
+      );
+    }
+
+    async function encryptNote(text, passkey) {
+      const key = await deriveKey(passkey);
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const enc = new TextEncoder();
+      const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(text));
+      const combined = new Uint8Array([...iv, ...new Uint8Array(ciphertext)]);
+      return btoa(String.fromCharCode(...combined));
+    }
+
+    async function decryptNote(encoded, passkey) {
+      const key = await deriveKey(passkey);
+      const combined = Uint8Array.from(atob(encoded), c => c.charCodeAt(0));
+      const iv = combined.slice(0, 12);
+      const ciphertext = combined.slice(12);
+      const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+      return new TextDecoder().decode(dec);
+    }
+
+    // ============================================================
+    // STATUS HELPER
+    // ============================================================
+    const statusTimers = {};
+
+    function showStatus(id, type, icon, message, autoDismiss = true) {
+      const el = document.getElementById(id);
+      el.className = `status-message status-${type}`;
+      el.innerHTML = type === 'loading'
+        ? `<span class="spinner"></span><span>${message}</span>`
+        : `<span class="status-icon">${icon}</span><span>${message}</span>`;
+      el.removeAttribute('hidden');
+
+      clearTimeout(statusTimers[id]);
+      if (autoDismiss && type !== 'loading') {
+        statusTimers[id] = setTimeout(() => {
+          el.setAttribute('hidden', 'true');
+        }, 5000);
       }
+    }
 
-      statusDiv.className = 'status-message';
-      statusDiv.textContent = 'Encrypting & Sealing...';
-      statusDiv.removeAttribute('hidden');
+    function hideStatus(id) {
+      document.getElementById(id).setAttribute('hidden', 'true');
+    }
 
-      try {
-        const hash = await hashString(passkey);
-        const encodedNote = btoa(encodeURIComponent(note)); 
-        await set(ref(db, 'notes/' + hash), { payload: encodedNote });
-        
-        statusDiv.className = 'status-message status-success';
-        statusDiv.textContent = 'SEALED. DO NOT LOSE YOUR PASSKEY.';
-        
-        document.getElementById('note-content').value = '';
-        document.getElementById('passkey-create').value = '';
-      } catch (e) {
-        statusDiv.className = 'status-message status-error';
-        statusDiv.textContent = 'SYSTEM ERR: Database connection failed.';
+    // ============================================================
+    // CHARACTER COUNTER
+    // ============================================================
+    const noteArea = document.getElementById('note-content');
+    const charCount = document.getElementById('char-count');
+    const maxChars = 5000;
+
+    noteArea.addEventListener('input', () => {
+      const len = noteArea.value.length;
+      charCount.textContent = `${len.toLocaleString()} / ${maxChars.toLocaleString()}`;
+      charCount.className = 'char-count';
+      if (len > maxChars * 0.85) charCount.classList.add('warning');
+      if (len > maxChars * 0.95) charCount.classList.add('danger');
+    });
+
+    // ============================================================
+    // OVERWRITE DETECTION
+    // Checks if a note already exists for a given passkey
+    // ============================================================
+    let overwriteCheckTimer;
+    const passkeyCreate = document.getElementById('passkey-create');
+    const overwriteWarning = document.getElementById('overwrite-warning');
+
+    passkeyCreate.addEventListener('input', () => {
+      overwriteWarning.classList.remove('visible');
+      clearTimeout(overwriteCheckTimer);
+      if (passkeyCreate.value.length >= 6 && db) {
+        overwriteCheckTimer = setTimeout(async () => {
+          try {
+            const hash = await hashString(passkeyCreate.value);
+            const snap = await get(ref(db, 'notes/' + hash));
+            if (snap.exists()) overwriteWarning.classList.add('visible');
+          } catch {}
+        }, 600);
       }
     });
 
-    // Read Note
+    // ============================================================
+    // SEAL LETTER — with confirmation modal
+    // ============================================================
+    const sealModal = document.getElementById('sealModal');
+    const modalConfirm = document.getElementById('modalConfirm');
+    const modalCancel = document.getElementById('modalCancel');
+
+    function openModal() {
+      sealModal.removeAttribute('hidden');
+      modalConfirm.focus();
+    }
+
+    function closeModal() {
+      sealModal.setAttribute('hidden', 'true');
+      document.getElementById('btn-seal').focus();
+    }
+
+    modalCancel.addEventListener('click', closeModal);
+    sealModal.addEventListener('click', e => { if (e.target === sealModal) closeModal(); });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !sealModal.hasAttribute('hidden')) closeModal();
+    });
+
+    document.getElementById('btn-seal').addEventListener('click', () => {
+      const note = noteArea.value.trim();
+      const passkey = passkeyCreate.value;
+
+      if (!note) {
+        showStatus('write-status', 'error', '✕', 'Your letter is empty. Write something first.');
+        noteArea.focus();
+        return;
+      }
+      if (!passkey || passkey.length < 6) {
+        showStatus('write-status', 'error', '✕', 'Your passkey must be at least 6 characters.');
+        passkeyCreate.focus();
+        return;
+      }
+      openModal();
+    });
+
+    modalConfirm.addEventListener('click', async () => {
+      closeModal();
+      const note = noteArea.value.trim();
+      const passkey = passkeyCreate.value;
+
+      showStatus('write-status', 'loading', '', 'Encrypting and sealing your letter...', false);
+
+      if (!db) {
+        showStatus('write-status', 'error', '✕', 'Cannot reach the vault. Check your connection.');
+        return;
+      }
+
+      try {
+        const hash = await hashString(passkey);
+        const encrypted = await encryptNote(note, passkey);
+        await set(ref(db, 'notes/' + hash), { payload: encrypted, ts: Date.now() });
+
+        showStatus('write-status', 'success', '✦', 'Sealed. Guard your passkey — it cannot be recovered.');
+        noteArea.value = '';
+        passkeyCreate.value = '';
+        charCount.textContent = `0 / ${maxChars.toLocaleString()}`;
+        charCount.className = 'char-count';
+        overwriteWarning.classList.remove('visible');
+      } catch (e) {
+        console.error(e);
+        showStatus('write-status', 'error', '✕', 'The vault is unreachable. Please try again.');
+      }
+    });
+
+    // ============================================================
+    // OPEN LETTER
+    // ============================================================
+    let currentHash = null;
+
     document.getElementById('btn-break').addEventListener('click', async () => {
       const passkey = document.getElementById('passkey-enter').value;
-      const statusDiv = document.getElementById('read-status');
+      const wrapper = document.getElementById('retrieved-wrapper');
       const contentArea = document.getElementById('retrieved-content');
 
+      wrapper.setAttribute('hidden', 'true');
+      contentArea.value = '';
+
       if (!passkey) {
-        statusDiv.className = 'status-message status-error';
-        statusDiv.textContent = 'SYSTEM ERR: Passkey required.';
-        statusDiv.removeAttribute('hidden');
+        showStatus('read-status', 'error', '✕', 'Enter your passkey to open the letter.');
         return;
       }
 
-      statusDiv.className = 'status-message';
-      statusDiv.textContent = 'Scanning database...';
-      statusDiv.removeAttribute('hidden');
+      showStatus('read-status', 'loading', '', 'Searching the vault...', false);
+
+      if (!db) {
+        showStatus('read-status', 'error', '✕', 'Cannot reach the vault. Check your connection.');
+        return;
+      }
 
       try {
         const hash = await hashString(passkey);
-        const snapshot = await get(ref(db, 'notes/' + hash));
-        
-        if (snapshot.exists()) {
-          const decodedNote = decodeURIComponent(atob(snapshot.val().payload));
-          contentArea.value = decodedNote;
-          
-          statusDiv.className = 'status-message status-success';
-          statusDiv.textContent = 'SEAL BROKEN. MESSAGE DECRYPTED.';
+        const snap = await get(ref(db, 'notes/' + hash));
+
+        if (snap.exists()) {
+          const decrypted = await decryptNote(snap.val().payload, passkey);
+          contentArea.value = decrypted;
+          currentHash = hash;
+
+          showStatus('read-status', 'success', '❧', 'The seal is broken. Your letter has been revealed.');
+          wrapper.removeAttribute('hidden');
           document.getElementById('passkey-enter').value = '';
         } else {
-          statusDiv.className = 'status-message status-error';
-          statusDiv.textContent = 'ACCESS DENIED: Incorrect passkey or no record found.';
-          contentArea.value = '';
+          showStatus('read-status', 'error', '✕', 'No letter found. Check your passkey and try again.');
+          currentHash = null;
         }
       } catch (e) {
-        statusDiv.className = 'status-message status-error';
-        statusDiv.textContent = 'SYSTEM ERR: Database connection failed.';
+        console.error(e);
+        showStatus('read-status', 'error', '✕', 'Could not open the letter. The vault may be unreachable.');
+        currentHash = null;
       }
     });
+
+    // ============================================================
+    // COPY TO CLIPBOARD
+    // ============================================================
+    const copyToast = document.getElementById('copyToast');
+    let toastTimer;
+
+    document.getElementById('btn-copy').addEventListener('click', async () => {
+      const text = document.getElementById('retrieved-content').value;
+      if (!text) return;
+
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          // Fallback for older browsers
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        clearTimeout(toastTimer);
+        copyToast.classList.add('show');
+        toastTimer = setTimeout(() => copyToast.classList.remove('show'), 2500);
+      } catch {
+        showStatus('read-status', 'error', '✕', 'Could not copy — please select and copy manually.');
+      }
+    });
+
+    // ============================================================
+    // DELETE / BURN LETTER
+    // ============================================================
+    document.getElementById('btn-delete').addEventListener('click', async () => {
+      if (!currentHash || !db) return;
+      const confirmed = confirm('Burn this letter permanently? This cannot be undone.');
+      if (!confirmed) return;
+
+      try {
+        await remove(ref(db, 'notes/' + currentHash));
+        document.getElementById('retrieved-wrapper').setAttribute('hidden', 'true');
+        document.getElementById('retrieved-content').value = '';
+        showStatus('read-status', 'success', '✦', 'The letter has been burned. No trace remains.');
+        currentHash = null;
+      } catch {
+        showStatus('read-status', 'error', '✕', 'Could not burn the letter. Try again.');
+      }
+    });
+
   </script>
 </body>
 </html>
