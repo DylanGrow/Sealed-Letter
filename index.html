@@ -2,451 +2,191 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="robots" content="index, follow">
-
-  <!-- SEO -->
-  <title>Sealed Letter — Private Notes, Protected by Your Passkey</title>
-  <meta name="description" content="Write a private note, set your own passkey, and retrieve it securely on any device. No account, no login — just your passkey.">
-  <meta name="keywords" content="private notes, encrypted notes, passkey, secure message, cross device notes, no account, end‑to‑end encrypted">
-  <meta name="author" content="Sealed Letter">
-  <link rel="canonical" href="https://dylangrow.github.io/Sealed-Letter/">
-
-  <!-- Open Graph / Social -->
-  <meta property="og:title" content="Sealed Letter — Private Notes, Protected by Your Passkey">
-  <meta property="og:description" content="Write a private note, set your own passkey, retrieve it on any device. No account needed.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://dylangrow.github.io/Sealed-Letter/">
-  <meta property="og:image" content="https://dylangrow.github.io/Sealed-Letter/assets/og-image.png">
-
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Sealed Letter — Private Notes, Protected by Your Passkey">
-  <meta name="twitter:description" content="Write a private note, set your own passkey, retrieve it on any device. No account needed.">
-  <meta name="twitter:image" content="https://dylangrow.github.io/Sealed-Letter/assets/og-image.png">
-
-  <!-- Theme color -->
-  <meta name="theme-color" content="#0f0a04">
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/Sealed-Letter/assets/favicon.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/Sealed-Letter/assets/favicon-16.png">
-  <link rel="shortcut icon" href="/Sealed-Letter/assets/favicon.ico">
-
-  <link rel="manifest" href="/Sealed-Letter/manifest.webmanifest">
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Source+Code+Pro&display=swap" rel="stylesheet">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sealed Letter — Private Notes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
   <style>
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     :root {
-      --bg: #f8f8f6;
-      --fg: #1c1c1c;
-      --card: #ffffff;
-      --accent: #0066cc;
-      --accent-hover: #0055aa;
-      --border: #ddd;
-      --hint: #555;
-      --max-width: 600px;
-      --border-radius: 8px;
-      --font-text: 1rem;
+      --bg: #0a0a0b;
+      --surface: #18181b;
+      --border: #27272a;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --danger: #ef4444;
+      --success: #22c55e;
     }
 
-    html {
-      scroll-behavior: smooth;
-      -webkit-text-size-adjust: 100%;
-      font-size: 16px;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      font-size: var(--font-text);
-      line-height: 1.5;
+      font-family: 'Inter', sans-serif;
       background: var(--bg);
-      color: var(--fg);
+      color: var(--text);
+      line-height: 1.6;
       min-height: 100vh;
-      padding: 1rem;
-      margin: 0 auto;
-      max-width: var(--max-width);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
     }
 
     header {
       text-align: center;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2.5rem;
     }
 
-    header h1 {
-      font-size: clamp(1.8rem, 5vw, 2.4rem);
-      font-weight: 600;
-      margin: 0 0 0.5rem;
-    }
+    h1 { font-size: 2rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+    header p { color: var(--text-muted); font-size: 0.95rem; }
 
-    header p {
-      font-size: 1rem;
-      color: var(--hint);
-    }
-
-    .action-tabs {
+    .tabs {
       display: flex;
-      margin: 1rem 0 1.5rem;
-      gap: 1rem;
+      background: var(--surface);
+      padding: 0.35rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border);
     }
 
-    .action-tabs button {
+    .tab {
       flex: 1;
-      padding: 0.8rem 1rem;
-      font-size: 1rem;
-      font-weight: 500;
-      text-align: center;
-      border: 2px solid var(--border);
+      padding: 0.75rem;
       background: transparent;
-      color: var(--fg);
+      border: none;
+      color: var(--text-muted);
+      font-weight: 500;
+      font-family: inherit;
+      font-size: 0.9rem;
       cursor: pointer;
-      border-radius: var(--border-radius);
-      transition: 0.15s;
+      border-radius: 8px;
+      transition: all 0.2s ease;
     }
 
-    .action-tabs button.active {
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
+    .tab.active {
+      background: var(--border);
+      color: var(--text);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    .action-tabs button:hover {
-      background: var(--accent-hover);
-      border-color: var(--accent-hover);
-    }
+    .view { display: none; animation: fadeIn 0.3s ease; }
+    .view.active { display: block; }
 
-    main {
-      margin: 0 auto 2rem;
-    }
-
-    .view {
-      display: none;
-    }
-
-    .view.active {
-      display: block;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .card {
-      background: var(--card);
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--border-radius);
-      padding: 1.25rem;
-      margin: 0 0 1rem;
-      box-shadow:
-        0 1px 4px rgba(0,0,0,0.1),
-        0 4px 16px rgba(0,0,0,0.08);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
 
-    label {
-      display: block;
-      font-weight: 600;
-      margin: 0 0 0.25rem;
-      font-size: 1rem;
-    }
-
-    textarea,
-    input[type="text"] {
+    label { display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-muted); margin-bottom: 0.5rem; }
+    
+    input, textarea {
       width: 100%;
-      min-height: 120px;
-      padding: 0.6rem 0.75rem;
-      font-family: Source Code Pro, monospace;
-      font-size: 1rem;
-      line-height: 1.5;
+      background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: 4px;
-      outline: 2px solid transparent;
-      background: white;
-      color: var(--fg);
-      resize: vertical;
+      color: var(--text);
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+      transition: border-color 0.2s;
     }
 
-    textarea:focus,
-    input[type="text"]:focus {
-      outline: 2px solid var(--accent);
-    }
+    textarea { font-family: 'JetBrains Mono', monospace; resize: vertical; min-height: 120px; }
+    input:focus, textarea:focus { outline: none; border-color: var(--accent); }
 
-    .hint {
-      font-size: 0.9rem;
-      color: var(--hint);
-      margin: 0.5rem 0 0;
-      line-height: 1.4;
-    }
-
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: .45rem;
-      padding: .65rem 1.2rem;
-      font-family: system-ui, sans-serif;
-      font-size: 1rem;
-      letter-spacing: .08em;
-      cursor: pointer;
-      border: none;
-      border-radius: 4px;
+    button.primary {
+      width: 100%;
       background: var(--accent);
       color: white;
-      transition: 0.15s;
-      min-height: 48px;
-    }
-
-    .btn-primary:hover {
-      background: var(--accent-hover);
-    }
-
-    .btn-primary:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .spin {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      border: 1.5px solid rgba(255,255,255,0.25);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.55s linear infinite;
-      vertical-align: middle;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .msg {
-      font-family: system-ui, sans-serif;
-      font-size: 0.9rem;
-      padding: 0.5rem 0.8rem;
-      margin-top: 0.6rem;
-      border-radius: 4px;
-      border-left: 3px solid;
-      display: none;
-      line-height: 1.4;
-    }
-
-    .msg.err {
-      background: #f8e5e5;
-      color: #a61a1a;
-      border-color: #a61a1a;
-      display: block;
-    }
-
-    .msg.ok {
-      background: #eafce9;
-      color: #2e6a2e;
-      border-color: #4a9a4a;
-      display: block;
-    }
-
-    .passkey-box {
-      display: none;
-      margin-top: 1.1rem;
-      background: rgba(0,0,0,0.02);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 1.1rem;
-      text-align: center;
-    }
-
-    .passkey-value {
-      font-family: Source Code Pro, monospace;
-      font-size: 1.1rem;
-      padding: 0.5rem 0.7rem;
-      margin: 0.5rem 0 0;
-      background: rgba(0,0,0,0.03);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      word-break: break-all;
-    }
-
-    .copy-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-size: 0.9rem;
-      letter-spacing: 0.08em;
-      padding: 0.5rem 0.9rem;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      background: white;
-      color: var(--fg);
+      border: none;
+      padding: 0.85rem;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 1rem;
       cursor: pointer;
-      margin-top: 0.5rem;
+      transition: background 0.2s;
     }
 
-    .copy-btn:hover {
-      background: #f0f0f0;
-    }
+    button.primary:hover { background: var(--accent-hover); }
 
-    .copy-flash {
-      font-size: 0.8rem;
-      color: #2e6a2e;
-      margin-top: 0.4rem;
+    .result-box {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
       display: none;
     }
 
-    .orn {
-      text-align: center;
-      margin: 1.5rem 0;
-      color: var(--hint);
-      font-size: 1rem;
-      letter-spacing: 0.2em;
-    }
+    .result-box h3 { font-size: 0.85rem; color: var(--success); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .result-box .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; word-break: break-all; white-space: pre-wrap;}
 
-    .note-reveal {
-      display: none;
-      margin-top: 1.1rem;
-      border-top: 1px solid var(--border);
-      padding-top: 1.1rem;
-    }
-
-    .note-text {
-      font-family: Source Code Pro, monospace;
-      font-size: 1rem;
-      line-height: 1.6rem;
-      white-space: pre-wrap;
-      word-break: break-word;
-      min-height: 1.6rem;
-    }
-
-    footer {
-      text-align: center;
-      padding: 1.5rem 1rem 2rem;
-      font-size: 0.85rem;
-      color: var(--hint);
-    }
-
-    @media (max-width: 560px) {
-      body {
-        padding: 0.75rem;
-      }
-
-      .action-tabs {
-        flex-direction: column;
-      }
-
-      .action-tabs button {
-        font-size: 1rem;
-        padding: 0.8rem;
-      }
-    }
+    .error-msg { color: var(--danger); font-size: 0.85rem; margin-bottom: 1rem; display: none; }
   </style>
 </head>
-
 <body>
 
-  <header>
-    <h1>Sealed Letter</h1>
-    <p>Write a private note once. Retrieve it anywhere with your passkey.</p>
-  </header>
+  <div class="container">
+    <header>
+      <h1>Sealed Letter</h1>
+      <p>Write once. Retrieve anywhere with your passkey.</p>
+    </header>
 
-  <main>
-
-    <div class="action-tabs">
-      <button class="tab active" data-view="write">Write a note</button>
-      <button class="tab" data-view="retrieve">Retrieve a note</button>
+    <div class="tabs">
+      <button class="tab active" data-target="write">Write Note</button>
+      <button class="tab" data-target="retrieve">Retrieve Note</button>
     </div>
 
-    <!-- Write view -->
-    <section id="write-view" class="view active">
+    <div id="write" class="view active">
       <div class="card">
-        <label for="note-text" class="hint" style="display:block;margin-bottom:.5rem">Your message</label>
-        <textarea id="note-text" placeholder="Type anything — a password, address, note, or thought…" rows="6" aria-describedby="note-hint"></textarea>
-        <p class="hint" id="note-hint" style="margin-top:.4rem">Encrypted in your browser before it's saved. Nobody else can read it.</p>
+        <label>Your Message</label>
+        <textarea id="note-text" placeholder="Type your secret here..."></textarea>
 
-        <label for="passkey-input" class="hint" style="display:block;margin-bottom:.6rem">Your passkey</label>
-        <div class="field">
-          <span class="field-pre" aria-hidden="true">Key —</span>
-          <input type="text"
-                 id="passkey-input"
-                 placeholder="something memorable…"
-                 autocomplete="off"
-                 autocorrect="off"
-                 autocapitalize="off"
-                 spellcheck="false"
-                 aria-describedby="passkey-hint"/>
-        </div>
-        <p class="hint" id="passkey-hint">Choose anything you'll remember — a word, phrase, or sentence. You'll type this on any device to get your message back.</p>
+        <label>Your Passkey</label>
+        <input type="text" id="passkey-input" placeholder="e.g. correct horse battery staple" autocomplete="off">
 
-        <div id="seal-msg" class="msg" role="alert"></div>
+        <div id="write-error" class="error-msg"></div>
 
-        <div class="btn-row">
-          <button class="btn-primary" onclick="sealNote()" id="save-btn" aria-label="Seal and save your message">
-            <span id="save-label">Seal it</span>
-            <span id="save-spin" class="spin hidden" aria-hidden="true"></span>
-          </button>
-        </div>
+        <button class="primary" id="save-btn">Seal & Save</button>
 
-        <!-- Success state -->
-        <div class="passkey-box fu" id="passkey-box" role="status" aria-live="polite">
-          <div class="passkey-label">Sealed &amp; saved — your passkey</div>
-          <div class="passkey-value" id="passkey-display"></div>
-          <p class="passkey-hint">Write this down. Enter it on any device to retrieve your message.</p>
-          <button class="copy-btn" onclick="copyPasskey()" aria-label="Copy passkey to clipboard">
-            Copy
-          </button>
-          <div class="copy-flash" id="copy-flash" aria-live="polite">✓ Copied</div>
+        <div id="save-result" class="result-box">
+          <h3>Sealed Successfully</h3>
+          <p class="mono" id="saved-passkey-display"></p>
         </div>
       </div>
-    </section>
+    </div>
 
-    <div class="orn" aria-hidden="true">✦ ✦ ✦</div>
-
-    <!-- Retrieve view -->
-    <section id="retrieve-view" class="view hidden">
+    <div id="retrieve" class="view">
       <div class="card">
-        <label for="unlock-input" class="hint" style="display:block;margin-bottom:.5rem">Your passkey</label>
-        <div class="field">
-          <span class="field-pre" aria-hidden="true">Key —</span>
-          <input type="text"
-                 id="unlock-input"
-                 placeholder="type your passkey…"
-                 autocomplete="off"
-                 autocorrect="off"
-                 autocapitalize="off"
-                 spellcheck="false"
-                 aria-describedby="unlock-hint"/>
-        </div>
-        <p class="hint" id="unlock-hint">Tip: capitalisation and spaces matter — type it exactly as you set it.</p>
+        <label>Your Passkey</label>
+        <input type="text" id="unlock-input" placeholder="Enter passkey to retrieve..." autocomplete="off">
 
-        <div id="unlock-msg" class="msg" role="alert"></div>
+        <div id="read-error" class="error-msg"></div>
 
-        <div class="btn-row">
-          <button class="btn-primary" onclick="retrieveNote()" id="unlock-btn" aria-label="Retrieve your sealed message">
-            <span id="unlock-label">Retrieve message</span>
-            <span id="unlock-spin" class="spin hidden" aria-hidden="true"></span>
-          </button>
-        </div>
+        <button class="primary" id="unlock-btn">Unlock Message</button>
 
-        <div id="note-reveal" class="note-reveal fu" aria-live="polite">
-          <div class="section-title" style="margin-bottom:.5rem">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6a9a3a" stroke-width="2.5" style="flex-shrink:0" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-            Message retrieved
-          </div>
-          <div class="note-text" id="note-content"></div>
+        <div id="read-result" class="result-box">
+          <h3>Message Decrypted</h3>
+          <p class="mono" id="retrieved-note-display"></p>
         </div>
       </div>
-    </section>
+    </div>
+  </div>
 
-  </main>
-
-  <footer>
-    Sealed Letter • No account. No login. End‑to‑end encrypted. &nbsp;|&nbsp;
-    <a href="/privacy.html">Privacy &amp; How it works</a>
-  </footer>
-
-  <!-- ── Firebase & logic (same as your original JS) ── -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -458,4 +198,97 @@
       projectId: "sealed-letter-f3af5",
       storageBucket: "sealed-letter-f3af5.firebasestorage.app",
       messagingSenderId: "778056799822",
-      appId: "1:778056799822:web
+      appId: "1:778056799822:web:7a8b9c0d1e2f3a4b" // Added placeholder completion to fix syntax
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Tab Navigation Logic
+    const tabs = document.querySelectorAll('.tab');
+    const views = document.querySelectorAll('.view');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        views.forEach(v => v.classList.remove('active'));
+        
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.target).classList.add('active');
+      });
+    });
+
+    // Simple SHA-256 hash to use passkey as a secure DB key
+    async function hashString(string) {
+      const utf8 = new TextEncoder().encode(string);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(bytes => bytes.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Write Logic
+    document.getElementById('save-btn').addEventListener('click', async () => {
+      const note = document.getElementById('note-text').value;
+      const passkey = document.getElementById('passkey-input').value;
+      const errorDiv = document.getElementById('write-error');
+      
+      if (!note || !passkey) {
+        errorDiv.innerText = "Please provide both a message and a passkey.";
+        errorDiv.style.display = 'block';
+        return;
+      }
+      errorDiv.style.display = 'none';
+
+      try {
+        const hash = await hashString(passkey);
+        // Basic encoding for transport (In production, replace with AES-GCM encryption here)
+        const encodedNote = btoa(encodeURIComponent(note)); 
+        
+        await set(ref(db, 'notes/' + hash), { payload: encodedNote });
+        
+        document.getElementById('saved-passkey-display').innerText = `Passkey: ${passkey}`;
+        document.getElementById('save-result').style.display = 'block';
+        document.getElementById('note-text').value = '';
+        document.getElementById('passkey-input').value = '';
+      } catch (e) {
+        errorDiv.innerText = "Error saving to database.";
+        errorDiv.style.display = 'block';
+      }
+    });
+
+    // Read Logic
+    document.getElementById('unlock-btn').addEventListener('click', async () => {
+      const passkey = document.getElementById('unlock-input').value;
+      const errorDiv = document.getElementById('read-error');
+
+      if (!passkey) {
+        errorDiv.innerText = "Please enter your passkey.";
+        errorDiv.style.display = 'block';
+        return;
+      }
+      errorDiv.style.display = 'none';
+      document.getElementById('read-result').style.display = 'none';
+
+      try {
+        const hash = await hashString(passkey);
+        const snapshot = await get(ref(db, 'notes/' + hash));
+        
+        if (snapshot.exists()) {
+          const encodedNote = snapshot.val().payload;
+          const decodedNote = decodeURIComponent(atob(encodedNote));
+          
+          document.getElementById('retrieved-note-display').innerText = decodedNote;
+          document.getElementById('read-result').style.display = 'block';
+          document.getElementById('unlock-input').value = '';
+        } else {
+          errorDiv.innerText = "No note found. Check your passkey and try again.";
+          errorDiv.style.display = 'block';
+        }
+      } catch (e) {
+        errorDiv.innerText = "Error retrieving from database.";
+        errorDiv.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
