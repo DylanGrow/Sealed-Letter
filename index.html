@@ -2,366 +2,531 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sealed Letter</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<!-- SEO -->
+<title>Sealed Letter — Private Notes, Protected by Your Passkey</title>
+<meta name="description" content="Write a private note, set your own passkey, and retrieve it securely on any device. No account, no login — just your passkey.">
+<meta name="keywords" content="private notes, encrypted notes, passkey, secure message, cross device notes">
+<meta name="author" content="Sealed Letter">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://dylangrow.github.io/Sealed-Letter/">
+
+<!-- Open Graph (for sharing previews) -->
+<meta property="og:title" content="Sealed Letter — Private Notes, Protected by Your Passkey">
+<meta property="og:description" content="Write a private note, set your own passkey, retrieve it on any device. No account needed.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dylangrow.github.io/Sealed-Letter/">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Sealed Letter">
+<meta name="twitter:description" content="Private notes protected by your own passkey. Works on any device.">
+
+<!-- Theme color for mobile browser chrome -->
+<meta name="theme-color" content="#0f0a04">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IM+Fell+English:ital@0;1&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --parchment: #f2e8d5;
-  --parchment-dark: #e8d9bc;
-  --parchment-deeper: #d4c4a0;
-  --ink: #1c1208;
-  --ink-faded: #4a3d28;
-  --ink-light: #7a6a50;
-  --red-wax: #8b1a1a;
-  --red-wax-light: #c0392b;
-  --gold: #b8860b;
-  --border-aged: #c4a96a;
-  --stain: rgba(139, 90, 20, 0.08);
+/* ── Reset & base ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --p:#f2e8d5;
+  --pd:#e8d9bc;
+  --pdr:#d4c4a0;
+  --ink:#1c1208;
+  --inkf:#4a3d28;
+  --inkl:#7a6a50;
+  --wax:#8b1a1a;
+  --waxl:#c0392b;
+  --gold:#b8860b;
+  --ba:#c4a96a;
+  --bg:#0f0a04;
+  --st:rgba(139,90,20,0.07);
+  --max:560px;
 }
 
-body {
-  font-family: 'Courier Prime', 'Courier New', monospace;
-  background: #1a1208;
-  color: var(--ink);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow-x: hidden;
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+
+body{
+  font-family:'Courier Prime','Courier New',monospace;
+  background:var(--bg);
+  color:var(--ink);
+  min-height:100vh;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
 }
 
-.bg-texture {
-  position: fixed; inset: 0;
+/* ── Background ── */
+.bg{
+  position:fixed;inset:0;z-index:0;
   background:
-    radial-gradient(ellipse at 20% 50%, #2a1a08 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 20%, #1a0a02 0%, transparent 50%),
-    #0f0a04;
-  z-index: 0;
+    radial-gradient(ellipse at 15% 40%,#251808 0%,transparent 55%),
+    radial-gradient(ellipse at 85% 15%,#180a02 0%,transparent 50%),
+    var(--bg);
+}
+.scanlines{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background-image:repeating-linear-gradient(
+    0deg,transparent,transparent 3px,
+    rgba(255,220,120,0.012) 3px,rgba(255,220,120,0.012) 4px
+  );
 }
 
-.bg-texture::after {
-  content: ''; position: fixed; inset: 0;
-  background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,220,120,0.015) 2px, rgba(255,220,120,0.015) 4px);
-  pointer-events: none;
+/* ── Dust particles ── */
+.dust{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.dust i{
+  position:absolute;top:100%;border-radius:50%;
+  background:rgba(255,220,140,0.45);
+  animation:drift linear infinite;
+}
+.dust i:nth-child(1){left:8%;width:2px;height:2px;animation-duration:20s}
+.dust i:nth-child(2){left:22%;width:1px;height:1px;animation-duration:25s;animation-delay:4s}
+.dust i:nth-child(3){left:38%;width:2px;height:2px;animation-duration:18s;animation-delay:8s}
+.dust i:nth-child(4){left:54%;width:1px;height:1px;animation-duration:22s;animation-delay:2s}
+.dust i:nth-child(5){left:70%;width:2px;height:2px;animation-duration:16s;animation-delay:6s}
+.dust i:nth-child(6){left:84%;width:1px;height:1px;animation-duration:24s;animation-delay:11s}
+@keyframes drift{
+  0%{transform:translateY(0) translateX(0);opacity:0}
+  8%{opacity:1}
+  92%{opacity:.7}
+  100%{transform:translateY(-105vh) translateX(20px);opacity:0}
 }
 
-.dust { position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
-.dust span {
-  position: absolute; width: 2px; height: 2px;
-  background: rgba(255,220,140,0.4); border-radius: 50%;
-  animation: drift linear infinite;
+/* ── Page wrapper ── */
+.wrap{
+  position:relative;z-index:2;
+  width:100%;max-width:var(--max);
+  padding:2rem 1.25rem env(safe-area-inset-bottom,2rem);
+  animation:pageIn .7s ease both;
 }
-.dust span:nth-child(1)  { left:10%; animation-duration:18s; animation-delay:0s;   top:100%; }
-.dust span:nth-child(2)  { left:25%; animation-duration:24s; animation-delay:3s;   top:100%; width:1px; height:1px; }
-.dust span:nth-child(3)  { left:40%; animation-duration:20s; animation-delay:7s;   top:100%; }
-.dust span:nth-child(4)  { left:55%; animation-duration:16s; animation-delay:1s;   top:100%; width:1px; height:1px; opacity:0.6; }
-.dust span:nth-child(5)  { left:70%; animation-duration:22s; animation-delay:5s;   top:100%; }
-.dust span:nth-child(6)  { left:85%; animation-duration:19s; animation-delay:9s;   top:100%; width:3px; height:3px; opacity:0.2; }
-.dust span:nth-child(7)  { left:15%; animation-duration:26s; animation-delay:12s;  top:100%; }
-.dust span:nth-child(8)  { left:60%; animation-duration:21s; animation-delay:4s;   top:100%; width:1px; height:1px; }
-.dust span:nth-child(9)  { left:78%; animation-duration:17s; animation-delay:8s;   top:100%; }
-.dust span:nth-child(10) { left:33%; animation-duration:23s; animation-delay:15s;  top:100%; width:1px; height:1px; opacity:0.5; }
+@keyframes pageIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 
-@keyframes drift {
-  0%   { transform:translateY(0) translateX(0) rotate(0deg); opacity:0; }
-  10%  { opacity:1; }
-  90%  { opacity:0.8; }
-  100% { transform:translateY(-105vh) translateX(30px) rotate(180deg); opacity:0; }
+/* ── Header ── */
+header{text-align:center;padding:1.5rem 0 2rem}
+
+.env-icon{
+  width:48px;height:48px;margin:0 auto .75rem;
+  animation:float 5s ease-in-out infinite;
 }
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 
-.wrap {
-  position:relative; z-index:2;
-  width:100%; max-width:620px;
-  padding:2.5rem 1.25rem 4rem;
-  animation:pageIn 0.8s ease forwards;
+h1{
+  font-family:'IM Fell English',Georgia,serif;
+  font-size:clamp(2rem,8vw,2.8rem);
+  color:#f0e4cc;
+  letter-spacing:.03em;line-height:1;
+  text-shadow:2px 2px 10px rgba(0,0,0,.9),0 0 50px rgba(184,134,11,.15);
 }
+h1 em{font-style:italic;color:var(--gold)}
 
-@keyframes pageIn {
-  from { opacity:0; transform:translateY(20px); }
-  to   { opacity:1; transform:translateY(0); }
+.tagline-wrap{margin-top:.5rem;height:1.3rem;overflow:hidden}
+.tagline{
+  font-family:'Special Elite',cursive;
+  font-size:clamp(.6rem,.55rem + .5vw,.72rem);
+  letter-spacing:.2em;text-transform:uppercase;color:#6a5a40;
 }
-
-header { text-align:center; margin-bottom:2.5rem; }
-
-.envelope-icon { width:56px; height:56px; margin:0 auto 1rem; animation:float 4s ease-in-out infinite; }
-
-@keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-6px); } }
-
-.logo {
-  font-family:'IM Fell English','Georgia',serif;
-  font-size:2.6rem; color:var(--parchment);
-  letter-spacing:0.04em; line-height:1;
-  text-shadow:2px 2px 8px rgba(0,0,0,0.8), 0 0 40px rgba(184,134,11,0.2);
-}
-.logo em { font-style:italic; color:var(--gold); }
-
-.tagline-wrap { margin-top:0.6rem; height:1.4rem; overflow:hidden; }
-.tagline {
-  font-family:'Special Elite',cursive; font-size:0.72rem;
-  letter-spacing:0.25em; text-transform:uppercase; color:#8a7a5a;
-}
-.cursor {
-  display:inline-block; width:2px; height:0.8em;
-  background:var(--gold); margin-left:2px; vertical-align:middle;
+.cur{
+  display:inline-block;width:2px;height:.75em;
+  background:var(--gold);margin-left:2px;vertical-align:middle;
   animation:blink 1s step-end infinite;
 }
-@keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0; } }
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 
-.paper {
-  background:var(--parchment); border:1px solid var(--border-aged);
-  border-radius:1px; padding:2rem; margin-bottom:1.25rem; position:relative;
-  box-shadow:0 2px 4px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.6), inset 0 0 60px var(--stain);
+/* ── Section labels ── */
+.section-title{
+  font-family:'Special Elite',cursive;
+  font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;
+  color:#6a5a3a;margin-bottom:1.5rem;
+  display:flex;align-items:center;gap:.75rem;
 }
-.paper::before {
-  content:''; position:absolute; top:0; right:0;
-  width:0; height:0; border-style:solid;
-  border-width:0 28px 28px 0;
-  border-color:transparent var(--parchment-deeper) transparent transparent;
-  filter:drop-shadow(-2px 2px 2px rgba(0,0,0,0.2));
+.section-title::after{content:'';flex:1;height:1px;background:linear-gradient(to right,#5a4a28,transparent)}
+
+/* ── Paper card ── */
+.card{
+  background:var(--p);
+  border:1px solid var(--ba);
+  border-radius:2px;
+  padding:clamp(1.25rem,5vw,1.75rem);
+  margin-bottom:1rem;
+  position:relative;
+  box-shadow:
+    0 1px 3px rgba(0,0,0,.3),
+    0 6px 24px rgba(0,0,0,.5),
+    inset 0 0 50px var(--st);
 }
-.paper::after {
-  content:''; position:absolute; top:-8px; left:20px;
-  width:48px; height:48px; border-radius:50%;
-  background:radial-gradient(circle, rgba(139,90,20,0.12) 0%, rgba(139,90,20,0.04) 60%, transparent 70%);
+
+/* Folded corner */
+.card::before{
+  content:'';position:absolute;top:0;right:0;
+  width:0;height:0;border-style:solid;
+  border-width:0 22px 22px 0;
+  border-color:transparent var(--pdr) transparent transparent;
+}
+
+/* Subtle coffee ring */
+.card::after{
+  content:'';position:absolute;top:-6px;left:16px;
+  width:40px;height:40px;border-radius:50%;
+  background:radial-gradient(circle,rgba(139,90,20,.1) 0%,transparent 70%);
   pointer-events:none;
 }
-.ruled {
-  background-image:repeating-linear-gradient(transparent, transparent 27px, rgba(100,80,40,0.12) 27px, rgba(100,80,40,0.12) 28px);
-  background-size:100% 28px; background-position:0 8px;
+
+/* Ruled lines */
+.ruled{
+  background-image:repeating-linear-gradient(
+    transparent,transparent 27px,
+    rgba(100,80,40,.1) 27px,rgba(100,80,40,.1) 28px
+  );
+  background-size:100% 28px;
+  background-position:0 6px;
 }
 
-.paper-label {
-  font-family:'Special Elite',cursive; font-size:0.62rem;
-  letter-spacing:0.25em; text-transform:uppercase; color:var(--ink-light);
-  margin-bottom:0.9rem; display:flex; align-items:center; gap:0.5rem;
+/* ── Form elements ── */
+textarea{
+  width:100%;
+  min-height:clamp(120px,30vw,180px);
+  background:transparent;border:none;
+  padding:.2rem 0;
+  font-family:'Courier Prime',monospace;
+  font-size:clamp(.9rem,2.5vw,1rem);
+  color:var(--ink);line-height:1.9rem;
+  resize:vertical;outline:none;
+  caret-color:var(--wax);
 }
-.paper-label::after { content:''; flex:1; height:1px; background:linear-gradient(to right, var(--border-aged), transparent); }
+textarea::placeholder{color:var(--pdr);font-style:italic}
 
-textarea {
-  width:100%; min-height:200px; background:transparent; border:none;
-  padding:0.25rem 0; font-family:'Courier Prime',monospace; font-size:1rem;
-  color:var(--ink); line-height:1.95rem; resize:vertical; outline:none; caret-color:var(--red-wax);
+.field{
+  display:flex;align-items:flex-end;
+  border-bottom:1.5px solid var(--ba);
+  padding-bottom:.35rem;margin-bottom:.5rem;
 }
-textarea::placeholder { color:var(--parchment-deeper); font-style:italic; }
-
-.field-row {
-  display:flex; align-items:flex-end; gap:0;
-  border-bottom:1.5px solid var(--border-aged); padding-bottom:0.4rem; margin-top:1rem;
+.field-pre{
+  font-family:'Special Elite',cursive;
+  font-size:.74rem;color:var(--inkl);
+  white-space:nowrap;padding-bottom:.15rem;padding-right:.4rem;
+  flex-shrink:0;
 }
-.field-prefix {
-  font-family:'Special Elite',cursive; font-size:0.78rem; color:var(--ink-light);
-  white-space:nowrap; padding-bottom:0.2rem; padding-right:0.5rem;
+input[type=text]{
+  flex:1;min-width:0;
+  background:transparent;border:none;
+  font-family:'Courier Prime',monospace;
+  font-size:clamp(.9rem,2.5vw,1rem);
+  color:var(--ink);outline:none;
+  caret-color:var(--wax);
 }
-input[type="text"] {
-  flex:1; background:transparent; border:none;
-  font-family:'Courier Prime',monospace; font-size:1rem; color:var(--ink);
-  outline:none; caret-color:var(--red-wax);
-}
-input[type="text"]::placeholder { color:var(--parchment-deeper); font-style:italic; }
+input[type=text]::placeholder{color:var(--pdr);font-style:italic}
 
-.btn-row { display:flex; align-items:center; gap:1rem; margin-top:1.5rem; flex-wrap:wrap; }
-
-.seal-btn {
-  display:inline-flex; align-items:center; gap:0.5rem;
-  padding:0.55rem 1.4rem; font-family:'Special Elite',cursive;
-  font-size:0.8rem; letter-spacing:0.1em; cursor:pointer; border-radius:1px;
-  border:2px solid var(--red-wax); background:var(--red-wax); color:var(--parchment);
-  transition:all 0.18s; text-transform:uppercase;
-  box-shadow:2px 2px 0 #5a0a0a, 0 4px 12px rgba(139,26,26,0.4);
-}
-.seal-btn:hover { background:var(--red-wax-light); border-color:var(--red-wax-light); transform:translateY(-1px); box-shadow:3px 3px 0 #5a0a0a, 0 6px 20px rgba(139,26,26,0.5); }
-.seal-btn:active { transform:translate(2px,2px); box-shadow:none; }
-.seal-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
-
-.ghost-btn {
-  font-family:'Special Elite',cursive; font-size:0.75rem; letter-spacing:0.1em;
-  text-transform:uppercase; color:var(--ink-faded); background:transparent;
-  border:1px solid var(--border-aged); padding:0.5rem 1rem; cursor:pointer;
-  border-radius:1px; transition:all 0.15s;
-}
-.ghost-btn:hover { background:var(--parchment-dark); color:var(--ink); }
-
-.msg {
-  font-family:'Special Elite',cursive; font-size:0.72rem; letter-spacing:0.06em;
-  padding:0.5rem 0.75rem; margin-top:0.75rem; border-radius:1px; display:none; border-left:3px solid;
-}
-.msg.err { background:#f5e8e8; color:var(--red-wax); border-color:var(--red-wax); display:block; }
-.msg.ok  { background:#eaf0e2; color:#3a5a1a; border-color:#6a9a3a; display:block; }
-
-.share-section { display:none; margin-top:1.25rem; }
-.share-paper {
-  background:var(--parchment-dark); border:1px dashed var(--border-aged);
-  padding:1rem 1.25rem; border-radius:1px; cursor:pointer; transition:background 0.15s;
-}
-.share-paper:hover { background:var(--parchment-deeper); }
-.share-caption { font-family:'Special Elite',cursive; font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--ink-light); margin-bottom:0.4rem; }
-.share-url { font-family:'Courier Prime',monospace; font-size:0.78rem; color:var(--ink-faded); word-break:break-all; }
-.copy-flash { font-family:'Special Elite',cursive; font-size:0.65rem; color:#3a5a1a; letter-spacing:0.1em; margin-top:0.4rem; display:none; }
-
-.ornament { text-align:center; margin:1.75rem 0; position:relative; color:#4a3a20; font-size:1.1rem; letter-spacing:0.5em; }
-.ornament::before, .ornament::after { content:''; position:absolute; top:50%; width:calc(50% - 3rem); height:1px; }
-.ornament::before { left:0; background:linear-gradient(to right, transparent, #4a3a20); }
-.ornament::after  { right:0; background:linear-gradient(to left, transparent, #4a3a20); }
-
-.lock-badge {
-  display:inline-flex; align-items:center; gap:0.5rem;
-  font-family:'Special Elite',cursive; font-size:0.62rem; letter-spacing:0.2em;
-  text-transform:uppercase; color:var(--ink-light); border:1px solid var(--border-aged);
-  padding:0.3rem 0.7rem; border-radius:1px; margin-bottom:1.25rem; background:var(--parchment-dark);
+.hint{
+  font-family:'Special Elite',cursive;
+  font-size:.62rem;color:var(--inkl);
+  font-style:italic;line-height:1.6;
+  margin-top:.35rem;
 }
 
-.note-reveal { display:none; margin-top:1.25rem; border-top:1.5px solid var(--border-aged); padding-top:1.25rem; }
-.note-reveal-text { font-family:'Courier Prime',monospace; font-size:1rem; line-height:1.95rem; color:var(--ink); white-space:pre-wrap; min-height:2rem; }
+/* ── Buttons ── */
+.btn-row{display:flex;align-items:center;gap:.75rem;margin-top:1.25rem;flex-wrap:wrap}
 
-.wax-seal {
-  width:60px; height:60px; border-radius:50%;
-  background:radial-gradient(circle at 35% 35%, var(--red-wax-light), var(--red-wax) 50%, #5a0a0a);
-  display:flex; align-items:center; justify-content:center;
-  margin:0 auto 0.5rem;
-  box-shadow:0 4px 12px rgba(139,26,26,0.5), inset 0 1px 2px rgba(255,255,255,0.15);
-  animation:float 4s ease-in-out infinite; animation-delay:0.5s;
+.btn-primary{
+  display:inline-flex;align-items:center;gap:.45rem;
+  padding:.55rem 1.3rem;
+  font-family:'Special Elite',cursive;
+  font-size:clamp(.72rem,2vw,.8rem);
+  letter-spacing:.1em;text-transform:uppercase;
+  cursor:pointer;border-radius:1px;
+  border:2px solid var(--wax);background:var(--wax);color:var(--p);
+  transition:all .15s;
+  box-shadow:2px 2px 0 #4a0808,0 4px 12px rgba(139,26,26,.35);
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+.btn-primary:hover{background:var(--waxl);border-color:var(--waxl);transform:translateY(-1px);box-shadow:3px 3px 0 #4a0808,0 6px 18px rgba(139,26,26,.45)}
+.btn-primary:active{transform:translate(1px,1px);box-shadow:none}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* ── Messages ── */
+.msg{
+  font-family:'Special Elite',cursive;
+  font-size:.7rem;letter-spacing:.05em;
+  padding:.45rem .7rem;margin-top:.65rem;
+  border-radius:1px;display:none;
+  border-left:3px solid;line-height:1.5;
+}
+.msg.err{background:#f5e8e8;color:var(--wax);border-color:var(--wax);display:block}
+.msg.ok {background:#eaf0e2;color:#3a5a1a;border-color:#6a9a3a;display:block}
+
+/* ── Success passkey box ── */
+.passkey-box{
+  display:none;margin-top:1.1rem;
+  background:var(--pd);
+  border:1px solid var(--ba);border-radius:1px;
+  padding:1.25rem;text-align:center;
+}
+.passkey-label{
+  font-family:'Special Elite',cursive;
+  font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--inkl);margin-bottom:.6rem;
+}
+.passkey-value{
+  font-family:'Courier Prime',monospace;
+  font-size:clamp(1.2rem,5vw,1.6rem);
+  font-weight:700;color:var(--ink);
+  letter-spacing:.1em;
+  word-break:break-all;
+  margin-bottom:.6rem;
+  padding:.4rem .6rem;
+  background:rgba(0,0,0,.04);
+  border-radius:1px;
+}
+.passkey-hint{
+  font-family:'Special Elite',cursive;
+  font-size:.62rem;color:var(--inkl);
+  font-style:italic;margin-bottom:.9rem;line-height:1.5;
+}
+.copy-btn{
+  display:inline-flex;align-items:center;gap:.35rem;
+  font-family:'Special Elite',cursive;font-size:.68rem;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--inkf);background:transparent;
+  border:1px solid var(--ba);padding:.38rem .85rem;
+  cursor:pointer;border-radius:1px;transition:all .13s;
+  -webkit-tap-highlight-color:transparent;
+}
+.copy-btn:hover{background:var(--pdr)}
+.copy-flash{
+  font-family:'Special Elite',cursive;font-size:.6rem;
+  color:#3a5a1a;margin-top:.4rem;display:none;
 }
 
-.hint { font-family:'Special Elite',cursive; font-size:0.65rem; color:var(--ink-light); font-style:italic; }
-
-.stamp {
-  position:absolute; top:1.25rem; right:2.25rem;
-  width:44px; height:52px; border:2px solid var(--border-aged); border-radius:1px;
-  display:flex; align-items:center; justify-content:center;
-  background:var(--parchment-dark); box-shadow:inset 0 0 6px rgba(100,80,40,0.2);
+/* ── Divider ── */
+.orn{
+  text-align:center;margin:1.5rem 0;
+  position:relative;color:#3a2a14;
+  font-size:1rem;letter-spacing:.5em;
 }
-.stamp svg { opacity:0.5; }
-
-.spinner {
-  display:inline-block; width:11px; height:11px;
-  border:1.5px solid rgba(242,232,213,0.3); border-top-color:var(--parchment);
-  border-radius:50%; animation:spin 0.6s linear infinite; vertical-align:middle;
+.orn::before,.orn::after{
+  content:'';position:absolute;top:50%;height:1px;
+  width:calc(50% - 2.5rem);
 }
-@keyframes spin { to { transform:rotate(360deg); } }
+.orn::before{left:0;background:linear-gradient(to right,transparent,#3a2a14)}
+.orn::after{right:0;background:linear-gradient(to left,transparent,#3a2a14)}
 
-@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-.fade-up { animation:fadeUp 0.5s ease forwards; }
-.hidden { display:none !important; }
+/* ── Retrieve hero ── */
+.retrieve-hero{
+  text-align:center;
+  padding:1.5rem clamp(1rem,4vw,1.75rem);
+}
+.wax-seal{
+  width:54px;height:54px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,var(--waxl),var(--wax) 50%,#4a0808);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto .65rem;
+  box-shadow:0 4px 14px rgba(139,26,26,.45),inset 0 1px 2px rgba(255,255,255,.12);
+  animation:float 5s ease-in-out infinite;animation-delay:.5s;
+}
+.retrieve-title{
+  font-family:'IM Fell English',serif;
+  font-size:clamp(1.1rem,4vw,1.3rem);
+  color:var(--ink);margin-bottom:.2rem;
+}
+.lbadge{
+  display:inline-flex;align-items:center;gap:.4rem;
+  font-family:'Special Elite',cursive;font-size:.58rem;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:var(--inkl);border:1px solid var(--ba);
+  padding:.25rem .6rem;border-radius:1px;
+  margin-bottom:1rem;background:var(--pd);
+}
+
+/* ── Revealed note ── */
+.note-reveal{
+  display:none;margin-top:1.1rem;
+  border-top:1.5px solid var(--ba);padding-top:1.1rem;
+}
+.note-text{
+  font-family:'Courier Prime',monospace;
+  font-size:clamp(.9rem,2.5vw,1rem);
+  line-height:1.9rem;color:var(--ink);
+  white-space:pre-wrap;word-break:break-word;
+  min-height:1.9rem;
+}
+
+/* ── Footer ── */
+footer{
+  position:relative;z-index:2;
+  text-align:center;padding:1.5rem 1rem 2rem;
+  font-family:'Special Elite',cursive;
+  font-size:.58rem;letter-spacing:.15em;
+  text-transform:uppercase;color:#3a2a14;
+}
+
+/* ── Spinner ── */
+.spin{
+  display:inline-block;width:10px;height:10px;
+  border:1.5px solid rgba(242,232,213,.25);
+  border-top-color:var(--p);border-radius:50%;
+  animation:spin .55s linear infinite;vertical-align:middle;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fu{animation:fadeUp .4s ease both}
+.hidden{display:none!important}
+
+/* ── Mobile tweaks ── */
+@media(max-width:480px){
+  .wrap{padding:1.5rem 1rem}
+  .card{padding:1.1rem}
+  header{padding:1.25rem 0 1.5rem}
+}
 </style>
 </head>
 <body>
 
-<div class="bg-texture"></div>
-<div class="dust">
-  <span></span><span></span><span></span><span></span><span></span>
-  <span></span><span></span><span></span><span></span><span></span>
+<div class="bg" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
+<div class="dust" aria-hidden="true">
+  <i></i><i></i><i></i><i></i><i></i><i></i>
 </div>
 
 <div class="wrap">
 
+  <!-- ── Header ── -->
   <header>
-    <div class="envelope-icon">
-      <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div class="env-icon" aria-hidden="true">
+      <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Envelope icon">
         <rect x="2" y="12" width="52" height="36" rx="2" fill="#e8d9bc" stroke="#c4a96a" stroke-width="1.5"/>
-        <path d="M2 14l26 20L54 14" stroke="#c4a96a" stroke-width="1.5" fill="none"/>
-        <circle cx="28" cy="44" r="7" fill="#8b1a1a" opacity="0.9"/>
+        <path d="M2 14l26 20L54 14" stroke="#c4a96a" stroke-width="1.5"/>
+        <circle cx="28" cy="44" r="7" fill="#8b1a1a" opacity=".9"/>
         <path d="M28 40v4M26 42h4" stroke="#f2e8d5" stroke-width="1.2" stroke-linecap="round"/>
       </svg>
     </div>
-    <div class="logo"><em>Sealed</em> Letter</div>
+    <h1><em>Sealed</em> Letter</h1>
     <div class="tagline-wrap">
-      <span class="tagline" id="tagline-text"></span><span class="cursor"></span>
+      <span class="tagline" id="tgt" aria-live="polite"></span><span class="cur" aria-hidden="true"></span>
     </div>
   </header>
 
-  <!-- COMPOSE -->
-  <div id="compose-view">
-    <div class="paper ruled">
-      <div class="stamp">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8a7a5a" stroke-width="1.5">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
-      </div>
-      <div class="paper-label">Your message</div>
-      <textarea id="note-text" placeholder="Write something only you and they should know…" rows="8"></textarea>
+  <!-- ── SEAL A NOTE ── -->
+  <section aria-labelledby="seal-heading">
+    <div class="section-title" id="seal-heading">Seal a message</div>
+
+    <div class="card ruled">
+      <label for="note-text" class="hint" style="display:block;margin-bottom:.5rem">Your message</label>
+      <textarea id="note-text" placeholder="Type anything — a password, address, note, or thought…" rows="6" aria-describedby="note-hint"></textarea>
+      <p class="hint" id="note-hint" style="margin-top:.4rem">Encrypted in your browser before it's saved. Nobody else can read it.</p>
     </div>
 
-    <div class="paper">
-      <div class="paper-label">Passphrase to seal it</div>
-      <div class="field-row">
-        <span class="field-prefix">Phrase —</span>
-        <input type="text" id="phrase-input" placeholder="only you know this…" autocomplete="off"/>
+    <div class="card">
+      <label for="passkey-input" class="hint" style="display:block;margin-bottom:.6rem">Your passkey</label>
+      <div class="field">
+        <span class="field-pre" aria-hidden="true">Key —</span>
+        <input type="text"
+               id="passkey-input"
+               placeholder="something memorable…"
+               autocomplete="off"
+               autocorrect="off"
+               autocapitalize="off"
+               spellcheck="false"
+               aria-describedby="passkey-hint"/>
       </div>
-      <p class="hint" style="margin-top:0.6rem;">Case-insensitive. Spaces are fine. The longer, the safer.</p>
-      <div id="compose-msg" class="msg"></div>
+      <p class="hint" id="passkey-hint">Choose anything you'll remember — a word, phrase, or sentence. You'll type this on any device to get your message back.</p>
+
+      <div id="seal-msg" class="msg" role="alert"></div>
+
       <div class="btn-row">
-        <button class="seal-btn" onclick="saveNote()" id="save-btn">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-          <span id="save-label">Seal &amp; send</span>
-          <span id="save-spin" class="spinner hidden"></span>
+        <button class="btn-primary" onclick="sealNote()" id="save-btn" aria-label="Seal and save your message">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          <span id="save-label">Seal it</span>
+          <span id="save-spin" class="spin hidden" aria-hidden="true"></span>
         </button>
-        <span class="hint">encrypted before it leaves your device</span>
+      </div>
+
+      <!-- Success state -->
+      <div class="passkey-box fu" id="passkey-box" role="status" aria-live="polite">
+        <div class="passkey-label">Sealed &amp; saved — your passkey</div>
+        <div class="passkey-value" id="passkey-display"></div>
+        <p class="passkey-hint">Write this down. Enter it on any device to retrieve your message.</p>
+        <button class="copy-btn" onclick="copyPasskey()" aria-label="Copy passkey to clipboard">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy
+        </button>
+        <div class="copy-flash" id="copy-flash" aria-live="polite">✓ Copied</div>
       </div>
     </div>
+  </section>
 
-    <div id="share-section" class="share-section fade-up">
-      <div class="share-paper" onclick="copyLink()">
-        <div class="share-caption">&#9993; Your sealed link — click to copy</div>
-        <div class="share-url" id="share-url"></div>
-        <div class="copy-flash" id="copy-flash">✓ Copied to clipboard</div>
-      </div>
-      <p class="hint" style="margin-top:0.6rem; text-align:center; color:#8a7a5a;">
-        Share the link &amp; passphrase separately. Anyone without the phrase sees only ciphertext.
-      </p>
-    </div>
-  </div>
+  <div class="orn" aria-hidden="true">✦ ✦ ✦</div>
 
-  <div class="ornament">✦ ✦ ✦</div>
+  <!-- ── RETRIEVE ── -->
+  <section aria-labelledby="retrieve-heading">
+    <div class="section-title" id="retrieve-heading">Retrieve a message</div>
 
-  <!-- UNLOCK -->
-  <div id="unlock-view" class="hidden">
-    <div class="paper" style="text-align:center; padding-top:1.75rem; padding-bottom:1.75rem;">
-      <div class="wax-seal">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f2e8d5" stroke-width="2">
+    <div class="card retrieve-hero">
+      <div class="wax-seal" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f2e8d5" stroke-width="2" aria-hidden="true">
           <rect x="3" y="11" width="18" height="11" rx="2"/>
           <path d="M7 11V7a5 5 0 0110 0v4"/>
         </svg>
       </div>
-      <div style="font-family:'IM Fell English',serif; font-size:1.3rem; color:var(--ink); margin-bottom:0.25rem;">
-        A sealed letter awaits you.
-      </div>
-      <p class="hint">Speak the passphrase to break the seal.</p>
+      <p class="retrieve-title">Have a passkey?</p>
+      <p class="hint">Enter it below to retrieve your message on any device.</p>
     </div>
 
-    <div class="paper">
-      <div class="lock-badge">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-        Awaiting passphrase
+    <div class="card">
+      <div class="lbadge" aria-hidden="true">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Enter passkey
       </div>
-      <div class="field-row">
-        <span class="field-prefix">Phrase —</span>
-        <input type="text" id="unlock-input" placeholder="enter passphrase…" autocomplete="off"/>
+
+      <label for="unlock-input" class="hint" style="display:block;margin-bottom:.5rem">Your passkey</label>
+      <div class="field">
+        <span class="field-pre" aria-hidden="true">Key —</span>
+        <input type="text"
+               id="unlock-input"
+               placeholder="type your passkey…"
+               autocomplete="off"
+               autocorrect="off"
+               autocapitalize="off"
+               spellcheck="false"
+               aria-describedby="unlock-hint"/>
       </div>
-      <div id="unlock-msg" class="msg"></div>
+      <p class="hint" id="unlock-hint">Tip: capitalisation and spaces matter — type it exactly as you set it.</p>
+
+      <div id="unlock-msg" class="msg" role="alert"></div>
+
       <div class="btn-row">
-        <button class="seal-btn" onclick="unlockNote()" id="unlock-btn">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 019.9-1"/></svg>
-          <span id="unlock-label">Break the seal</span>
-          <span id="unlock-spin" class="spinner hidden"></span>
+        <button class="btn-primary" onclick="retrieveNote()" id="unlock-btn" aria-label="Retrieve your sealed message">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 019.9-1"/></svg>
+          <span id="unlock-label">Retrieve message</span>
+          <span id="unlock-spin" class="spin hidden" aria-hidden="true"></span>
         </button>
-        <button class="ghost-btn" onclick="showCompose()">Write a new letter</button>
       </div>
-      <div id="note-reveal" class="note-reveal">
-        <div class="paper-label" style="margin-bottom:0.5rem;">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6a9a3a" stroke-width="2.5" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
-          Seal broken — message revealed
+
+      <div id="note-reveal" class="note-reveal fu" aria-live="polite">
+        <div class="section-title" style="margin-bottom:.5rem">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6a9a3a" stroke-width="2.5" style="flex-shrink:0" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          Message retrieved
         </div>
-        <div class="note-reveal-text" id="note-content"></div>
+        <div class="note-text" id="note-content"></div>
       </div>
     </div>
-  </div>
+  </section>
 
 </div>
 
+<!-- ── Footer ── -->
+<footer>
+  <p>Sealed Letter &mdash; end-to-end encrypted &mdash; no account needed</p>
+</footer>
+
+<!-- ── Firebase & logic ── -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -380,148 +545,147 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
 
+// ── Passkey → stable Firebase key (SHA-256) ──
+async function passkeyToFbKey(passkey) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(passkey));
+  const hex = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  return 'k' + hex.slice(0,32);
+}
+
+// ── AES-GCM encryption ──────────────────
 const enc = new TextEncoder(), dec = new TextDecoder();
 
-async function deriveKey(phrase, salt) {
-  const raw = await crypto.subtle.importKey("raw", enc.encode(phrase), "PBKDF2", false, ["deriveKey"]);
+async function deriveKey(passkey, salt) {
+  const raw = await crypto.subtle.importKey("raw", enc.encode(passkey), "PBKDF2", false, ["deriveKey"]);
   return crypto.subtle.deriveKey(
-    { name:"PBKDF2", salt, iterations:200000, hash:"SHA-256" },
-    raw, { name:"AES-GCM", length:256 }, false, ["encrypt","decrypt"]
+    {name:"PBKDF2",salt,iterations:200000,hash:"SHA-256"},
+    raw,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]
   );
 }
 
-async function encrypt(text, phrase) {
+async function encrypt(text, passkey) {
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const iv   = crypto.getRandomValues(new Uint8Array(12));
-  const key  = await deriveKey(phrase, salt);
-  const ct   = await crypto.subtle.encrypt({ name:"AES-GCM", iv }, key, enc.encode(text));
-  const buf  = new Uint8Array(salt.byteLength + iv.byteLength + ct.byteLength);
-  buf.set(salt,0); buf.set(iv,16); buf.set(new Uint8Array(ct),28);
-  return btoa(String.fromCharCode(...buf));
+  const key  = await deriveKey(passkey, salt);
+  const ct   = await crypto.subtle.encrypt({name:"AES-GCM",iv}, key, enc.encode(text));
+  const out  = new Uint8Array(28 + ct.byteLength);
+  out.set(salt,0); out.set(iv,16); out.set(new Uint8Array(ct),28);
+  return btoa(String.fromCharCode(...out));
 }
 
-async function decrypt(b64, phrase) {
+async function decrypt(b64, passkey) {
   const buf  = Uint8Array.from(atob(b64), c=>c.charCodeAt(0));
-  const salt = buf.slice(0,16), iv = buf.slice(16,28), ct = buf.slice(28);
-  const key  = await deriveKey(phrase, salt);
-  const pt   = await crypto.subtle.decrypt({ name:"AES-GCM", iv }, key, ct);
+  const key  = await deriveKey(passkey, buf.slice(0,16));
+  const pt   = await crypto.subtle.decrypt({name:"AES-GCM",iv:buf.slice(16,28)}, key, buf.slice(28));
   return dec.decode(pt);
 }
 
-const norm = p => p.toLowerCase().replace(/\s+/g,' ').trim();
-const uid  = () => Math.random().toString(36).slice(2,9) + Date.now().toString(36);
-
+// ── UI helpers ──────────────────────────
 function showMsg(id, text, type) {
   const el = document.getElementById(id);
-  el.textContent = text; el.className = `msg ${type}`;
+  el.textContent = text;
+  el.className = 'msg ' + type;
 }
 
 function setSpin(prefix, on) {
-  document.getElementById(`${prefix}-label`).classList.toggle('hidden', on);
-  document.getElementById(`${prefix}-spin`).classList.toggle('hidden', !on);
-  document.getElementById(`${prefix}-btn`).disabled = on;
+  document.getElementById(prefix+'-label').classList.toggle('hidden', on);
+  document.getElementById(prefix+'-spin').classList.toggle('hidden', !on);
+  document.getElementById(prefix+'-btn').disabled = on;
 }
 
-// Typewriter tagline
+// ── Typewriter ──────────────────────────
 const lines = [
-  'private notes, sealed by your words.',
-  'your passphrase. your secret.',
-  'written in confidence. read by few.',
-  'across any device. beyond any eyes.',
+  'your words. your key. any device.',
+  'type it. seal it. retrieve it anywhere.',
+  'no account. no login. just your passkey.',
+  'one key. every device. always yours.',
 ];
-let li=0, ci=0, deleting=false;
-const tagEl = document.getElementById('tagline-text');
-
-function typewriter() {
+let li=0,ci=0,del=false;
+const tgtEl = document.getElementById('tgt');
+function tw() {
   const line = lines[li];
-  if (!deleting) {
-    tagEl.textContent = line.slice(0,++ci);
-    if (ci===line.length) { deleting=true; setTimeout(typewriter,2200); return; }
-    setTimeout(typewriter,48);
+  if (!del) {
+    tgtEl.textContent = line.slice(0,++ci);
+    if (ci===line.length){del=true;setTimeout(tw,2400);return;}
+    setTimeout(tw,44);
   } else {
-    tagEl.textContent = line.slice(0,--ci);
-    if (ci===0) { deleting=false; li=(li+1)%lines.length; setTimeout(typewriter,400); return; }
-    setTimeout(typewriter,24);
+    tgtEl.textContent = line.slice(0,--ci);
+    if (ci===0){del=false;li=(li+1)%lines.length;setTimeout(tw,350);return;}
+    setTimeout(tw,20);
   }
 }
-setTimeout(typewriter,800);
+setTimeout(tw, 900);
 
-// Save
-window.saveNote = async function() {
-  const note   = document.getElementById('note-text').value.trim();
-  const phrase = document.getElementById('phrase-input').value.trim();
-  if (!note)   { showMsg('compose-msg','Write your message first.','err'); return; }
-  if (!phrase) { showMsg('compose-msg','Set a passphrase to seal it.','err'); return; }
-  setSpin('save',true);
+// ── Seal ────────────────────────────────
+window.sealNote = async function() {
+  const note    = document.getElementById('note-text').value.trim();
+  const passkey = document.getElementById('passkey-input').value.trim();
+  if (!note)         { showMsg('seal-msg','Write your message first.','err'); return; }
+  if (!passkey)      { showMsg('seal-msg','Choose a passkey.','err'); return; }
+  if (passkey.length < 3) { showMsg('seal-msg','Passkey needs at least 3 characters.','err'); return; }
+  setSpin('save', true);
   try {
-    const id        = uid();
-    const encrypted = await encrypt(note, norm(phrase));
-    await set(ref(db,`notes/${id}`), { c:encrypted, t:Date.now() });
-    const url = `${location.origin}${location.pathname}#${id}`;
-    document.getElementById('share-url').textContent = url;
-    document.getElementById('share-section').style.display = 'block';
-    showMsg('compose-msg','Sealed. Share the link and passphrase separately.','ok');
+    const fbKey = await passkeyToFbKey(passkey);
+    const enc   = await encrypt(note, passkey);
+    await set(ref(db,`notes/${fbKey}`), {c:enc, t:Date.now()});
+    document.getElementById('passkey-display').textContent = passkey;
+    document.getElementById('passkey-box').style.display = 'block';
+    document.getElementById('seal-msg').style.display = 'none';
+    document.getElementById('passkey-box').scrollIntoView({behavior:'smooth',block:'nearest'});
   } catch(e) {
-    showMsg('compose-msg','Could not save — make sure Realtime Database is enabled in Firebase.','err');
+    showMsg('seal-msg','Could not save — make sure Firebase Realtime Database is enabled.','err');
     console.error(e);
   }
-  setSpin('save',false);
+  setSpin('save', false);
 };
 
-// Copy link
-window.copyLink = function() {
-  const url = document.getElementById('share-url').textContent;
-  navigator.clipboard.writeText(url).then(() => {
+// ── Copy passkey ────────────────────────
+window.copyPasskey = function() {
+  const key = document.getElementById('passkey-display').textContent;
+  navigator.clipboard.writeText(key).then(() => {
     const f = document.getElementById('copy-flash');
     f.style.display = 'block';
-    setTimeout(()=> f.style.display='none', 2000);
+    setTimeout(() => f.style.display='none', 2000);
   });
 };
 
-// Typewriter reveal
-async function typeReveal(target, text) {
-  target.textContent = '';
+// ── Typewriter reveal ───────────────────
+async function typeReveal(el, text) {
+  el.textContent = '';
   for (let i=0; i<text.length; i++) {
-    target.textContent += text[i];
-    await new Promise(r => setTimeout(r,18));
+    el.textContent += text[i];
+    await new Promise(r => setTimeout(r,16));
   }
 }
 
-// Unlock
-window.unlockNote = async function() {
-  const phrase = document.getElementById('unlock-input').value.trim();
-  if (!phrase) { showMsg('unlock-msg','Enter your passphrase.','err'); return; }
-  setSpin('unlock',true);
+// ── Retrieve ────────────────────────────
+window.retrieveNote = async function() {
+  const passkey = document.getElementById('unlock-input').value.trim();
+  if (!passkey) { showMsg('unlock-msg','Enter your passkey.','err'); return; }
+  setSpin('unlock', true);
   document.getElementById('note-reveal').style.display = 'none';
   try {
-    const id   = location.hash.slice(1);
-    const snap = await get(ref(db,`notes/${id}`));
-    if (!snap.exists()) { showMsg('unlock-msg','Letter not found or already destroyed.','err'); setSpin('unlock',false); return; }
-    const text = await decrypt(snap.val().c, norm(phrase));
-    showMsg('unlock-msg','Seal broken. Your letter is revealed.','ok');
+    const fbKey = await passkeyToFbKey(passkey);
+    const snap  = await get(ref(db,`notes/${fbKey}`));
+    if (!snap.exists()) {
+      showMsg('unlock-msg','No message found — double-check your passkey.','err');
+      setSpin('unlock',false); return;
+    }
+    const text = await decrypt(snap.val().c, passkey);
+    showMsg('unlock-msg','Message retrieved.','ok');
     const reveal = document.getElementById('note-reveal');
     reveal.style.display = 'block';
-    reveal.classList.add('fade-up');
+    reveal.scrollIntoView({behavior:'smooth',block:'nearest'});
     await typeReveal(document.getElementById('note-content'), text);
   } catch {
-    showMsg('unlock-msg','Wrong passphrase. The seal holds.','err');
+    showMsg('unlock-msg','Wrong passkey — message could not be decrypted.','err');
   }
-  setSpin('unlock',false);
+  setSpin('unlock', false);
 };
 
-document.getElementById('unlock-input').addEventListener('keydown', e => { if(e.key==='Enter') window.unlockNote(); });
-document.getElementById('phrase-input').addEventListener('keydown', e => { if(e.key==='Enter') window.saveNote(); });
-
-window.showCompose = function() {
-  document.getElementById('unlock-view').classList.add('hidden');
-  document.getElementById('compose-view').classList.remove('hidden');
-  history.replaceState(null,'',location.pathname);
-};
-
-if (location.hash.length > 1) {
-  document.getElementById('compose-view').classList.add('hidden');
-  document.getElementById('unlock-view').classList.remove('hidden');
-}
+// ── Enter key shortcuts ─────────────────
+document.getElementById('passkey-input').addEventListener('keydown', e => { if(e.key==='Enter') window.sealNote(); });
+document.getElementById('unlock-input').addEventListener('keydown', e => { if(e.key==='Enter') window.retrieveNote(); });
 </script>
 
 </body>
