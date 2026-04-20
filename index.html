@@ -7,18 +7,24 @@
   <style>
     /* Warm, light retro theme with pop-art brutalist elements */
     :root {
-      --bg: #FDF9F1; /* Warm paper off-white */
-      --text: #1A1A1A; /* High contrast black */
-      --accent: #E63946; /* Vibrant retro red */
+      --bg: #FDF9F1; 
+      --text: #1A1A1A; 
+      --accent: #E63946; 
       --accent-hover: #D62828;
       --border: #1A1A1A;
-      --focus-ring: #457B9D; /* Clear blue for keyboard focus */
+      --focus-ring: #457B9D; 
       --card-bg: #FFFFFF;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     /* Accessibility: Respect reduced motion */
     @media (prefers-reduced-motion: reduce) {
-      .cursor-circle, .cursor-trail {
+      .custom-cursor-element {
         display: none !important;
       }
       * {
@@ -27,18 +33,11 @@
       }
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      cursor: none; /* Hide default cursor for custom one */
-    }
-
     body {
       font-family: "Georgia", "Times New Roman", serif;
       background-color: var(--bg);
       color: var(--text);
-      font-size: 18px; /* Senior-friendly base size */
+      font-size: 18px; 
       line-height: 1.6;
       display: flex;
       flex-direction: column;
@@ -46,6 +45,8 @@
       min-height: 100vh;
       padding: 2rem 1rem;
       overflow-x: hidden;
+      /* We hide the default cursor on the body, but restore it for text */
+      cursor: none; 
     }
 
     .container {
@@ -53,7 +54,7 @@
       max-width: 650px;
       flex: 1;
       position: relative;
-      z-index: 10; /* Keep above cursor effects */
+      z-index: 10; 
     }
 
     .sr-only {
@@ -113,6 +114,7 @@
       box-shadow: 4px 4px 0px var(--border);
       transition: transform 0.1s, box-shadow 0.1s;
       border-radius: 6px;
+      cursor: none; /* Hide default pointer, use custom */
     }
 
     .tab-btn[aria-selected="true"] {
@@ -156,6 +158,7 @@
       margin-bottom: 0.5rem;
     }
 
+    /* Restore native text cursor for inputs! */
     input[type="text"],
     textarea {
       width: 100%;
@@ -167,6 +170,7 @@
       border: 3px solid var(--border);
       color: var(--text);
       border-radius: 6px;
+      cursor: text !important; 
     }
 
     textarea { resize: vertical; min-height: 180px; }
@@ -184,6 +188,7 @@
       box-shadow: 5px 5px 0px var(--border);
       transition: transform 0.1s, box-shadow 0.1s;
       border-radius: 6px;
+      cursor: none; 
     }
 
     .action-btn:hover {
@@ -224,43 +229,51 @@
       max-width: 650px;
     }
 
-    /* Custom Cursor Styles */
-    .cursor-circle {
+    /* --- Improved Custom Cursor --- */
+    .custom-cursor-element {
       position: fixed;
-      top: 0; left: 0;
-      width: 40px; height: 40px;
-      border: 3px solid var(--accent);
-      border-radius: 50%;
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-      transition: width 0.2s, height 0.2s, background-color 0.2s;
+      top: 0; 
+      left: 0;
+      pointer-events: none; /* Let clicks pass through */
       z-index: 9999;
-      mix-blend-mode: multiply;
+      will-change: transform;
     }
 
-    .cursor-trail {
-      position: fixed;
-      top: 0; left: 0;
-      width: 15px; height: 15px;
-      background: var(--focus-ring);
+    #cursor-dot {
+      width: 10px;
+      height: 10px;
+      background-color: var(--accent);
       border-radius: 50%;
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-      z-index: 9998;
-      opacity: 0.7;
     }
 
-    /* Fallback for when custom cursor is hidden or on touch screens */
+    #cursor-halo {
+      width: 40px;
+      height: 40px;
+      border: 2px solid var(--text);
+      border-radius: 50%;
+      transition: width 0.2s ease, height 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    /* When hovering over buttons/tabs */
+    #cursor-halo.hovering {
+      width: 60px;
+      height: 60px;
+      background-color: rgba(230, 57, 70, 0.15); /* Light red tint */
+      border-color: var(--accent);
+    }
+
+    /* Hidden entirely on touch devices */
     @media (hover: none) and (pointer: coarse) {
-      * { cursor: auto !important; }
-      .cursor-circle, .cursor-trail { display: none !important; }
+      body { cursor: auto; }
+      .tab-btn, .action-btn { cursor: pointer; }
+      .custom-cursor-element { display: none !important; }
     }
   </style>
 </head>
 <body>
 
-  <div class="cursor-circle" id="cursor-circle"></div>
-  <div id="cursor-trails-container"></div>
+  <div id="cursor-dot" class="custom-cursor-element" aria-hidden="true"></div>
+  <div id="cursor-halo" class="custom-cursor-element" aria-hidden="true"></div>
 
   <main class="container">
     <header>
@@ -329,61 +342,60 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // ---- Custom Cursor Logic ----
-    const circle = document.getElementById('cursor-circle');
-    const trailContainer = document.getElementById('cursor-trails-container');
-    const trails = [];
-    const trailCount = 8;
+    // ---- Smooth Physics Cursor Logic ----
+    const dot = document.getElementById('cursor-dot');
+    const halo = document.getElementById('cursor-halo');
+    
     let mouseX = window.innerWidth / 2;
     let mouseY = window.innerHeight / 2;
+    let haloX = mouseX;
+    let haloY = mouseY;
 
-    // Check for reduced motion
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
-    if (!prefersReducedMotion && matchMedia('(pointer:fine)').matches) {
-      for(let i = 0; i < trailCount; i++) {
-        let t = document.createElement('div');
-        t.className = 'cursor-trail';
-        trailContainer.appendChild(t);
-        trails.push({ el: t, x: mouseX, y: mouseY });
-      }
-
+    if (!prefersReducedMotion && !isTouchDevice) {
       document.addEventListener('mousemove', (e) => {
         mouseX = e.clientX;
         mouseY = e.clientY;
-        circle.style.left = mouseX + 'px';
-        circle.style.top = mouseY + 'px';
+        // Dot follows mouse instantly
+        dot.style.transform = `translate3d(calc(${mouseX}px - 50%), calc(${mouseY}px - 50%), 0)`;
       });
 
-      function animateTrails() {
-        let x = mouseX;
-        let y = mouseY;
-        trails.forEach((pt, index) => {
-          const nextX = pt.x + (x - pt.x) * 0.4;
-          const nextY = pt.y + (y - pt.y) * 0.4;
-          pt.x = nextX;
-          pt.y = nextY;
-          pt.el.style.left = pt.x + 'px';
-          pt.el.style.top = pt.y + 'px';
-          pt.el.style.transform = `translate(-50%, -50%) scale(${(trailCount - index) / trailCount})`;
-          x = pt.x;
-          y = pt.y;
-        });
-        requestAnimationFrame(animateTrails);
+      // Halo follows with smooth linear interpolation (lerp)
+      function renderHalo() {
+        haloX += (mouseX - haloX) * 0.15; // The smaller the decimal, the more it trails
+        haloY += (mouseY - haloY) * 0.15;
+        halo.style.transform = `translate3d(calc(${haloX}px - 50%), calc(${haloY}px - 50%), 0)`;
+        requestAnimationFrame(renderHalo);
       }
-      animateTrails();
+      requestAnimationFrame(renderHalo);
 
-      // Interactive hover states
-      document.querySelectorAll('button, input, textarea, a').forEach(el => {
-        el.addEventListener('mouseenter', () => {
-          circle.style.width = '60px';
-          circle.style.height = '60px';
-          circle.style.backgroundColor = 'rgba(230, 57, 70, 0.2)'; // semi-transparent accent
+      // Interactive Hover States
+      const buttons = document.querySelectorAll('button');
+      const textInputs = document.querySelectorAll('input, textarea');
+
+      // Expand halo on buttons
+      buttons.forEach(btn => {
+        btn.addEventListener('mouseenter', () => {
+          halo.classList.add('hovering');
+          dot.style.opacity = '0'; // Hide dot while hovering over button
         });
-        el.addEventListener('mouseleave', () => {
-          circle.style.width = '40px';
-          circle.style.height = '40px';
-          circle.style.backgroundColor = 'transparent';
+        btn.addEventListener('mouseleave', () => {
+          halo.classList.remove('hovering');
+          dot.style.opacity = '1';
+        });
+      });
+
+      // Hide custom cursor elements entirely when over text inputs so the native caret works!
+      textInputs.forEach(input => {
+        input.addEventListener('mouseenter', () => {
+          dot.style.display = 'none';
+          halo.style.display = 'none';
+        });
+        input.addEventListener('mouseleave', () => {
+          dot.style.display = 'block';
+          halo.style.display = 'block';
         });
       });
     }
@@ -402,7 +414,6 @@
         targetPanel.removeAttribute('hidden');
       });
 
-      // Keyboard arrow support
       tab.addEventListener('keydown', e => {
         let index = Array.prototype.indexOf.call(tabs, e.target);
         let dir = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : null;
