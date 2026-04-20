@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dylangrow.github.io/Sealed-Letter/sitemap.xml
