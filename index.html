@@ -2,333 +2,154 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Sealed Letter — Private Notes</title>
-  <meta name="description" content="A private ledger for your thoughts. Write, seal, and retrieve secret letters with a passkey.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔴</text></svg>">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sealed Letter | Secure Transmissions</title>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IM+Fell+English:ital@0;1&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Courier+Prime&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Courier Prime', 'monospace'],
+          },
+          colors: {
+            gold: {
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+            },
+            zinc: {
+              850: '#202024',
+              950: '#09090b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 
   <style>
-    :root {
-      --bg: #fdf6e3;
-      --bg-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-      --card-bg: #5c3317;
-      --card-shadow: 0 20px 60px rgba(92,51,23,0.35), 0 4px 16px rgba(92,51,23,0.2);
-      --text: #1a0f00;
-      --card-text: #fff4d6;
-      --card-label: #f5c89a;
-      --card-muted: #c9a07a;
-      --accent: #8b1a1a;
-      --accent-hover: #c0392b;
-      --gold: #c8962c;
-      --gold-bright: #ffd700;
-      --input-bg: #3d2008;
-      --input-text: #ffe066;
-      --input-placeholder: #a0743a;
-      --border: #8b5e3c;
-      --border-card: #7a4520;
-      --focus-ring: #ffd700;
-      --muted: #6b4c2a;
-      --font-display: 'Playfair Display', Georgia, serif;
-      --font-body: 'IM Fell English', Georgia, serif;
-      --font-mono: 'Courier Prime', 'Courier New', monospace;
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms!important;
-        animation-iteration-count: 1!important;
-        transition-duration: 0.01ms!important;
-      }
-     .cursor { display: none!important; }
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-
+    /* Custom Scrollbar and Base Styles */
     body {
-      font-family: var(--font-body);
-      background-color: var(--bg);
-      background-image: var(--bg-texture);
-      color: var(--text);
-      font-size: clamp(16px, 2vw, 20px);
-      line-height: 1.7;
-      -webkit-font-smoothing: antialiased;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      min-height: 100dvh;
-      padding: clamp(1.5rem, 4vw, 3rem) 1rem;
+      background-color: #09090b;
+      color: #e4e4e7;
       overflow-x: hidden;
     }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #09090b; }
+    ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
 
-   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
-   .skip-link { position: absolute; top: -100px; left: 1rem; background: var(--accent); color: white; padding: 0.75rem 1.5rem; font-family: var(--font-mono); font-weight: bold; text-decoration: none; z-index: 10000; border-radius: 4px; transition: top 0.2s; }
-   .skip-link:focus { top: 1rem; }
-
-    /* CUSTOM FLAME CURSOR */
-   .cursor-core, .cursor-glow { position: fixed; pointer-events: none; will-change: transform; transform: translate(-50%, -50%); opacity: 0; z-index: 9999; }
-   .cursor-core { 
-      width: 18px; height: 18px; 
-      background: radial-gradient(circle at 30% 70%, #fff 0%, #ffeb3b 30%, #ff9800 60%, #f44336 90%); 
-      border-radius: 0 50% 50% 50%; 
-      animation: flicker 0.12s infinite alternate;
-      box-shadow: 0 0 10px #ff9800;
+    /* Ensure Three.js canvas stays in the background */
+    #canvas-container {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: -1;
+      pointer-events: none;
     }
-   .cursor-glow { 
-      width: 40px; height: 40px; 
-      background: radial-gradient(circle, rgba(255,152,0,0.4) 0%, transparent 70%); 
-      border-radius: 50%; 
-      animation: pulseGlow 1s infinite alternate;
-    }
-    @keyframes flicker { 
-      0% { transform: translate(-50%, -50%) rotate(-45deg) scale(0.9); opacity: 0.8; filter: brightness(1); } 
-      100% { transform: translate(-50%, -50%) rotate(-45deg) scale(1.1); opacity: 1; filter: brightness(1.2); } 
-    }
-    @keyframes pulseGlow { 0% { transform: translate(-50%, -50%) scale(1); } 100% { transform: translate(-50%, -50%) scale(1.3); } }
 
-    @media (hover: hover) and (pointer: fine) {
-      body.cursor-ready { cursor: none; }
-      body.cursor-ready button, body.cursor-ready.tab-btn, body.cursor-ready a { cursor: none; }
-      body.cursor-ready input, body.cursor-ready textarea { cursor: text!important; }
-    }
-    @media (hover: none), (prefers-reduced-motion: reduce) {.cursor-core,.cursor-glow { display: none!important; } }
-
-    body::before { content: ''; position: fixed; inset: 0; background-image: repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(139,94,60,0.04) 28px, rgba(139,94,60,0.04) 29px); pointer-events: none; z-index: 0; }
-
-   .container { width: 100%; max-width: 680px; flex: 1; position: relative; z-index: 10; }
-
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-    header { text-align: center; margin-bottom: clamp(2rem, 5vw, 3.5rem); animation: fadeUp 0.8s cubic-bezier(0.4,0,0.2,1) both; }
-   .wax-seal { display: inline-block; width: 72px; height: 72px; margin-bottom: 1.5rem; animation: fadeUp 0.6s both, sealPulse 4s ease-in-out infinite 1.5s; filter: drop-shadow(0 4px 12px rgba(139,26,0.5)); }
-    @keyframes sealPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
-
-   .nav-tabs { display: flex; margin-bottom: 0; border-radius: 8px 0 0; overflow: hidden; animation: fadeUp 0.9s 0.1s both; }
-   .tab-btn { flex: 1; background: #e8d5b0; border: 2px solid var(--border); border-bottom: none; color: var(--muted); font-family: var(--font-display); font-size: clamp(0.9rem, 2.5vw, 1.15rem); font-weight: 700; font-style: italic; padding: clamp(0.8rem, 2vw, 1.1rem) 1rem; letter-spacing: 1px; transition: var(--transition); }
-   .tab-btn[aria-selected="true"] { background: var(--card-bg); color: var(--card-text); border-color: var(--card-bg); }
-   .tab-btn[aria-selected="false"]:hover { background: #d4c09a; color: var(--text); }
-   .tab-btn:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: -3px; }
-
-   .card { background: var(--card-bg); border: 2px solid var(--border-card); border-top: none; padding: clamp(1.5rem, 4vw, 2.5rem); border-radius: 0 0 12px 12px; box-shadow: var(--card-shadow); position: relative; overflow: hidden; animation: fadeUp 1s 0.2s both; transition: transform 0.1s, filter 0.3s; }
-   .card::before { content: ''; position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='leather'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.65' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23leather)' opacity='0.06'/%3E%3C/svg%3E"); pointer-events: none; }
-   .card::after { content: '❧'; position: absolute; top: 1rem; right: 1.2rem; font-size: 1.5rem; color: rgba(245,200,154,0.2); }
-   .card > * { position: relative; z-index: 1; }
-
-   /* Magic Seal Animation */
-   .card.magic-seal-active {
-     animation: magicShake 0.6s cubic-bezier(.36,.07,.19,.97) both;
-     filter: drop-shadow(0 0 30px #ff3300) brightness(1.2);
-   }
-   @keyframes magicShake {
-     10%, 90% { transform: translate3d(-2px, 0, 0); }
-     20%, 80% { transform: translate3d(4px, 0, 0); }
-     30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
-     40%, 60% { transform: translate3d(8px, 0, 0); }
-   }
-
-   .view-section { display: none; }
-   .view-section:not([hidden]) { display: block; animation: panelFadeIn 0.4s; }
-    @keyframes panelFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; } }
-
-   .form-group { margin-bottom: 1.8rem; }
-    label { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--font-mono); font-weight: 700; font-size: clamp(0.75rem, 2vw, 0.9rem); margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 2px; color: var(--card-label); }
-   .char-count { font-size: 0.75rem; color: var(--card-muted); transition: color 0.2s; }
-   .char-count.warning { color: #ffaa44; }.char-count.danger { color: #ff6b; }
-
-    input[type="text"], textarea { width: 100%; padding: clamp(0.8rem, 2vw, 1rem); font-family: var(--font-mono); font-size: clamp(0.95rem, 2vw, 1.1rem); background: var(--input-bg); border: 2px solid var(--border-card); color: var(--input-text); border-radius: 6px; line-height: 1.6; transition: border-color 0.25s, box-shadow 0.25s; }
-    input:focus, textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,215,0.2); }
-    textarea { resize: none; min-height: 180px; }
-
-    /* Highly visible requirement */
-   .passkey-hint {
-      margin-top: 0.8rem;
-      padding: 0.8rem;
-      border: 2px dashed #ff4444;
-      background: rgba(255,68,68,0.1);
-      border-radius: 6px;
-      font-family: var(--font-mono);
-      font-size: clamp(1.1rem, 2.5vw, 1.3rem);
-      color: #ff6b6b;
-      font-weight: 900;
-      letter-spacing: 1px;
-      text-align: center;
-      min-height: 2rem;
-    }
-   .hint-cursor { display: inline-block; width: 2px; height: 1.1em; background: #ff6b6b; margin-left: 3px; animation: blink 1s step-end infinite; vertical-align: text-bottom; }
-
-   .ornamental-divider { text-align: center; color: rgba(245,200,154,0.3); font-size: 1.2rem; margin: 1.5rem 0; letter-spacing: 8px; }
-
-   .action-btn { width: 100%; padding: clamp(0.9rem, 2.5vw, 1.2rem); background: linear-gradient(135deg, var(--accent) 0%, #6b1212 100%); color: #fff4d6; border: 2px solid rgba(255,244,214,0.15); font-family: var(--font-display); font-size: clamp(1rem, 2.5vw, 1.25rem); font-weight: 700; font-style: italic; letter-spacing: 3px; border-radius: 6px; transition: transform 0.15s, box-shadow 0.25s; text-shadow: 0 1px 3px rgba(0,0,0,0.4); box-shadow: 0 4px 16px rgba(139,26,26,0.4); }
-   .action-btn:hover { background: linear-gradient(135deg, var(--accent-hover), var(--accent)); transform: translateY(-1px); box-shadow: 0 6px 24px rgba(139,26,26,0.55); }
-   .action-btn:active { transform: scale(0.98); }
-
-   .btn-row { display: flex; gap: 0.8rem; margin-top: 0.5rem; }
-   .secondary-btn { flex: 1; padding: clamp(0.7rem, 2vw, 0.9rem); background: transparent; color: var(--card-label); border: 2px solid var(--border-card); font-family: var(--font-mono); font-size: clamp(0.8rem, 2vw, 0.95rem); font-weight: 700; letter-spacing: 1px; border-radius: 6px; transition: var(--transition); }
-   .secondary-btn:hover { background: rgba(245,200,154,0.1); border-color: var(--card-label); color: var(--card-text); }
-
-   .status-message { margin-top: 1.2rem; padding: 1rem 1.2rem; border-left: 4px solid; font-family: var(--font-mono); font-weight: 700; font-size: clamp(0.85rem, 2vw, 1rem); border-radius: 0 6px 6px 0; display: flex; gap: 0.6rem; animation: statusSlideIn 0.3s; }
-    @keyframes statusSlideIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; } }
-   .status-message[hidden] { display: none; }
-   .status-success { border-color: #5a9e5a; color: #a8e6a8; background: rgba(90,158,90,0.12); }
-   .status-error { border-color: var(--accent-hover); color: #ffaaaa; background: rgba(192,57,43,0.12); }
-   .status-loading { border-color: var(--gold); color: var(--gold-bright); background: rgba(200,150,44,0.1); }
-   .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(200,150,44,0.3); border-top-color: var(--gold-bright); border-radius: 50%; animation: spin 0.7s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-   .retrieved-wrapper { margin-top: 1.5rem; animation: fadeUp 0.4s; }
-   .retrieved-wrapper[hidden] { display: none; }
-   
-   /* Blockquote styling */
-   .retrieved-quote {
-     font-family: var(--font-body);
-     font-size: clamp(1.1rem, 2.5vw, 1.3rem);
-     line-height: 1.8;
-     color: var(--card-text);
-     border-left: 4px solid var(--gold);
-     padding: 1rem 1.5rem;
-     background: rgba(0,0,0,0.2);
-     border-radius: 0 8px 8px 0;
-     margin-bottom: 1.5rem;
-     white-space: pre-wrap;
-     min-height: 100px;
-   }
-
-   .retrieved-actions { display: flex; gap: 0.6rem; margin-top: 0.8rem; }
-
-   .modal-overlay { position: fixed; inset: 0; background: rgba(26,15,0,0.75); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1rem; animation: overlayFadeIn 0.25s; }
-   .modal-overlay[hidden] { display: none; }
-    @keyframes overlayFadeIn { from { opacity: 0; } to { opacity: 1; } }
-   .modal-box { background: var(--card-bg); border: 2px solid var(--border-card); border-radius: 12px; padding: 2rem; max-width: 420px; width: 100%; box-shadow: 0 24px 64px rgba(0,0,0,0.6); animation: modalSlideIn 0.3s cubic-bezier(0.34,1.56,0.64,1); }
-    @keyframes modalSlideIn { from { opacity: 0; transform: scale(0.9) translateY(16px); } to { opacity: 1; } }
-   .modal-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; font-style: italic; color: var(--card-text); margin-bottom: 0.8rem; }
-   .modal-body { font-family: var(--font-body); font-size: 1rem; color: var(--card-muted); margin-bottom: 1.5rem; line-height: 1.6; }
-   .modal-actions { display: flex; gap: 0.8rem; }
-   .modal-confirm { flex: 1; padding: 0.8rem; background: linear-gradient(135deg, var(--accent), #6b1212); color: var(--card-text); border: none; font-family: var(--font-mono); font-weight: 700; letter-spacing: 1px; border-radius: 6px; }
-   .modal-cancel { flex: 1; padding: 0.8rem; background: transparent; color: var(--card-label); border: 2px solid var(--border-card); font-family: var(--font-mono); font-weight: 700; letter-spacing: 1px; border-radius: 6px; }
-
-   .overwrite-warning { display: none; margin-top: 0.5rem; padding: 0.6rem 0.9rem; background: rgba(255,170,68,0.12); border-left: 3px solid #ffaa44; border-radius: 0 4px 4px 0; font-family: var(--font-mono); font-size: 0.82rem; color: #ffaa44; }
-   .overwrite-warning.visible { display: block; animation: statusSlideIn 0.3s; }
-
-    footer { margin-top: clamp(2.5rem, 6vw, 4rem); text-align: center; width: 100%; max-width: 680px; padding-top: 1.5rem; position: relative; z-index: 10; animation: fadeUp 1.1s 0.4s both; }
-   .footer-ornament { color: var(--muted); font-size: 1.4rem; letter-spacing: 12px; margin-bottom: 0.8rem; opacity: 0.5; }
-   .footer-line { width: 100%; height: 1px; background: linear-gradient(to right, transparent, var(--border), transparent); margin-bottom: 1.2rem; }
-   
-   .main-typewriter {
-      font-family: var(--font-display);
-      font-size: clamp(1.4rem, 3vw, 2rem);
-      font-weight: 700;
-      line-height: 1.3;
-      color: var(--muted);
-      min-height: 4rem;
-      max-width: 580px;
-      margin: 0.5rem auto 1rem;
-      text-shadow: 1px 1px 0px rgba(139,94,60,0.15);
-    }
-   .typewriter-cursor { display: inline-block; width: 2px; height: 1.1em; background-color: var(--accent); margin-left: 2px; animation: blink 1.1s step-end infinite; vertical-align: baseline; }
-    @keyframes blink { 50% { opacity: 0; } }
-   .typewriter-cursor.done { display: none; }
-
-    footer p { font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted); letter-spacing: 1px; }
-
-   .copy-toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(80px); background: #1a0f00; color: var(--gold-bright); font-family: var(--font-mono); font-size: 0.9rem; font-weight: 700; padding: 0.8rem 1.5rem; border-radius: 8px; border: 1px solid var(--gold); box-shadow: 0 8px 24px rgba(0,0,0,0.5); z-index: 9000; transition: transform 0.35s, opacity 0.35s; opacity: 0; pointer-events: none; }
-   .copy-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    /* Smooth transitions for UI states */
+    .fade-enter { opacity: 0; transform: translateY(10px); }
+    .fade-enter-active { opacity: 1; transform: translateY(0); transition: opacity 400ms, transform 400ms; }
+    .hidden { display: none !important; }
   </style>
 </head>
-<body>
-  <a href="#main-content" class="skip-link">Skip to content</a>
-  <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
-  <div class="cursor-core" id="cursorCore" aria-hidden="true"></div>
-  <div class="copy-toast" id="copyToast" aria-live="polite">✦ Copied to clipboard</div>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 antialiased relative">
 
-  <div class="modal-overlay" id="sealModal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="modal-box">
-      <div class="modal-title" id="modalTitle">Press the seal?</div>
-      <div class="modal-body">Once sealed, your letter will only be retrievable with your exact passkey. There is no recovery. Are you certain?</div>
-      <div class="modal-actions">
-        <button class="modal-cancel" id="modalCancel">Go back</button>
-        <button class="modal-confirm" id="modalConfirm">Seal it</button>
-      </div>
-    </div>
-  </div>
+  <div id="canvas-container" aria-hidden="true"></div>
 
-  <main class="container" id="main-content">
-    <header>
-      <svg class="wax-seal" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <defs>
-          <radialGradient id="sealGrad" cx="40%" cy="35%"><stop offset="0%" stop-color="#e84c3d"/><stop offset="60%" stop-color="#8b1a1a"/><stop offset="100%" stop-color="#5c0f0f"/></radialGradient>
-        </defs>
-        <ellipse cx="20" cy="82" rx="7" ry="5" fill="#6b1212" opacity="0.6"/>
-        <ellipse cx="80" cy="78" rx="5" ry="4" fill="#6b1212" opacity="0.5"/>
-        <ellipse cx="50" cy="88" rx="6" ry="4" fill="#6b1212" opacity="0.55"/>
-        <circle cx="50" cy="50" r="38" fill="url(#sealGrad)"/>
-        <circle cx="50" cy="50" r="30" fill="none" stroke="rgba(255,244,214,0.25)" stroke-width="1.5"/>
-        <text x="50" y="58" text-anchor="middle" font-family="Georgia, serif" font-size="28" font-weight="bold" fill="rgba(255,244,214,0.9)" font-style="italic">S</text>
-      </svg>
+  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 w-full max-w-xs"></div>
+
+  <main class="w-full max-w-xl z-10">
+    
+    <header class="text-center mb-8">
+      <h1 class="text-4xl font-extrabold tracking-tight text-white mb-2">
+        SEALED <span class="text-gold-500">LETTER</span>
+      </h1>
+      <p class="text-zinc-400 text-sm font-mono">End-to-end encrypted protocol. Burn on read.</p>
     </header>
 
-    <nav aria-label="Application modes">
-      <div class="nav-tabs" role="tablist">
-        <button id="tab-write" class="tab-btn" role="tab" aria-selected="true" aria-controls="panel-write"><span>✦ Write a Letter</span></button>
-        <button id="tab-read" class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-read"><span>❧ Open a Letter</span></button>
+    <section id="compose-view" class="bg-zinc-850/80 backdrop-blur-md rounded-2xl p-6 border border-zinc-800 shadow-2xl transition-all duration-300">
+      
+      <div class="mb-6">
+        <label for="note-text" class="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">The Payload</label>
+        <textarea id="note-text" rows="6" 
+          class="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-4 text-zinc-200 font-mono focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all resize-none placeholder-zinc-600" 
+          placeholder="Enter the transmission data here..."></textarea>
       </div>
-    </nav>
 
-    <div class="card" id="main-card">
-      <section id="panel-write" class="view-section" role="tabpanel" aria-labelledby="tab-write">
-        <div class="form-group">
-          <label for="note-content"><span>Your Private Message</span><span class="char-count" id="char-count">0 / 5000</span></label>
-          <textarea id="note-content" placeholder="Write what no one else should read..." maxlength="5000"></textarea>
-        </div>
-        <div class="form-group">
-          <label for="passkey-create"><span>Your Secret Word</span></label>
-          <input type="text" id="passkey-create" placeholder="A phrase only you would remember..." autocomplete="off" spellcheck="false" minlength="6">
-          <div class="passkey-hint" id="passkey-hint" aria-live="polite">
-            <span id="hint-typewriter"></span><span class="hint-cursor" aria-hidden="true"></span>
-          </div>
-          <div class="overwrite-warning" id="overwrite-warning" role="alert">⚠ A letter already exists with this passkey. Sealing will overwrite it permanently.</div>
-        </div>
-        <div class="ornamental-divider" aria-hidden="true">· · ✦ · ·</div>
-        <button id="btn-seal" class="action-btn">Press the Seal</button>
-        <div id="write-status" class="status-message" role="alert" hidden></div>
-      </section>
+      <div class="mb-6">
+        <label for="phrase-input" class="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Decryption Key (Passphrase)</label>
+        <input type="text" id="phrase-input" autocomplete="off"
+          class="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-4 text-zinc-200 font-mono focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all placeholder-zinc-600" 
+          placeholder="e.g., hunter2">
+        <p class="text-xs text-zinc-500 mt-2 font-mono">Do not lose this. Recovery is mathematically impossible.</p>
+      </div>
 
-      <section id="panel-read" class="view-section" role="tabpanel" aria-labelledby="tab-read" hidden>
-        <div class="form-group">
-          <label for="passkey-enter">Enter Your Passkey</label>
-          <input type="text" id="passkey-enter" placeholder="The exact phrase you sealed it with..." autocomplete="off" spellcheck="false">
+      <button id="save-btn" 
+        class="w-full bg-gold-500 hover:bg-gold-400 text-zinc-950 font-bold py-4 px-6 rounded-xl transition-all active:scale-95 flex justify-center items-center gap-2">
+        <span>Encrypt & Seal Letter</span>
+      </button>
+
+      <div id="share-section" class="mt-6 hidden bg-zinc-950 rounded-xl border border-dashed border-gold-500/50 p-4 text-center">
+        <p class="text-xs font-bold text-gold-500 uppercase tracking-wider mb-2">Transmission Link Generated</p>
+        <div id="share-url" class="font-mono text-sm text-zinc-300 break-all mb-4 select-all"></div>
+        <button id="copy-btn" class="bg-zinc-800 hover:bg-zinc-700 text-white text-sm py-2 px-4 rounded-lg transition-colors border border-zinc-600">
+          Copy Link
+        </button>
+      </div>
+    </section>
+
+    <section id="unlock-view" class="hidden bg-zinc-850/80 backdrop-blur-md rounded-2xl p-6 border border-zinc-800 shadow-2xl transition-all duration-300">
+      
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-zinc-950 border border-gold-500 mb-4">
+          <svg class="w-8 h-8 text-gold-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
         </div>
-        <div class="ornamental-divider" aria-hidden="true">· · ❧ · ·</div>
-        <button id="btn-break" class="action-btn">Open the Letter</button>
-        <div id="read-status" class="status-message" role="alert" hidden></div>
-        <div class="retrieved-wrapper" id="retrieved-wrapper" hidden>
-          <div class="form-group" style="margin-bottom:0.8rem">
-            <label>Your Message</label>
-            <blockquote id="retrieved-content" class="retrieved-quote"></blockquote>
-          </div>
-          <div class="retrieved-actions">
-            <button class="secondary-btn" id="btn-copy">⊕ Copy Message</button>
-            <button class="secondary-btn" id="btn-delete">✕ Burn Letter</button>
-          </div>
+        <h2 class="text-xl font-bold text-white">Encrypted Transmission Found</h2>
+        <p class="text-sm text-zinc-400 font-mono mt-1">Provide the decryption key to access payload.</p>
+      </div>
+
+      <div class="mb-6">
+        <input type="text" id="unlock-input" autocomplete="off"
+          class="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-4 text-zinc-200 font-mono text-center focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all placeholder-zinc-600" 
+          placeholder="Enter Passphrase">
+      </div>
+
+      <button id="unlock-btn" 
+        class="w-full bg-gold-500 hover:bg-gold-400 text-zinc-950 font-bold py-4 px-6 rounded-xl transition-all active:scale-95">
+        Break Seal & Read
+      </button>
+
+      <div id="note-reveal" class="mt-6 hidden border-t border-zinc-700 pt-6">
+        <p class="text-xs font-bold text-green-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Decryption Successful
+        </p>
+        <div id="note-content" class="bg-zinc-950 rounded-xl p-4 font-mono text-zinc-200 whitespace-pre-wrap border border-zinc-800"></div>
+        
+        <div class="mt-6 flex justify-center">
+           <button onclick="window.location.href = window.location.pathname" class="text-sm text-zinc-400 hover:text-white transition-colors underline">Compose a new letter</button>
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
+
   </main>
 
-  <footer>
-    <div class="footer-ornament" aria-hidden="true">✦ ✦ ✦</div>
-    <div class="footer-line"></div>
-    <p class="main-typewriter" id="tagline-text" aria-live="polite">
-      <span id="typewriter-text"></span><span id="typewriter-cursor" class="typewriter-cursor" aria-hidden="true"></span>
-    </p>
-    <p>Crafted by <strong>Dylan Grow</strong> &copy; 2026</p>
-  </footer>
-
   <script type="module">
+    // ----------------------------------------------------------------------
+    // 1. Firebase Initialization & Imports
+    // ----------------------------------------------------------------------
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
@@ -339,146 +160,351 @@
       projectId: "sealed-letter-f3af5",
       storageBucket: "sealed-letter-f3af5.firebasestorage.app",
       messagingSenderId: "778056799822",
-      appId: "1:778056799822:web:7a8b9c0d1e2f3a4b"
+      appId: "1:778056799822:web:9f1b9ffb42d74604cc151f"
     };
-    let app, db;
-    try { app = initializeApp(firebaseConfig); db = getDatabase(app); } catch(e) { console.error(e); }
 
-    const phrases = ["A private ledger for your thoughts. Write, seal, and leave no trace behind."];
-    const textEl = document.getElementById('typewriter-text');
-    const cursorEl = document.getElementById('typewriter-cursor');
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let db;
+    try {
+      const app = initializeApp(firebaseConfig);
+      db = getDatabase(app);
+    } catch (err) {
+      console.error("Firebase Init Error:", err);
+    }
 
-    if (prefersReduced) {
-      textEl.textContent = phrases[0];
-      cursorEl.classList.add('done');
-    } else {
-      let charIndex = 0;
-      function typeLoop() {
-        const current = phrases[0];
-        textEl.textContent = current.substring(0, charIndex + 1);
-        charIndex++;
-        if (charIndex < current.length) {
-          const ch = current[charIndex-1];
-          const delay = ['.',',','!','?'].includes(ch)? 180 : 55 + Math.random()*40;
-          setTimeout(typeLoop, delay);
-        } else {
-          cursorEl.classList.add('done');
+    // ----------------------------------------------------------------------
+    // 2. Custom Toast Notification System (Replaces alert)
+    // ----------------------------------------------------------------------
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      // Determine styling based on type
+      let bgColor = 'bg-zinc-800';
+      let border = 'border-zinc-600';
+      let icon = 'ℹ️';
+
+      if (type === 'error') { bgColor = 'bg-red-950'; border = 'border-red-800'; icon = '⚠️'; }
+      if (type === 'success') { bgColor = 'bg-green-950'; border = 'border-green-800'; icon = '✓'; }
+
+      toast.className = `${bgColor} text-white px-4 py-3 rounded-lg shadow-lg border ${border} flex items-center gap-3 font-mono text-sm transform transition-all duration-300 translate-x-full opacity-0`;
+      toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+      
+      container.appendChild(toast);
+
+      // Animate In
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-x-full', 'opacity-0');
+      });
+
+      // Animate Out & Remove
+      setTimeout(() => {
+        toast.classList.add('translate-x-full', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // ----------------------------------------------------------------------
+    // 3. Audio Engine (Tone.js)
+    // ----------------------------------------------------------------------
+    let audioInitialized = false;
+    
+    // Synthesizer for UI blips
+    const uiSynth = new Tone.PolySynth(Tone.FMSynth).toDestination();
+    uiSynth.set({
+      envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 1 },
+      harmonicity: 3,
+      modulationIndex: 10
+    });
+
+    // Synthesizer for the heavy "crack" / burn sound
+    const noiseSynth = new Tone.NoiseSynth({
+      noise: { type: "brown" },
+      envelope: { attack: 0.05, decay: 0.8, sustain: 0.1, release: 2 }
+    }).toDestination();
+    const filter = new Tone.Filter(800, "lowpass").toDestination();
+    noiseSynth.connect(filter);
+
+    async function initAudio() {
+      if (!audioInitialized) {
+        await Tone.start();
+        audioInitialized = true;
+      }
+    }
+
+    function playActionSound() {
+      if(audioInitialized) uiSynth.triggerAttackRelease(["C4", "E4", "G4"], "16n");
+    }
+
+    function playUnlockSound() {
+      if(audioInitialized) {
+        noiseSynth.triggerAttackRelease("4n");
+        uiSynth.triggerAttackRelease(["C2", "G2"], "8n"); // Deep thud
+      }
+    }
+
+    function playErrorSound() {
+      if(audioInitialized) uiSynth.triggerAttackRelease(["C3", "Db3"], "8n");
+    }
+
+    // Initialize audio on first user interaction anywhere on the document
+    document.body.addEventListener('pointerdown', initAudio, { once: true });
+    document.body.addEventListener('keydown', initAudio, { once: true });
+
+    // ----------------------------------------------------------------------
+    // 4. Background Rendering (Three.js Embers)
+    // ----------------------------------------------------------------------
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x09090b, 0.002);
+
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+    camera.position.z = 100;
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+    // Create particles
+    const particleCount = 200;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const velocities = [];
+
+    for (let i = 0; i < particleCount; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 400; // x
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 400; // y
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 200; // z
+      velocities.push({
+        x: (Math.random() - 0.5) * 0.2,
+        y: Math.random() * 0.5 + 0.1 // Moving upwards
+      });
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    // Simple material for embers
+    const material = new THREE.PointsMaterial({
+      color: 0xf59e0b, // Tailwind Gold-500
+      size: 1.5,
+      transparent: true,
+      opacity: 0.6,
+      blending: THREE.AdditiveBlending
+    });
+
+    const particles = new THREE.Points(geometry, material);
+    scene.add(particles);
+
+    // Animation Loop
+    function animate() {
+      requestAnimationFrame(animate);
+      const positions = particles.geometry.attributes.position.array;
+      for (let i = 0; i < particleCount; i++) {
+        positions[i * 3 + 1] += velocities[i].y; // Move up
+        positions[i * 3] += velocities[i].x;     // Drift sideways
+        
+        // Reset if it goes too high
+        if (positions[i * 3 + 1] > 200) {
+          positions[i * 3 + 1] = -200;
+          positions[i * 3] = (Math.random() - 0.5) * 400;
         }
       }
-      setTimeout(typeLoop, 900);
+      particles.geometry.attributes.position.needsUpdate = true;
+      // Slowly rotate the entire system
+      particles.rotation.y += 0.001;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Handle Window Resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // ----------------------------------------------------------------------
+    // 5. Cryptography (Web Crypto API)
+    // ----------------------------------------------------------------------
+    const enc = new TextEncoder(), dec = new TextDecoder();
+
+    // Derives a secure key from the user's password using PBKDF2
+    async function deriveKey(phrase, salt) {
+      const raw = await crypto.subtle.importKey("raw", enc.encode(phrase), "PBKDF2", false, ["deriveKey"]);
+      return crypto.subtle.deriveKey(
+        { name: "PBKDF2", salt, iterations: 200000, hash: "SHA-256" },
+        raw, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
+      );
     }
 
-    // Passkey hint typewriter
-    const hintFullText = "Minimum 6 characters. There is no recovery if lost.";
-    const hintEl = document.getElementById('hint-typewriter');
-    const hintCursor = document.querySelector('.hint-cursor');
-    let hintIdx = 0, hintStarted = false;
-    function typeHint() {
-      if (!hintEl || hintStarted) return;
-      if (prefersReduced) { hintEl.textContent = hintFullText; if(hintCursor) hintCursor.style.display='none'; return; }
-      hintStarted = true;
-      function step() {
-        if (hintIdx < hintFullText.length) {
-          hintEl.textContent += hintFullText.charAt(hintIdx++);
-          setTimeout(step, 38 + Math.random()*22);
-        } else if (hintCursor) hintCursor.style.display = 'none';
-      }
-      step();
-    }
-    if (!prefersReduced) setTimeout(typeHint, 1400);
-    document.getElementById('tab-write')?.addEventListener('click', () => setTimeout(typeHint, 200));
-
-    // Custom cursor
-    const cursorCore = document.getElementById('cursorCore');
-    const cursorGlow = document.getElementById('cursorGlow');
-    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-    if (!prefersReduced &&!isTouch) {
-      let mouseX=0, mouseY=0, glowX=0, glowY=0, first=true;
-      document.addEventListener('mousemove', e => {
-        mouseX = e.clientX; mouseY = e.clientY;
-        if (first) { document.body.classList.add('cursor-ready'); cursorCore.style.opacity='1'; cursorGlow.style.opacity='1'; first=false; }
-      }, {passive:true});
-      function update() {
-        cursorCore.style.transform = `translate3d(${mouseX}px,${mouseY}px,0) translate(-50%,-50%)`;
-        glowX += (mouseX-glowX)*0.15; glowY += (mouseY-glowY)*0.15;
-        cursorGlow.style.transform = `translate3d(${glowX}px,${glowY}px,0) translate(-50%,-50%)`;
-        requestAnimationFrame(update);
-      }
-      requestAnimationFrame(update);
-    }
-
-    // Tabs
-    const tabs = document.querySelectorAll('[role="tab"]');
-    const panels = document.querySelectorAll('[role="tabpanel"]');
-    function activateTab(tab){ tabs.forEach(t=>t.setAttribute('aria-selected','false')); panels.forEach(p=>p.setAttribute('hidden','true')); tab.setAttribute('aria-selected','true'); document.getElementById(tab.getAttribute('aria-controls')).removeAttribute('hidden'); }
-    tabs.forEach(tab=>{ tab.addEventListener('click', ()=>activateTab(tab)); });
-
-    // Crypto helpers
-    async function hashString(str){ const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str)); return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join(''); }
-    async function deriveKey(passkey){ const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(passkey), {name:'PBKDF2'}, false, ['deriveKey']); return crypto.subtle.deriveKey({name:'PBKDF2', salt: new TextEncoder().encode('sealed-letter-salt'), iterations:100000, hash:'SHA-256'}, km, {name:'AES-GCM',length:256}, false, ['encrypt','decrypt']); }
-    async function encryptNote(text, passkey){ const key=await deriveKey(passkey); const iv=crypto.getRandomValues(new Uint8Array(12)); const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv}, key, new TextEncoder().encode(text)); const combined=new Uint8Array([...iv,...new Uint8Array(ct)]); return btoa(String.fromCharCode(...combined)); }
-    async function decryptNote(enc, passkey){ const key=await deriveKey(passkey); const combined=Uint8Array.from(atob(enc),c=>c.charCodeAt(0)); const iv=combined.slice(0,12); const ct=combined.slice(12); const dec=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct); return new TextDecoder().decode(dec); }
-
-    function showStatus(id,type,icon,msg){ const el=document.getElementById(id); el.className=`status-message status-${type}`; el.innerHTML=type==='loading'?`<span class="spinner"></span><span>${msg}</span>`:`<span>${icon}</span><span>${msg}</span>`; el.removeAttribute('hidden'); if(type!=='loading') setTimeout(()=>el.setAttribute('hidden','true'),5000); }
-
-    // Char count
-    const noteArea=document.getElementById('note-content'); const charCount=document.getElementById('char-count');
-    noteArea.addEventListener('input',()=>{ const len=noteArea.value.length; charCount.textContent=`${len} / 5000`; charCount.className='char-count'+(len>4250?' warning':'')+(len>4750?' danger':''); });
-
-    // Overwrite check
-    const passkeyCreate=document.getElementById('passkey-create'); const overwriteWarning=document.getElementById('overwrite-warning'); let owTimer;
-    passkeyCreate.addEventListener('input',()=>{ overwriteWarning.classList.remove('visible'); clearTimeout(owTimer); if(passkeyCreate.value.length>=6&&db){ owTimer=setTimeout(async()=>{ const h=await hashString(passkeyCreate.value); const s=await get(ref(db,'notes/'+h)); if(s.exists()) overwriteWarning.classList.add('visible'); },600); }});
-
-    // Seal
-    const sealModal=document.getElementById('sealModal');
-    const mainCard=document.getElementById('main-card');
-    document.getElementById('btn-seal').addEventListener('click',()=>{ const note=noteArea.value.trim(); const pk=passkeyCreate.value; if(!note){showStatus('write-status','error','✕','Your letter is empty.');return;} if(!pk||pk.length<6){showStatus('write-status','error','✕','Passkey must be at least 6 characters.');return;} sealModal.removeAttribute('hidden'); });
-    document.getElementById('modalCancel').addEventListener('click',()=>sealModal.setAttribute('hidden','true'));
-    
-    document.getElementById('modalConfirm').addEventListener('click', async ()=>{
-      sealModal.setAttribute('hidden','true');
+    // Encrypts text using AES-GCM
+    async function encrypt(text, phrase) {
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const key = await deriveKey(phrase, salt);
+      const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(text));
       
-      // Magic Effect Trigger
-      mainCard.classList.add('magic-seal-active');
-      setTimeout(() => mainCard.classList.remove('magic-seal-active'), 600);
+      const buf = new Uint8Array(salt.byteLength + iv.byteLength + ct.byteLength);
+      buf.set(salt, 0); buf.set(iv, 16); buf.set(new Uint8Array(ct), 28);
+      return btoa(String.fromCharCode(...buf)); // Return Base64 encoded cipher
+    }
 
-      const note=noteArea.value.trim(); const pk=passkeyCreate.value;
-      showStatus('write-status','loading','','Encrypting and sealing...');
-      try{ const h=await hashString(pk); const enc=await encryptNote(note,pk); await set(ref(db,'notes/'+h),{payload:enc,ts:Date.now()}); showStatus('write-status','success','✦','Sealed. Guard your passkey — it cannot be recovered.'); noteArea.value=''; passkeyCreate.value=''; charCount.textContent='0 / 5000'; overwriteWarning.classList.remove('visible'); hintIdx=0; hintStarted=false; hintEl.textContent=''; if(hintCursor) hintCursor.style.display='inline-block'; setTimeout(typeHint,400); }catch(e){ showStatus('write-status','error','✕','Vault unreachable.'); }
+    // Decrypts AES-GCM ciphertext
+    async function decrypt(b64, phrase) {
+      const buf = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+      const salt = buf.slice(0, 16), iv = buf.slice(16, 28), ct = buf.slice(28);
+      const key = await deriveKey(phrase, salt);
+      const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
+      return dec.decode(pt);
+    }
+
+    const normalizePassphrase = p => p.toLowerCase().replace(/\s+/g, ' ').trim();
+
+    // ----------------------------------------------------------------------
+    // 6. Application Controller Logic
+    // ----------------------------------------------------------------------
+    
+    // View Management based on URL Hash
+    function updateView() {
+      const composeView = document.getElementById('compose-view');
+      const unlockView = document.getElementById('unlock-view');
+      
+      if (location.hash.length > 1) {
+        // We have a hash, show unlock mode
+        composeView.classList.add('hidden');
+        unlockView.classList.remove('hidden');
+      } else {
+        // No hash, show compose mode
+        composeView.classList.remove('hidden');
+        unlockView.classList.add('hidden');
+      }
+    }
+
+    // Call on load and on hash change
+    window.addEventListener('hashchange', updateView);
+    updateView();
+
+    // -- Handle Saving / Encrypting --
+    document.getElementById('save-btn').addEventListener('click', async () => {
+      const noteInput = document.getElementById('note-text');
+      const phraseInput = document.getElementById('phrase-input');
+      const btn = document.getElementById('save-btn');
+      
+      const note = noteInput.value.trim();
+      const phrase = phraseInput.value.trim();
+
+      if (!note) { showToast('Payload cannot be empty.', 'error'); playErrorSound(); return; }
+      if (!phrase) { showToast('Decryption key is required.', 'error'); playErrorSound(); return; }
+
+      try {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="animate-pulse">Encrypting...</span>`;
+        
+        // Generate a random ID
+        const id = Math.random().toString(36).slice(2, 12);
+        
+        // Encrypt locally
+        const encrypted = await encrypt(note, normalizePassphrase(phrase));
+        
+        // Save to Firebase
+        await set(ref(db, `notes/${id}`), { c: encrypted, t: Date.now() });
+        
+        // Update UI
+        playActionSound();
+        const url = `${location.origin}${location.pathname}#${id}`;
+        document.getElementById('share-url').textContent = url;
+        document.getElementById('share-section').classList.remove('hidden');
+        
+        showToast('Payload sealed and ready for transmission.', 'success');
+        
+        // Lock inputs
+        noteInput.disabled = true;
+        phraseInput.disabled = true;
+        btn.innerHTML = `<span>Sealed</span>`;
+
+      } catch (err) {
+        console.error(err);
+        showToast('Encryption or network failure.', 'error');
+        playErrorSound();
+        btn.disabled = false;
+        btn.innerHTML = `<span>Encrypt & Seal Letter</span>`;
+      }
     });
 
-    // Open & Blockquote Typewriter
-    let currentHash=null;
-    document.getElementById('btn-break').addEventListener('click', async ()=>{
-      const pk=document.getElementById('passkey-enter').value; const wrap=document.getElementById('retrieved-wrapper'); const out=document.getElementById('retrieved-content');
-      wrap.setAttribute('hidden','true'); out.textContent=''; if(!pk){showStatus('read-status','error','✕','Enter your passkey.');return;}
-      showStatus('read-status','loading','','Searching...');
-      try{ 
-        const h=await hashString(pk); const snap=await get(ref(db,'notes/'+h)); 
-        if(snap.exists()){ 
-          const dec=await decryptNote(snap.val().payload,pk); 
-          currentHash=h; showStatus('read-status','success','❧','The seal is broken.'); 
-          wrap.removeAttribute('hidden'); document.getElementById('passkey-enter').value=''; 
-          
-          // Typewriter reveal logic
-          let i = 0;
-          function typeReveal() {
-            if (i < dec.length) {
-              out.textContent += dec.charAt(i++);
-              setTimeout(typeReveal, 15);
-            }
-          }
-          typeReveal();
-
-        } else { showStatus('read-status','error','✕','No letter found.'); } 
-      }catch(e){ showStatus('read-status','error','✕','Could not open.'); }
+    // -- Handle Copy Link --
+    document.getElementById('copy-btn').addEventListener('click', async () => {
+      const url = document.getElementById('share-url').textContent;
+      try {
+        await navigator.clipboard.writeText(url);
+        showToast('Link copied to clipboard.', 'info');
+        playActionSound();
+      } catch (err) {
+        showToast('Failed to copy. Please copy manually.', 'error');
+      }
     });
 
-    // Copy / Burn
-    const toast=document.getElementById('copyToast');
-    document.getElementById('btn-copy').addEventListener('click', async ()=>{ const t=document.getElementById('retrieved-content').textContent; if(!t)return; try{ await navigator.clipboard.writeText(t); toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2200);}catch{} });
-    document.getElementById('btn-delete').addEventListener('click', async ()=>{ if(!currentHash||!db)return; if(!confirm('Burn this letter permanently?'))return; await remove(ref(db,'notes/'+currentHash)); document.getElementById('retrieved-wrapper').setAttribute('hidden','true'); showStatus('read-status','success','✦','Letter burned.'); currentHash=null; });
+    // -- Handle Decrypting / Unlocking --
+    document.getElementById('unlock-btn').addEventListener('click', async () => {
+      const phrase = document.getElementById('unlock-input').value.trim();
+      const id = location.hash.slice(1);
+      const btn = document.getElementById('unlock-btn');
+
+      if (!phrase) { showToast('Passphrase required.', 'error'); playErrorSound(); return; }
+
+      try {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="animate-pulse">Decrypting...</span>`;
+
+        // Fetch from Firebase
+        const snap = await get(ref(db, `notes/${id}`));
+        
+        if (!snap.exists()) {
+          showToast('Data missing or already destroyed.', 'error');
+          playErrorSound();
+          btn.disabled = false;
+          btn.innerHTML = `<span>Break Seal & Read</span>`;
+          return;
+        }
+
+        // Attempt Decryption
+        const text = await decrypt(snap.val().c, normalizePassphrase(phrase));
+        
+        // Success: Burn after reading (Delete from Firebase)
+        await remove(ref(db, `notes/${id}`));
+        
+        playUnlockSound(); // Big sound effect
+        showToast('Seal broken. Data destroyed from servers.', 'success');
+        
+        // Accelerate Three.js particles to simulate an explosion/burn
+        for (let i = 0; i < particleCount; i++) {
+          velocities[i].y += (Math.random() * 2);
+          velocities[i].x *= 3;
+        }
+        material.color.setHex(0xef4444); // Flash red
+
+        // Reveal content
+        document.getElementById('unlock-input').disabled = true;
+        btn.classList.add('hidden');
+        
+        document.getElementById('note-reveal').classList.remove('hidden');
+        document.getElementById('note-content').textContent = text;
+
+      } catch (err) {
+        // Decryption failed (Wrong password)
+        showToast('Decryption failed. Invalid Key.', 'error');
+        playErrorSound();
+        btn.disabled = false;
+        btn.innerHTML = `<span>Break Seal & Read</span>`;
+      }
+    });
+
+    // Allow 'Enter' key to trigger primary buttons
+    document.getElementById('phrase-input').addEventListener('keydown', (e) => {
+      if(e.key === 'Enter') document.getElementById('save-btn').click();
+    });
+    document.getElementById('unlock-input').addEventListener('keydown', (e) => {
+      if(e.key === 'Enter') document.getElementById('unlock-btn').click();
+    });
+
   </script>
 </body>
 </html>
