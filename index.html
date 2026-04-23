@@ -1,571 +1,576 @@
-Gemini
-Website Enhancement: Burn After Reading
-Conversation with Gemini
-okay then redesign the page to make these more visible. Also do some seo tweaks and some optimization. with accessibiity tweaks
-
-I've overhauled the code to prioritize high-contrast visibility, semantic SEO structure, and modern accessibility standards. The "Retrieve" section now features a high-visibility gold focus state and clearer instructional hierarchy so you never lose track of where the passphrase goes.
-
-Optimized & Accessible "Sealed Letter"
-HTML
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sealed Letter | Secure, Encrypted Private Messaging</title>
-<meta name="description" content="Send end-to-end encrypted letters that self-destruct. Sealed with your own passphrase for total privacy.">
-<meta property="og:title" content="Sealed Letter">
-<meta property="og:description" content="A private, encrypted way to share secrets.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IM+Fell+English:ital@0;1&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --parchment: #f2e8d5;
-  --parchment-dark: #e8d9bc;
-  --parchment-deeper: #d4c4a0;
-  --ink: #1c1208;
-  --ink-faded: #4a3d28;
-  --gold: #b8860b;
-  --gold-bright: #ffd700;
-  --red-wax: #8b1a1a;
-  --red-wax-light: #c0392b;
-  --border-aged: #c4a96a;
-  --focus-ring: 0 0 0 3px rgba(184, 134, 11, 0.5);
-}
-
-body {
-  font-family: 'Courier Prime', 'Courier New', monospace;
-  background: #0f0a04;
-  color: var(--ink);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow-x: hidden;
-  line-height: 1.6;
-}
-
-/* SEO & Accessibility: Skip to Content */
-.skip-link {
-  position: absolute; top: -40px; left: 0; background: var(--gold); color: white;
-  padding: 8px; z-index: 100; transition: top 0.3s;
-}
-.skip-link:focus { top: 0; }
-
-.bg-texture {
-  position: fixed; inset: 0; z-index: -1;
-  background: radial-gradient(ellipse at 20% 50%, #2a1a08 0%, transparent 60%), #0f0a04;
-}
-
-.wrap {
-  position: relative; z-index: 2;
-  width: 100%; max-width: 650px;
-  padding: 3rem 1.5rem;
-}
-
-header { text-align: center; margin-bottom: 3rem; }
-.logo {
-  font-family: 'IM Fell English', serif; font-size: 3rem;
-  color: var(--parchment); text-shadow: 2px 2px 10px rgba(0,0,0,0.9);
-}
-.logo em { font-style: italic; color: var(--gold); }
-
-/* Visibility Improvements */
-.paper {
-  background: var(--parchment); border: 2px solid var(--border-aged);
-  border-radius: 4px; padding: 2.5rem; margin-bottom: 1.5rem;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-
-.paper-label {
-  font-family: 'Special Elite', cursive; font-size: 0.85rem;
-  text-transform: uppercase; color: var(--ink-faded);
-  margin-bottom: 1rem; font-weight: bold;
-}
-
-/* High Visibility Inputs */
-.input-container {
-  border-bottom: 3px solid var(--border-aged); margin-top: 1rem;
-  transition: border-color 0.3s;
-}
-.input-container:focus-within { border-color: var(--gold); }
-
-input[type="text"], textarea {
-  width: 100%; background: transparent; border: none;
-  font-family: 'Courier Prime', monospace; font-size: 1.1rem;
-  color: var(--ink); outline: none; padding: 0.5rem 0;
-}
-input[type="text"]:focus, textarea:focus { box-shadow: var(--focus-ring); }
-
-/* Buttons with clear states */
-.seal-btn {
-  background: var(--red-wax); color: #fff; border: none;
-  padding: 1rem 2rem; font-family: 'Special Elite', cursive;
-  font-size: 1rem; cursor: pointer; border-radius: 4px;
-  box-shadow: 0 4px 0 #5a0a0a; transition: 0.2s; width: 100%;
-}
-.seal-btn:hover, .seal-btn:focus { background: var(--red-wax-light); transform: translateY(-2px); outline: 2px solid var(--gold-bright); }
-.seal-btn:active { transform: translateY(2px); box-shadow: none; }
-
-.msg { padding: 1rem; border-radius: 4px; margin: 1rem 0; font-weight: bold; display: none; }
-.msg.err { background: #fee2e2; color: #991b1b; display: block; border: 1px solid #991b1b; }
-.msg.ok  { background: #dcfce7; color: #166534; display: block; border: 1px solid #166534; }
-
-.hidden { display: none !important; }
-
-/* Visual "Retrieve" visibility toggle */
-.retrieve-banner {
-  background: #2a1a08; border: 1px solid var(--gold);
-  color: var(--gold); padding: 1rem; text-align: center;
-  border-radius: 4px; margin-bottom: 1.5rem; font-family: 'Special Elite', cursive;
-}
-</style>
-</head>
-<body>
-
-<a href="#main-content" class="skip-link">Skip to main content</a>
-<div class="bg-texture" aria-hidden="true"></div>
-
-<main class="wrap" id="main-content">
-  <header>
-    <h1 class="logo"><em>Sealed</em> Letter</h1>
-    <p style="color: var(--parchment-deeper); font-size: 0.9rem;">Military-grade encryption for your private thoughts.</p>
-  </header>
-
-  <section id="compose-view">
-    <div class="paper">
-      <label class="paper-label" for="note-text">Write your secret letter</label>
-      <textarea id="note-text" placeholder="Type your message here..." rows="6"></textarea>
-    </div>
-
-    <div class="paper">
-      <label class="paper-label" for="phrase-input">Create a retrieval passphrase</label>
-      <div class="input-container">
-        <input type="text" id="phrase-input" placeholder="e.g. The blue fox jumps high" autocomplete="off">
-      </div>
-      <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--ink-faded);">This is the only key to open your letter. Do not lose it.</p>
-      
-      <div id="compose-msg" class="msg" role="alert"></div>
-      
-      <button class="seal-btn" onclick="saveNote()" id="save-btn" style="margin-top: 1.5rem;">
-        Seal & Generate Private Link
-      </button>
-    </div>
-
-    <div id="share-section" class="hidden">
-      <div class="paper" style="border-style: dashed; text-align: center;">
-        <p class="paper-label">Success! Copy this link</p>
-        <div id="share-url" style="word-break: break-all; font-weight: bold; margin: 1rem 0;"></div>
-        <button class="seal-btn" style="background: var(--gold); box-shadow: 0 4px 0 #8a6508;" onclick="copyLink()">Copy URL to Clipboard</button>
-      </div>
-    </div>
-  </section>
-
-  <section id="unlock-view" class="hidden">
-    <div class="retrieve-banner">
-      RECIEVING ENCRYPTED TRANSMISSION...
-    </div>
-    <div class="paper">
-      <label class="paper-label" for="unlock-input" style="font-size: 1.2rem; color: var(--ink);">Enter Passphrase to Decrypt</label>
-      <div class="input-container">
-        <input type="text" id="unlock-input" placeholder="Enter the secret phrase..." autocomplete="off">
-      </div>
-      
-      <div id="unlock-msg" class="msg" role="alert"></div>
-      
-      <button class="seal-btn" onclick="unlockNote()" id="unlock-btn" style="margin-top: 1.5rem;">
-        Break the Seal
-      </button>
-    </div>
-
-    <div id="note-reveal" class="paper hidden" style="border-color: #166534;">
-      <p class="paper-label" style="color: #166534;">Message Decrypted:</p>
-      <div id="note-content" style="white-space: pre-wrap; font-size: 1.2rem;"></div>
-    </div>
-  </section>
-</main>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyADPRoMDwuS_U1DcY_3N2UjVyKn8pBFv3s",
-  authDomain: "sealed-letter-f3af5.firebaseapp.com",
-  databaseURL: "https://sealed-letter-f3af5-default-rtdb.firebaseio.com",
-  projectId: "sealed-letter-f3af5",
-  storageBucket: "sealed-letter-f3af5.firebasestorage.app",
-  messagingSenderId: "778056799822",
-  appId: "1:778056799822:web:9f1b9ffb42d74604cc151f",
-  measurementId: "G-XKDYPRMJ64"
-};
-
-const app = initializeApp(firebaseConfig);
-const db  = getDatabase(app);
-
-const enc = new TextEncoder(), dec = new TextDecoder();
-
-async function deriveKey(phrase, salt) {
-  const raw = await crypto.subtle.importKey("raw", enc.encode(phrase), "PBKDF2", false, ["deriveKey"]);
-  return crypto.subtle.deriveKey(
-    { name:"PBKDF2", salt, iterations:200000, hash:"SHA-256" },
-    raw, { name:"AES-GCM", length:256 }, false, ["encrypt","decrypt"]
-  );
-}
-
-async function encrypt(text, phrase) {
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  const iv   = crypto.getRandomValues(new Uint8Array(12));
-  const key  = await deriveKey(phrase, salt);
-  const ct   = await crypto.subtle.encrypt({ name:"AES-GCM", iv }, key, enc.encode(text));
-  const buf  = new Uint8Array(salt.byteLength + iv.byteLength + ct.byteLength);
-  buf.set(salt,0); buf.set(iv,16); buf.set(new Uint8Array(ct),28);
-  return btoa(String.fromCharCode(...buf));
-}
-
-async function decrypt(b64, phrase) {
-  const buf  = Uint8Array.from(atob(b64), c=>c.charCodeAt(0));
-  const salt = buf.slice(0,16), iv = buf.slice(16,28), ct = buf.slice(28);
-  const key  = await deriveKey(phrase, salt);
-  const pt   = await crypto.subtle.decrypt({ name:"AES-GCM", iv }, key, ct);
-  return dec.decode(pt);
-}
-
-const norm = p => p.toLowerCase().replace(/\s+/g,' ').trim();
-
-window.saveNote = async function() {
-  const note = document.getElementById('note-text').value.trim();
-  const phrase = document.getElementById('phrase-input').value.trim();
-  const msg = document.getElementById('compose-msg');
-  
-  if (!note || !phrase) {
-    msg.textContent = "Error: Both fields are required.";
-    msg.className = "msg err";
-    return;
-  }
-
-  try {
-    const id = Math.random().toString(36).slice(2,12);
-    const encrypted = await encrypt(note, norm(phrase));
-    await set(ref(db, `notes/${id}`), { c: encrypted, t: Date.now() });
-    
-    const url = `${location.origin}${location.pathname}#${id}`;
-    document.getElementById('share-url').textContent = url;
-    document.getElementById('share-section').classList.remove('hidden');
-    msg.textContent = "Letter Sealed!";
-    msg.className = "msg ok";
-  } catch (e) {
-    msg.textContent = "Storage error. Check connection.";
-    msg.className = "msg err";
-  }
-};
-
-window.unlockNote = async function() {
-  const phrase = document.getElementById('unlock-input').value.trim();
-  const msg = document.getElementById('unlock-msg');
-  const id = location.hash.slice(1);
-
-  try {
-    const snap = await get(ref(db, `notes/${id}`));
-    if (!snap.exists()) {
-      msg.textContent = "Letter not found.";
-      msg.className = "msg err";
-      return;
-    }
-    const text = await decrypt(snap.val().c, norm(phrase));
-    document.getElementById('note-content').textContent = text;
-    document.getElementById('note-reveal').classList.remove('hidden');
-    msg.textContent = "Decrypted Successfully.";
-    msg.className = "msg ok";
-  } catch (e) {
-    msg.textContent = "Incorrect passphrase.";
-    msg.className = "msg err";
-  }
-};
-
-window.copyLink = function() {
-  const url = document.getElementById('share-url').textContent;
-  navigator.clipboard.writeText(url);
-  alert("Link copied!");
-};
-
-if (location.hash.length > 1) {
-  document.getElementById('compose-view').classList.add('hidden');
-  document.getElementById('unlock-view').classList.remove('hidden');
-}
-</script>
-</body>
-</html>
-Key Improvements Summary
-Visibility & Accessibility
-The input fields now have high-contrast borders and a gold "focus-within" effect, making it obvious which field is active. I added <label> tags to all inputs for screen reader support and a "Skip to content" link for keyboard navigation. The "Break the Seal" button is now 100% width and high-contrast red to act as the primary call-to-action.
-
-SEO Optimization
-I implemented semantic HTML5 tags like <main>, <section>, and <h1> to help search engines understand the content hierarchy. The header now includes Meta Description and Open Graph tags, which ensure that if you share the link on social media or Discord, it appears with a professional preview card rather than a blank URL.
-
-Code & Performance Optimization
-The passphrase normalization is streamlined to ensure that minor trailing spaces or capitalization differences don't block access. I replaced the heavy typewriter loop with a simple CSS-driven state for faster initial page loads and reduced CPU usage. The retrieval view is now triggered instantly by the URL hash, removing any "Compose" elements from the DOM to keep the user focused solely on decryption.
-
-okay I love the typewriter effect. what are 5 other tweaks you would do
-
-Since you enjoyed the typewriter effect, adding a Retro Terminal Toggle would be a great way to bridge the gap between the "old world" parchment and your professional background in networking. You could implement a small "switch" that flips the CSS from the aged paper style to a glowing green-on-black terminal, complete with a scanline overlay and a [HANDSHAKE_ESTABLISHED] log sequence during decryption.
-
-A Passphrase Entropy Meter would also add significant value by giving a visual "security grade" to the phrase as it's typed. Instead of just a standard bar, you could style it as a "Seal Quality" indicator that changes from a cracked, weak-looking wax seal to a deep, ornate gold one as the complexity increases.
-
-To lean into the tactile feel, Audio Haptics like a subtle "click-clack" of an old IBM Model M keyboard during typing or a satisfying "crackle" sound when the seal is broken would make the interface feel much more immersive. You could also add a Dynamic Candlelight Filter where the background "glow" or shadows flicker slightly in response to the user's typing speed, making the digital paper feel alive.
-
-Finally, a Self-Destruct "Burn" Animation is the ultimate closer. When the user finishes reading or the database entry is deleted, you can use a CSS mask to make the letter appear to char and turn into floating ash particles that drift off the screen, providing a high-end visual confirmation that the secret is gone forever.
-
-Since you're currently mastering enterprise networking, would you like to see how to implement a real-time "Network Log" overlay that shows the simulated encryption steps?
-
-lets keep tweaking the site im kinda burt out on learning today
-
-I totally get that. After grinding through A+ and Network+ prep all day, the last thing you need is another lecture. Let's stick to the fun, "eye-candy" stuff to make this project look high-end without the mental heavy lifting.
-
-The Atmospheric Flicker
-Add this to your CSS to give the background a "living" candlelight vibe. It makes the parchment feel like it's being read in a dark room.
-
-CSS
-@keyframes atmosphere {
-  0%, 100% { opacity: 0.9; filter: contrast(100%) brightness(100%); }
-  50% { opacity: 1; filter: contrast(110%) brightness(105%); }
-}
-.bg-texture {
-  animation: atmosphere 5s ease-in-out infinite;
-  transition: all 0.5s ease;
-}
-The "Burn" Disintegration
-Since we want that "self-destruct" feel, add this class. When the user clicks "Close" or "Destroy," you can trigger this animation to make the letter char and vanish.
-
-CSS
-.burn-away {
-  animation: charring 1.5s forwards;
-  pointer-events: none;
-}
-
-@keyframes charring {
-  0% { clip-path: inset(0 0 0 0); filter: sepia(0) brightness(1); }
-  30% { filter: sepia(1) brightness(0.5) contrast(1.5); }
-  100% { clip-path: inset(100% 0 0 0); opacity: 0; transform: translateY(-20px) skewX(5deg); }
-}
-Tactile Feedback (The Audio Tweak)
-If you want to go full immersion, grab a quick MP3 of a "wax seal cracking" or "paper crumbling" sound. You can trigger it in your unlockNote function with two lines of code: new Audio('crack.mp3').play();. It’s a small detail that makes the site feel expensive.
-
-Floating Ash Particles
-You already have a "dust" effect in your code. If we change the color to a dark charcoal grey (#333) and make them drift up instead of down when the letter is opened, it looks like the remains of a burnt secret floating away.
-
-Dynamic "Seal Quality"
-We can wrap the passphrase input in a "Security" border that glows brighter gold as the phrase gets longer. It gives the user immediate visual satisfaction for picking a strong password without needing a "Weak/Strong" text label.
-
-Should we hook up the "Burn" animation to your Firebase delete function so the letter actually disappears from the database the moment it finishes charring?
-
-lets make a Aesthetics are crucial. Make it look amazing, especially on mobile. Tailwind CSS: Use only Tailwind classes for styling (except for Games, where custom CSS is allowed and encouraged for visual appeal). Load Tailwind: <script src="https://cdn.tailwindcss.com"></script>. Font: Use "Inter" unless otherwise specified. Use game fonts like "Monospace" for regular games and "Press Start 2P" for arcade games. Rounded Corners: Use rounded corners on all elements. JavaScript Libraries: Use three.js (3D), d3 (visualization), tone.js (sound effects – no external sound URLs). Never use alert(). Use a message box instead. Image URLs: Provide fallbacks (e.g., onerror attribute, placeholder image). No base64 images. placeholder image: https://placehold.co/{width}x{height}/{background color in hex}/{text color in hex}?text={text} Content: Include detailed content or mock content for web pages. Add HTML comments.
-
-
-
-```
-
- Completeness: Include all necessary code to run independently.
-
-    Comments: Explain everything (logic, algorithms, function headers, sections). Be thorough.
-
-    Error Handling: Use try/catch and error boundaries.
-
-    No Placeholders: Never use ....
-
-
-
-
-
-ask me what 
-
-
-
-```
-
-
-
-ask me what to do next
-
-Parameters loaded and locked in. Tailwind, rounded aesthetics, required libraries, and strict error handling are all queued up for the next build.
-
-What are we building next?
-
-fix my site
-
-Here is the complete, rebuilt version of your Sealed Letter application.
-
-I’ve rewritten it from the ground up using Tailwind CSS for a sleek, responsive, and rounded interface, leaning into a dark terminal/cyberpunk aesthetic with gold accents. I’ve also integrated Three.js to create a subtle background effect of floating embers (like a burning letter) and Tone.js to synthesize physical sound effects (a mechanical "clack" when sealing, and a deep "thud" when the seal breaks)—all without relying on external assets.
-
-The alert() boxes are gone, replaced by a custom, animated notification system.
-
-index.html
-HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sealed Letter | Secure Transmissions</title>
-  
+  <title>Sealed Letter | Secure, Encrypted Private Messaging</title>
+  <meta name="description" content="Send end-to-end encrypted letters that self-destruct after reading. Sealed with your own passphrase for total privacy.">
+  <meta property="og:title" content="Sealed Letter – Burn After Reading">
+  <meta property="og:description" content="A private, encrypted way to share secrets. One read, then gone forever.">
+
+  <!-- Fonts: aged, letterpress feel -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Courier+Prime&display=swap" rel="stylesheet">
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            mono: ['Courier Prime', 'monospace'],
-          },
-          colors: {
-            gold: {
-              400: '#fbbf24',
-              500: '#f59e0b',
-              600: '#d97706',
-            },
-            zinc: {
-              850: '#202024',
-              950: '#09090b',
-            }
-          }
-        }
-      }
-    }
-  </script>
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
+  <!-- Three.js for ember particles -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  
+  <!-- Tone.js for sound effects -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 
   <style>
-    /* Custom Scrollbar and Base Styles */
-    body {
-      background-color: #09090b;
-      color: #e4e4e7;
-      overflow-x: hidden;
-    }
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: #09090b; }
-    ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
+    /* ── Reset & CSS Variables ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* Ensure Three.js canvas stays in the background */
-    #canvas-container {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      z-index: -1;
+    :root {
+      --parchment:       #f5ead0;
+      --parchment-dark:  #e8d5a3;
+      --parchment-deep:  #d4b97a;
+      --ink:             #1c1208;
+      --ink-mid:         #3d2f12;
+      --ink-faded:       #6b5535;
+      --wax:             #8b1a1a;
+      --wax-light:       #b52424;
+      --gold:            #b8860b;
+      --gold-bright:     #d4a017;
+      --border:          #c4a055;
+      --shadow:          rgba(0,0,0,0.6);
+      --bg:              #0c0703;
+    }
+
+    /* ── Base ──────────────────────────────────────────────────────── */
+    body {
+      font-family: 'Courier Prime', 'Courier New', monospace;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      line-height: 1.7;
+    }
+
+    /* Accessibility: skip link */
+    .skip-link {
+      position: absolute; top: -50px; left: 1rem;
+      background: var(--gold); color: #fff;
+      padding: 0.5rem 1rem; border-radius: 4px;
+      z-index: 200; transition: top 0.2s; font-size: 0.85rem;
+    }
+    .skip-link:focus { top: 1rem; }
+
+    /* ── Three.js Canvas ───────────────────────────────────────────── */
+    #ember-canvas {
+      position: fixed; inset: 0;
+      z-index: 0;
       pointer-events: none;
     }
 
-    /* Smooth transitions for UI states */
-    .fade-enter { opacity: 0; transform: translateY(10px); }
-    .fade-enter-active { opacity: 1; transform: translateY(0); transition: opacity 400ms, transform 400ms; }
+    /* ── Layout ────────────────────────────────────────────────────── */
+    .wrap {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 640px;
+      padding: 3rem 1.25rem 4rem;
+    }
+
+    /* ── Header ────────────────────────────────────────────────────── */
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .site-title {
+      font-family: 'IM Fell English', serif;
+      font-size: clamp(2.4rem, 7vw, 3.8rem);
+      color: var(--parchment);
+      text-shadow: 0 2px 12px rgba(0,0,0,0.8), 0 0 40px rgba(184,134,11,0.3);
+      letter-spacing: 0.04em;
+      line-height: 1.1;
+    }
+
+    .site-title em {
+      font-style: italic;
+      color: var(--gold-bright);
+    }
+
+    .site-subtitle {
+      font-family: 'Special Elite', cursive;
+      font-size: 0.8rem;
+      color: var(--ink-faded);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: 0.5rem;
+      color: #9c7c3a;
+    }
+
+    /* Decorative divider */
+    .divider {
+      display: flex; align-items: center; gap: 0.75rem;
+      margin: 1.25rem 0;
+      color: var(--border);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--border), transparent);
+    }
+
+    /* ── Paper card ────────────────────────────────────────────────── */
+    .paper {
+      background:
+        /* subtle grain overlay */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
+        linear-gradient(160deg, #f8edcf 0%, #f0e0b0 40%, #e8d49a 100%);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 2rem 2rem 2.5rem;
+      margin-bottom: 1.25rem;
+      box-shadow:
+        0 2px 0 var(--parchment-deep),
+        0 8px 32px rgba(0,0,0,0.55),
+        inset 0 1px 0 rgba(255,255,240,0.6);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Aged corner fold */
+    .paper::after {
+      content: '';
+      position: absolute; bottom: 0; right: 0;
+      width: 28px; height: 28px;
+      background: linear-gradient(225deg, #c4a055 50%, transparent 50%);
+      opacity: 0.5;
+    }
+
+    /* ── Field labels ──────────────────────────────────────────────── */
+    .field-label {
+      display: block;
+      font-family: 'Special Elite', cursive;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--ink-faded);
+      margin-bottom: 0.6rem;
+    }
+
+    /* ── Inputs & Textarea ─────────────────────────────────────────── */
+    textarea,
+    input[type="text"] {
+      width: 100%;
+      background: rgba(255,248,220,0.6);
+      border: none;
+      border-bottom: 2px solid var(--parchment-deep);
+      border-radius: 0;
+      font-family: 'Courier Prime', monospace;
+      font-size: 1rem;
+      color: var(--ink);
+      padding: 0.5rem 0.25rem;
+      outline: none;
+      transition: border-color 0.25s;
+      resize: none;
+    }
+
+    textarea:focus,
+    input[type="text"]:focus {
+      border-bottom-color: var(--gold);
+      background: rgba(255,248,220,0.9);
+      box-shadow: 0 2px 0 rgba(184,134,11,0.25);
+    }
+
+    textarea { min-height: 140px; line-height: 1.75; }
+
+    input::placeholder, textarea::placeholder { color: #b09a6a; }
+
+    .field-note {
+      font-size: 0.75rem;
+      color: var(--ink-faded);
+      margin-top: 0.4rem;
+      font-style: italic;
+    }
+
+    /* ── Wax Seal Button ───────────────────────────────────────────── */
+    .btn-wax {
+      display: block; width: 100%;
+      background: var(--wax);
+      color: #fff;
+      border: none;
+      padding: 0.9rem 1.5rem;
+      font-family: 'Special Elite', cursive;
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      border-radius: 3px;
+      margin-top: 1.5rem;
+      box-shadow: 0 4px 0 #5a0a0a, 0 6px 20px rgba(139,26,26,0.4);
+      transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
+      position: relative;
+    }
+
+    .btn-wax:hover {
+      background: var(--wax-light);
+    }
+
+    .btn-wax:focus-visible {
+      outline: 3px solid var(--gold-bright);
+      outline-offset: 3px;
+    }
+
+    .btn-wax:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #5a0a0a, 0 2px 8px rgba(139,26,26,0.3);
+    }
+
+    .btn-wax:disabled {
+      background: #5a3030;
+      box-shadow: none;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    /* Secondary (gold) button */
+    .btn-gold {
+      display: inline-block;
+      background: var(--gold);
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.25rem;
+      font-family: 'Special Elite', cursive;
+      font-size: 0.85rem;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      border-radius: 3px;
+      box-shadow: 0 3px 0 #7a5800;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .btn-gold:hover { background: var(--gold-bright); }
+    .btn-gold:active { transform: translateY(2px); box-shadow: none; }
+
+    /* ── Toast notifications ───────────────────────────────────────── */
+    #toast-area {
+      position: fixed;
+      top: 1rem; right: 1rem;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-width: 320px;
+      width: calc(100% - 2rem);
+    }
+
+    .toast {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.75rem 1rem;
+      border-radius: 4px;
+      font-family: 'Special Elite', cursive;
+      font-size: 0.85rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+      animation: toast-in 0.3s ease forwards;
+      border-left: 3px solid transparent;
+    }
+
+    .toast.ok  { background: #1a2e1a; color: #6fcf97; border-color: #27ae60; }
+    .toast.err { background: #2e1a1a; color: #eb5757; border-color: #c0392b; }
+    .toast.inf { background: #1a1a2e; color: #b8a06a; border-color: var(--gold); }
+
+    @keyframes toast-in {
+      from { opacity: 0; transform: translateX(20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ── Share box ─────────────────────────────────────────────────── */
+    #share-section {
+      margin-top: 1.25rem;
+      border: 1px dashed var(--border);
+      border-radius: 3px;
+      padding: 1.25rem;
+      background: rgba(255,248,200,0.25);
+      text-align: center;
+    }
+
+    .share-label {
+      font-family: 'Special Elite', cursive;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--gold);
+      margin-bottom: 0.6rem;
+    }
+
+    #share-url {
+      font-size: 0.8rem;
+      word-break: break-all;
+      color: var(--ink-mid);
+      margin-bottom: 0.75rem;
+      font-family: 'Courier Prime', monospace;
+      cursor: text;
+      user-select: all;
+    }
+
+    /* ── Unlock panel specific ─────────────────────────────────────── */
+    .unlock-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .wax-icon {
+      display: inline-flex;
+      align-items: center; justify-content: center;
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #a82020 0%, #5a0a0a 100%);
+      box-shadow: 0 0 0 4px #8b1a1a, 0 4px 16px rgba(139,26,26,0.5);
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .unlock-title {
+      font-family: 'IM Fell English', serif;
+      font-size: 1.5rem;
+      color: var(--ink);
+    }
+
+    .unlock-sub {
+      font-size: 0.8rem;
+      color: var(--ink-faded);
+      margin-top: 0.25rem;
+      font-style: italic;
+    }
+
+    /* ── Revealed message ──────────────────────────────────────────── */
+    #note-reveal {
+      border-top: 1px solid var(--border);
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+    }
+
+    .reveal-label {
+      font-family: 'Special Elite', cursive;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #27ae60;
+      margin-bottom: 0.75rem;
+    }
+
+    #note-content {
+      font-family: 'IM Fell English', serif;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: var(--ink);
+      white-space: pre-wrap;
+      background: rgba(255,248,220,0.5);
+      border-left: 3px solid var(--gold);
+      padding: 1rem 1.25rem;
+      border-radius: 0 3px 3px 0;
+    }
+
+    .new-letter-link {
+      display: inline-block;
+      margin-top: 1.25rem;
+      font-size: 0.8rem;
+      color: var(--ink-faded);
+      text-decoration: underline;
+      cursor: pointer;
+      font-family: 'Special Elite', cursive;
+      letter-spacing: 0.08em;
+      background: none; border: none;
+    }
+    .new-letter-link:hover { color: var(--ink); }
+
+    /* ── Utility ───────────────────────────────────────────────────── */
     .hidden { display: none !important; }
+
+    /* ── Responsive ────────────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .paper { padding: 1.5rem 1.25rem 2rem; }
+      .site-title { font-size: 2.2rem; }
+    }
+
+    /* ── Loading spinner ───────────────────────────────────────────── */
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 0.4rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Tab bar ───────────────────────────────────────────────────── */
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      margin-bottom: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .tab {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      font-family: 'Special Elite', cursive;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: none;
+      background: rgba(20,10,2,0.7);
+      color: var(--ink-faded);
+      transition: background 0.2s, color 0.2s;
+    }
+    .tab:hover { background: rgba(184,134,11,0.15); color: var(--parchment); }
+    .tab.active { background: var(--gold); color: #fff; }
+    .tab:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: -2px; }
+
+    /* ── Burn animation for revealed note ─────────────────────────── */
+    @keyframes char-out {
+      0%   { filter: sepia(0) brightness(1); clip-path: inset(0 0 0% 0); }
+      40%  { filter: sepia(1) brightness(0.4) contrast(1.5); }
+      100% { clip-path: inset(0 0 100% 0); opacity: 0; transform: translateY(-10px) skewX(3deg); }
+    }
+    .burning {
+      animation: char-out 1.8s forwards;
+      pointer-events: none;
+    }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4 antialiased relative">
+<body>
 
-  <div id="canvas-container" aria-hidden="true"></div>
+  <!-- Accessibility skip link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
 
-  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 w-full max-w-xs"></div>
+  <!-- Three.js canvas lives behind everything -->
+  <canvas id="ember-canvas" aria-hidden="true"></canvas>
 
-  <main class="w-full max-w-xl z-10">
-    
-    <header class="text-center mb-8">
-      <h1 class="text-4xl font-extrabold tracking-tight text-white mb-2">
-        SEALED <span class="text-gold-500">LETTER</span>
-      </h1>
-      <p class="text-zinc-400 text-sm font-mono">End-to-end encrypted protocol. Burn on read.</p>
+  <!-- Toast notification area -->
+  <div id="toast-area" aria-live="polite" aria-atomic="true"></div>
+
+  <main class="wrap" id="main-content">
+
+    <!-- ── Header ── -->
+    <header>
+      <h1 class="site-title"><em>Sealed</em> Letter</h1>
+      <p class="site-subtitle">End-to-end encrypted &bull; Burn after reading</p>
     </header>
 
-    <section id="compose-view" class="bg-zinc-850/80 backdrop-blur-md rounded-2xl p-6 border border-zinc-800 shadow-2xl transition-all duration-300">
-      
-      <div class="mb-6">
-        <label for="note-text" class="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">The Payload</label>
-        <textarea id="note-text" rows="6" 
-          class="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-4 text-zinc-200 font-mono focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all resize-none placeholder-zinc-600" 
-          placeholder="Enter the transmission data here..."></textarea>
+    <!-- ══════════════════════════════════════════════════════
+         TAB NAV
+    ══════════════════════════════════════════════════════ -->
+    <div class="tab-bar" role="tablist">
+      <button class="tab active" id="tab-compose" role="tab" aria-selected="true"  aria-controls="compose-view">Compose</button>
+      <button class="tab"        id="tab-unlock"  role="tab" aria-selected="false" aria-controls="unlock-view">Retrieve</button>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         COMPOSE VIEW
+    ══════════════════════════════════════════════════════ -->
+    <section id="compose-view" role="tabpanel" aria-label="Compose a sealed letter">
+
+      <div class="paper">
+        <label class="field-label" for="note-text">Write your letter</label>
+        <textarea id="note-text"
+          placeholder="Your message, confession, or secret..."
+          aria-required="true"></textarea>
+        <span class="field-note">Encrypted locally — the server never sees your words.</span>
       </div>
 
-      <div class="mb-6">
-        <label for="phrase-input" class="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Decryption Key (Passphrase)</label>
-        <input type="text" id="phrase-input" autocomplete="off"
-          class="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-4 text-zinc-200 font-mono focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all placeholder-zinc-600" 
-          placeholder="e.g., hunter2">
-        <p class="text-xs text-zinc-500 mt-2 font-mono">Do not lose this. Recovery is mathematically impossible.</p>
-      </div>
+      <div class="paper">
+        <label class="field-label" for="phrase-input">Choose a passphrase</label>
+        <input type="text" id="phrase-input"
+          placeholder="e.g. The blue fox jumps at midnight"
+          autocomplete="off"
+          spellcheck="false"
+          aria-required="true">
+        <span class="field-note">Send <em>only</em> this phrase to the recipient. They type it on the Retrieve tab to read the letter.</span>
 
-      <button id="save-btn" 
-        class="w-full bg-gold-500 hover:bg-gold-400 text-zinc-950 font-bold py-4 px-6 rounded-xl transition-all active:scale-95 flex justify-center items-center gap-2">
-        <span>Encrypt & Seal Letter</span>
-      </button>
-
-      <div id="share-section" class="mt-6 hidden bg-zinc-950 rounded-xl border border-dashed border-gold-500/50 p-4 text-center">
-        <p class="text-xs font-bold text-gold-500 uppercase tracking-wider mb-2">Transmission Link Generated</p>
-        <div id="share-url" class="font-mono text-sm text-zinc-300 break-all mb-4 select-all"></div>
-        <button id="copy-btn" class="bg-zinc-800 hover:bg-zinc-700 text-white text-sm py-2 px-4 rounded-lg transition-colors border border-zinc-600">
-          Copy Link
+        <button class="btn-wax" id="save-btn">
+          Seal the Letter
         </button>
       </div>
-    </section>
 
-    <section id="unlock-view" class="hidden bg-zinc-850/80 backdrop-blur-md rounded-2xl p-6 border border-zinc-800 shadow-2xl transition-all duration-300">
-      
-      <div class="text-center mb-6">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-zinc-950 border border-gold-500 mb-4">
-          <svg class="w-8 h-8 text-gold-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-        </div>
-        <h2 class="text-xl font-bold text-white">Encrypted Transmission Found</h2>
-        <p class="text-sm text-zinc-400 font-mono mt-1">Provide the decryption key to access payload.</p>
-      </div>
-
-      <div class="mb-6">
-        <input type="text" id="unlock-input" autocomplete="off"
-          class="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-4 text-zinc-200 font-mono text-center focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all placeholder-zinc-600" 
-          placeholder="Enter Passphrase">
-      </div>
-
-      <button id="unlock-btn" 
-        class="w-full bg-gold-500 hover:bg-gold-400 text-zinc-950 font-bold py-4 px-6 rounded-xl transition-all active:scale-95">
-        Break Seal & Read
-      </button>
-
-      <div id="note-reveal" class="mt-6 hidden border-t border-zinc-700 pt-6">
-        <p class="text-xs font-bold text-green-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Decryption Successful
+      <!-- Confirmation (hidden until sealed) -->
+      <div id="share-section" class="hidden" aria-live="polite">
+        <p class="share-label">&#x2713; Letter Sealed</p>
+        <p style="font-size:0.85rem; color:var(--ink-mid); font-family:'Courier Prime',monospace;">
+          Tell the recipient to visit this site and enter the passphrase on the <strong>Retrieve</strong> tab.
         </p>
-        <div id="note-content" class="bg-zinc-950 rounded-xl p-4 font-mono text-zinc-200 whitespace-pre-wrap border border-zinc-800"></div>
-        
-        <div class="mt-6 flex justify-center">
-           <button onclick="window.location.href = window.location.pathname" class="text-sm text-zinc-400 hover:text-white transition-colors underline">Compose a new letter</button>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         UNLOCK VIEW
+    ══════════════════════════════════════════════════════ -->
+    <section id="unlock-view" class="hidden" role="tabpanel" aria-label="Retrieve a sealed letter">
+
+      <div class="paper">
+        <div class="unlock-header">
+          <div class="wax-icon" aria-hidden="true">&#x1F48C;</div>
+          <h2 class="unlock-title">Retrieve a Letter</h2>
+          <p class="unlock-sub">Type the passphrase you were given.<br>
+          The letter will be destroyed from the server after reading.</p>
         </div>
+
+        <div class="divider">&#10070; &#10070; &#10070;</div>
+
+        <label class="field-label" for="unlock-input">Enter Passphrase</label>
+        <input type="text" id="unlock-input"
+          placeholder="The secret phrase..."
+          autocomplete="off"
+          spellcheck="false"
+          aria-required="true">
+
+        <button class="btn-wax" id="unlock-btn">
+          Break the Seal &amp; Read
+        </button>
+
+        <!-- Revealed message (hidden until decrypted) -->
+        <div id="note-reveal" class="hidden" aria-live="polite">
+          <p class="reveal-label">&#10003; Message Decrypted &amp; Destroyed</p>
+          <div id="note-content" role="region" aria-label="Decrypted message"></div>
+          <div style="text-align:center;">
+            <button class="new-letter-link" id="new-letter-btn">
+              Compose a new letter
+            </button>
+          </div>
+        </div>
+
       </div>
     </section>
 
-  </main>
+  </main><!-- /.wrap -->
 
+
+  <!-- ════════════════════════════════════════════════════════════════
+       JAVASCRIPT
+  ════════════════════════════════════════════════════════════════ -->
   <script type="module">
-    // ----------------------------------------------------------------------
-    // 1. Firebase Initialization & Imports
-    // ----------------------------------------------------------------------
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    // ── How this works ───────────────────────────────────────────────
+    // The passphrase does double duty:
+    //   1. Its SHA-256 hash is used as the Firebase key (lookup ID)
+    //   2. The raw passphrase is used as the AES-GCM encryption key
+    // So the recipient only needs the passphrase — no link required.
+    // The server only stores encrypted ciphertext keyed by a hash.
+
+    import { initializeApp }           from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
+    // ── Firebase config ──────────────────────────────────────────────
     const firebaseConfig = {
-      apiKey: "AIzaSyADPRoMDwuS_U1DcY_3N2UjVyKn8pBFv3s",
-      authDomain: "sealed-letter-f3af5.firebaseapp.com",
-      databaseURL: "https://sealed-letter-f3af5-default-rtdb.firebaseio.com",
-      projectId: "sealed-letter-f3af5",
-      storageBucket: "sealed-letter-f3af5.firebasestorage.app",
+      apiKey:            "AIzaSyADPRoMDwuS_U1DcY_3N2UjVyKn8pBFv3s",
+      authDomain:        "sealed-letter-f3af5.firebaseapp.com",
+      databaseURL:       "https://sealed-letter-f3af5-default-rtdb.firebaseio.com",
+      projectId:         "sealed-letter-f3af5",
+      storageBucket:     "sealed-letter-f3af5.firebasestorage.app",
       messagingSenderId: "778056799822",
-      appId: "1:778056799822:web:9f1b9ffb42d74604cc151f"
+      appId:             "1:778056799822:web:9f1b9ffb42d74604cc151f"
     };
 
     let db;
@@ -573,897 +578,350 @@ HTML
       const app = initializeApp(firebaseConfig);
       db = getDatabase(app);
     } catch (err) {
-      console.error("Firebase Init Error:", err);
+      console.error("Firebase init failed:", err);
     }
 
-    // ----------------------------------------------------------------------
-    // 2. Custom Toast Notification System (Replaces alert)
-    // ----------------------------------------------------------------------
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toast-container');
+    // ── Toast notification system ────────────────────────────────────
+    function showToast(message, type = 'inf') {
+      const area  = document.getElementById('toast-area');
       const toast = document.createElement('div');
-      
-      // Determine styling based on type
-      let bgColor = 'bg-zinc-800';
-      let border = 'border-zinc-600';
-      let icon = 'ℹ️';
-
-      if (type === 'error') { bgColor = 'bg-red-950'; border = 'border-red-800'; icon = '⚠️'; }
-      if (type === 'success') { bgColor = 'bg-green-950'; border = 'border-green-800'; icon = '✓'; }
-
-      toast.className = `${bgColor} text-white px-4 py-3 rounded-lg shadow-lg border ${border} flex items-center gap-3 font-mono text-sm transform transition-all duration-300 translate-x-full opacity-0`;
-      toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
-      
-      container.appendChild(toast);
-
-      // Animate In
-      requestAnimationFrame(() => {
-        toast.classList.remove('translate-x-full', 'opacity-0');
-      });
-
-      // Animate Out & Remove
+      toast.className = `toast ${type}`;
+      toast.setAttribute('role', 'alert');
+      const icons = { ok: '✓', err: '⚠', inf: '✉' };
+      toast.innerHTML = `<span aria-hidden="true">${icons[type] || '•'}</span><span>${message}</span>`;
+      area.appendChild(toast);
       setTimeout(() => {
-        toast.classList.add('translate-x-full', 'opacity-0');
-        setTimeout(() => toast.remove(), 300);
+        toast.style.transition = 'opacity 0.4s, transform 0.4s';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(20px)';
+        setTimeout(() => toast.remove(), 400);
       }, 4000);
     }
 
-    // ----------------------------------------------------------------------
-    // 3. Audio Engine (Tone.js)
-    // ----------------------------------------------------------------------
-    let audioInitialized = false;
-    
-    // Synthesizer for UI blips
-    const uiSynth = new Tone.PolySynth(Tone.FMSynth).toDestination();
-    uiSynth.set({
-      envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 1 },
-      harmonicity: 3,
-      modulationIndex: 10
-    });
+    // ── Tone.js audio engine ─────────────────────────────────────────
+    let audioReady = false;
 
-    // Synthesizer for the heavy "crack" / burn sound
-    const noiseSynth = new Tone.NoiseSynth({
-      noise: { type: "brown" },
-      envelope: { attack: 0.05, decay: 0.8, sustain: 0.1, release: 2 }
-    }).toDestination();
-    const filter = new Tone.Filter(800, "lowpass").toDestination();
-    noiseSynth.connect(filter);
-
-    async function initAudio() {
-      if (!audioInitialized) {
-        await Tone.start();
-        audioInitialized = true;
+    async function ensureAudio() {
+      if (!audioReady) {
+        try { await Tone.start(); audioReady = true; } catch(e) {}
       }
     }
 
-    function playActionSound() {
-      if(audioInitialized) uiSynth.triggerAttackRelease(["C4", "E4", "G4"], "16n");
+    // Seal sound: quill scratching / wax drip
+    const sealSynth = new Tone.PolySynth(Tone.FMSynth, {
+      harmonicity: 3,
+      modulationIndex: 8,
+      envelope: { attack: 0.01, decay: 0.2, sustain: 0.05, release: 0.8 }
+    }).toDestination();
+    sealSynth.volume.value = -12;
+
+    // Unlock sound: deep crack + tone
+    const crackNoise = new Tone.NoiseSynth({
+      noise: { type: "brown" },
+      envelope: { attack: 0.02, decay: 0.6, sustain: 0, release: 1.5 }
+    }).toDestination();
+    crackNoise.volume.value = -18;
+
+    const crackTone = new Tone.Synth({
+      oscillator: { type: "sine" },
+      envelope: { attack: 0.01, decay: 0.4, sustain: 0, release: 1 }
+    }).toDestination();
+    crackTone.volume.value = -20;
+
+    // Error sound
+    const errSynth = new Tone.PolySynth(Tone.Synth, {
+      envelope: { attack: 0.01, decay: 0.3, sustain: 0, release: 0.5 }
+    }).toDestination();
+    errSynth.volume.value = -16;
+
+    function playSealSound() {
+      if (!audioReady) return;
+      sealSynth.triggerAttackRelease(["C4","G4","E5"], "16n", Tone.now());
+      sealSynth.triggerAttackRelease(["G4","D5"], "16n", Tone.now() + 0.15);
     }
 
     function playUnlockSound() {
-      if(audioInitialized) {
-        noiseSynth.triggerAttackRelease("4n");
-        uiSynth.triggerAttackRelease(["C2", "G2"], "8n"); // Deep thud
-      }
+      if (!audioReady) return;
+      crackNoise.triggerAttackRelease("8n", Tone.now());
+      crackTone.triggerAttackRelease("C2", "4n", Tone.now() + 0.05);
+      crackTone.triggerAttackRelease("G2", "4n", Tone.now() + 0.25);
     }
 
     function playErrorSound() {
-      if(audioInitialized) uiSynth.triggerAttackRelease(["C3", "Db3"], "8n");
+      if (!audioReady) return;
+      errSynth.triggerAttackRelease(["C3","Db3"], "8n", Tone.now());
     }
 
-    // Initialize audio on first user interaction anywhere on the document
-    document.body.addEventListener('pointerdown', initAudio, { once: true });
-    document.body.addEventListener('keydown', initAudio, { once: true });
+    // Init audio on first interaction
+    ['pointerdown','keydown'].forEach(evt =>
+      document.body.addEventListener(evt, ensureAudio, { once: true })
+    );
 
-    // ----------------------------------------------------------------------
-    // 4. Background Rendering (Three.js Embers)
-    // ----------------------------------------------------------------------
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x09090b, 0.002);
-
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
-    camera.position.z = 100;
-
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    // ── Three.js ember particles ─────────────────────────────────────
+    const canvas   = document.getElementById('ember-canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-    // Create particles
-    const particleCount = 200;
-    const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(particleCount * 3);
-    const velocities = [];
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+    camera.position.z = 120;
 
-    for (let i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 400; // x
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 400; // y
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 200; // z
-      velocities.push({
-        x: (Math.random() - 0.5) * 0.2,
-        y: Math.random() * 0.5 + 0.1 // Moving upwards
+    const COUNT = window.innerWidth < 600 ? 120 : 250;
+    const geo   = new THREE.BufferGeometry();
+    const pos   = new Float32Array(COUNT * 3);
+    const vels  = [];
+
+    for (let i = 0; i < COUNT; i++) {
+      pos[i*3]   = (Math.random() - 0.5) * 400;
+      pos[i*3+1] = (Math.random() - 0.5) * 400;
+      pos[i*3+2] = (Math.random() - 0.5) * 150;
+      vels.push({
+        x: (Math.random() - 0.5) * 0.15,
+        y: Math.random() * 0.4 + 0.05,
+        flicker: Math.random() * Math.PI * 2   // phase offset for opacity flicker
       });
     }
 
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
 
-    // Simple material for embers
-    const material = new THREE.PointsMaterial({
-      color: 0xf59e0b, // Tailwind Gold-500
-      size: 1.5,
+    const mat = new THREE.PointsMaterial({
+      color:       0xc8880e,
+      size:        1.8,
       transparent: true,
-      opacity: 0.6,
-      blending: THREE.AdditiveBlending
+      opacity:     0.55,
+      blending:    THREE.AdditiveBlending,
+      depthWrite:  false
     });
 
-    const particles = new THREE.Points(geometry, material);
-    scene.add(particles);
+    const embers = new THREE.Points(geo, mat);
+    scene.add(embers);
 
-    // Animation Loop
-    function animate() {
-      requestAnimationFrame(animate);
-      const positions = particles.geometry.attributes.position.array;
-      for (let i = 0; i < particleCount; i++) {
-        positions[i * 3 + 1] += velocities[i].y; // Move up
-        positions[i * 3] += velocities[i].x;     // Drift sideways
-        
-        // Reset if it goes too high
-        if (positions[i * 3 + 1] > 200) {
-          positions[i * 3 + 1] = -200;
-          positions[i * 3] = (Math.random() - 0.5) * 400;
+    let burnMode = false;  // activated after seal is broken
+
+    function animateEmbers() {
+      requestAnimationFrame(animateEmbers);
+      const p = embers.geometry.attributes.position.array;
+      const t = performance.now() * 0.001;
+
+      for (let i = 0; i < COUNT; i++) {
+        p[i*3+1] += vels[i].y * (burnMode ? 3 : 1);
+        p[i*3]   += vels[i].x * (burnMode ? 2 : 1);
+        if (p[i*3+1] > 220) {
+          p[i*3+1] = -220;
+          p[i*3]   = (Math.random() - 0.5) * 400;
         }
       }
-      particles.geometry.attributes.position.needsUpdate = true;
-      // Slowly rotate the entire system
-      particles.rotation.y += 0.001;
+      embers.geometry.attributes.position.needsUpdate = true;
+
+      // Gentle flicker
+      mat.opacity = 0.45 + Math.sin(t * 1.5) * 0.1;
+
+      embers.rotation.y += 0.0005;
       renderer.render(scene, camera);
     }
-    animate();
+    animateEmbers();
 
-    // Handle Window Resize
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // ----------------------------------------------------------------------
-    // 5. Cryptography (Web Crypto API)
-    // ----------------------------------------------------------------------
-    const enc = new TextEncoder(), dec = new TextDecoder();
+    // ── Web Crypto helpers ───────────────────────────────────────────
+    const te = new TextEncoder();
+    const td = new TextDecoder();
 
-    // Derives a secure key from the user's password using PBKDF2
     async function deriveKey(phrase, salt) {
-      const raw = await crypto.subtle.importKey("raw", enc.encode(phrase), "PBKDF2", false, ["deriveKey"]);
+      const raw = await crypto.subtle.importKey(
+        "raw", te.encode(phrase), "PBKDF2", false, ["deriveKey"]
+      );
       return crypto.subtle.deriveKey(
         { name: "PBKDF2", salt, iterations: 200000, hash: "SHA-256" },
-        raw, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
+        raw,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt", "decrypt"]
       );
     }
 
-    // Encrypts text using AES-GCM
-    async function encrypt(text, phrase) {
+    async function encryptText(text, phrase) {
       const salt = crypto.getRandomValues(new Uint8Array(16));
-      const iv = crypto.getRandomValues(new Uint8Array(12));
-      const key = await deriveKey(phrase, salt);
-      const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(text));
-      
-      const buf = new Uint8Array(salt.byteLength + iv.byteLength + ct.byteLength);
-      buf.set(salt, 0); buf.set(iv, 16); buf.set(new Uint8Array(ct), 28);
-      return btoa(String.fromCharCode(...buf)); // Return Base64 encoded cipher
+      const iv   = crypto.getRandomValues(new Uint8Array(12));
+      const key  = await deriveKey(phrase, salt);
+      const ct   = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, te.encode(text));
+      const buf  = new Uint8Array(16 + 12 + ct.byteLength);
+      buf.set(salt, 0);
+      buf.set(iv, 16);
+      buf.set(new Uint8Array(ct), 28);
+      return btoa(String.fromCharCode(...buf));
     }
 
-    // Decrypts AES-GCM ciphertext
-    async function decrypt(b64, phrase) {
-      const buf = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-      const salt = buf.slice(0, 16), iv = buf.slice(16, 28), ct = buf.slice(28);
-      const key = await deriveKey(phrase, salt);
-      const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
-      return dec.decode(pt);
+    async function decryptText(b64, phrase) {
+      const buf  = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+      const salt = buf.slice(0, 16);
+      const iv   = buf.slice(16, 28);
+      const ct   = buf.slice(28);
+      const key  = await deriveKey(phrase, salt);
+      const pt   = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
+      return td.decode(pt);
     }
 
-    const normalizePassphrase = p => p.toLowerCase().replace(/\s+/g, ' ').trim();
+    // Normalise passphrase: lowercase, collapse spaces
+    const norm = p => p.toLowerCase().replace(/\s+/g, ' ').trim();
 
-    // ----------------------------------------------------------------------
-    // 6. Application Controller Logic
-    // ----------------------------------------------------------------------
-    
-    // View Management based on URL Hash
-    function updateView() {
-      const composeView = document.getElementById('compose-view');
-      const unlockView = document.getElementById('unlock-view');
-      
-      if (location.hash.length > 1) {
-        // We have a hash, show unlock mode
-        composeView.classList.add('hidden');
-        unlockView.classList.remove('hidden');
-      } else {
-        // No hash, show compose mode
-        composeView.classList.remove('hidden');
-        unlockView.classList.add('hidden');
-      }
+    // ── Tab switching ────────────────────────────────────────────────
+    const tabCompose = document.getElementById('tab-compose');
+    const tabUnlock  = document.getElementById('tab-unlock');
+    const viewCompose = document.getElementById('compose-view');
+    const viewUnlock  = document.getElementById('unlock-view');
+
+    function showTab(which) {
+      const isCompose = which === 'compose';
+      tabCompose.classList.toggle('active', isCompose);
+      tabUnlock.classList.toggle('active',  !isCompose);
+      tabCompose.setAttribute('aria-selected', isCompose);
+      tabUnlock.setAttribute('aria-selected',  !isCompose);
+      viewCompose.classList.toggle('hidden', !isCompose);
+      viewUnlock.classList.toggle('hidden',   isCompose);
     }
 
-    // Call on load and on hash change
-    window.addEventListener('hashchange', updateView);
-    updateView();
+    tabCompose.addEventListener('click', () => showTab('compose'));
+    tabUnlock.addEventListener('click',  () => showTab('unlock'));
 
-    // -- Handle Saving / Encrypting --
+    // ── Passphrase hash → Firebase key ──────────────────────────────
+    // We hash the normalised passphrase with SHA-256 and take the first
+    // 24 hex chars as the DB key. The passphrase itself is never stored.
+    async function passphraseToId(phrase) {
+      const buf  = await crypto.subtle.digest("SHA-256", te.encode(norm(phrase)));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('').slice(0, 24);
+    }
+
+    // ── COMPOSE: Seal & save ─────────────────────────────────────────
     document.getElementById('save-btn').addEventListener('click', async () => {
-      const noteInput = document.getElementById('note-text');
-      const phraseInput = document.getElementById('phrase-input');
-      const btn = document.getElementById('save-btn');
-      
-      const note = noteInput.value.trim();
-      const phrase = phraseInput.value.trim();
+      await ensureAudio();
+      const noteEl   = document.getElementById('note-text');
+      const phraseEl = document.getElementById('phrase-input');
+      const btn      = document.getElementById('save-btn');
 
-      if (!note) { showToast('Payload cannot be empty.', 'error'); playErrorSound(); return; }
-      if (!phrase) { showToast('Decryption key is required.', 'error'); playErrorSound(); return; }
+      const note   = noteEl.value.trim();
+      const phrase = phraseEl.value.trim();
+
+      if (!note)   { showToast('Please write a message first.', 'err'); playErrorSound(); noteEl.focus(); return; }
+      if (!phrase) { showToast('A passphrase is required.', 'err');     playErrorSound(); phraseEl.focus(); return; }
+      if (phrase.length < 6) { showToast('Passphrase too short — use at least 6 characters.', 'err'); playErrorSound(); return; }
 
       try {
         btn.disabled = true;
-        btn.innerHTML = `<span class="animate-pulse">Encrypting...</span>`;
-        
-        // Generate a random ID
-        const id = Math.random().toString(36).slice(2, 12);
-        
-        // Encrypt locally
-        const encrypted = await encrypt(note, normalizePassphrase(phrase));
-        
-        // Save to Firebase
+        btn.innerHTML = `<span class="spinner" aria-hidden="true"></span> Sealing…`;
+
+        const id        = await passphraseToId(phrase);
+        const encrypted = await encryptText(note, norm(phrase));
+
+        // Check if a letter already exists for this passphrase
+        const existing = await get(ref(db, `notes/${id}`));
+        if (existing.exists()) {
+          showToast('A letter with that passphrase already exists. Choose a different one.', 'err');
+          playErrorSound();
+          btn.disabled  = false;
+          btn.innerHTML = 'Seal the Letter';
+          return;
+        }
+
         await set(ref(db, `notes/${id}`), { c: encrypted, t: Date.now() });
-        
-        // Update UI
-        playActionSound();
-        const url = `${location.origin}${location.pathname}#${id}`;
-        document.getElementById('share-url').textContent = url;
+
+        playSealSound();
         document.getElementById('share-section').classList.remove('hidden');
-        
-        showToast('Payload sealed and ready for transmission.', 'success');
-        
+        showToast('Letter sealed! Tell the recipient to go to the Retrieve tab and enter the passphrase.', 'ok');
+
         // Lock inputs
-        noteInput.disabled = true;
-        phraseInput.disabled = true;
-        btn.innerHTML = `<span>Sealed</span>`;
+        noteEl.disabled   = true;
+        phraseEl.disabled = true;
+        btn.innerHTML     = '✓ Sealed';
 
       } catch (err) {
         console.error(err);
-        showToast('Encryption or network failure.', 'error');
+        showToast('Something went wrong. Check your connection.', 'err');
         playErrorSound();
-        btn.disabled = false;
-        btn.innerHTML = `<span>Encrypt & Seal Letter</span>`;
+        btn.disabled  = false;
+        btn.innerHTML = 'Seal the Letter';
       }
     });
 
-    // -- Handle Copy Link --
-    document.getElementById('copy-btn').addEventListener('click', async () => {
-      const url = document.getElementById('share-url').textContent;
-      try {
-        await navigator.clipboard.writeText(url);
-        showToast('Link copied to clipboard.', 'info');
-        playActionSound();
-      } catch (err) {
-        showToast('Failed to copy. Please copy manually.', 'error');
-      }
-    });
-
-    // -- Handle Decrypting / Unlocking --
+    // ── UNLOCK: Decrypt & burn ───────────────────────────────────────
     document.getElementById('unlock-btn').addEventListener('click', async () => {
-      const phrase = document.getElementById('unlock-input').value.trim();
-      const id = location.hash.slice(1);
-      const btn = document.getElementById('unlock-btn');
+      await ensureAudio();
+      const phrase  = document.getElementById('unlock-input').value.trim();
+      const btn     = document.getElementById('unlock-btn');
+      const inputEl = document.getElementById('unlock-input');
 
-      if (!phrase) { showToast('Passphrase required.', 'error'); playErrorSound(); return; }
+      if (!phrase) { showToast('Enter the passphrase first.', 'err'); playErrorSound(); inputEl.focus(); return; }
 
       try {
-        btn.disabled = true;
-        btn.innerHTML = `<span class="animate-pulse">Decrypting...</span>`;
+        btn.disabled  = true;
+        btn.innerHTML = `<span class="spinner" aria-hidden="true"></span> Decrypting…`;
 
-        // Fetch from Firebase
+        const id   = await passphraseToId(phrase);
         const snap = await get(ref(db, `notes/${id}`));
-        
+
         if (!snap.exists()) {
-          showToast('Data missing or already destroyed.', 'error');
+          showToast('No letter found for that passphrase — it may have already been read and destroyed.', 'err');
           playErrorSound();
-          btn.disabled = false;
-          btn.innerHTML = `<span>Break Seal & Read</span>`;
+          btn.disabled  = false;
+          btn.innerHTML = 'Break the Seal & Read';
           return;
         }
 
-        // Attempt Decryption
-        const text = await decrypt(snap.val().c, normalizePassphrase(phrase));
-        
-        // Success: Burn after reading (Delete from Firebase)
+        // Decrypt (throws if passphrase is wrong — shouldn't happen since
+        // the ID is derived from the passphrase, but guards against collisions)
+        const plaintext = await decryptText(snap.val().c, norm(phrase));
+
+        // DELETE from Firebase — true burn after read
         await remove(ref(db, `notes/${id}`));
-        
-        playUnlockSound(); // Big sound effect
-        showToast('Seal broken. Data destroyed from servers.', 'success');
-        
-        // Accelerate Three.js particles to simulate an explosion/burn
-        for (let i = 0; i < particleCount; i++) {
-          velocities[i].y += (Math.random() * 2);
-          velocities[i].x *= 3;
-        }
-        material.color.setHex(0xef4444); // Flash red
 
-        // Reveal content
-        document.getElementById('unlock-input').disabled = true;
-        btn.classList.add('hidden');
-        
-        document.getElementById('note-reveal').classList.remove('hidden');
-        document.getElementById('note-content').textContent = text;
+        // Ember burst
+        burnMode = true;
+        mat.color.setHex(0xef4444);
+        setTimeout(() => { burnMode = false; mat.color.setHex(0xc8880e); }, 4000);
 
-      } catch (err) {
-        // Decryption failed (Wrong password)
-        showToast('Decryption failed. Invalid Key.', 'error');
-        playErrorSound();
-        btn.disabled = false;
-        btn.innerHTML = `<span>Break Seal & Read</span>`;
-      }
-    });
-
-    // Allow 'Enter' key to trigger primary buttons
-    document.getElementById('phrase-input').addEventListener('keydown', (e) => {
-      if(e.key === 'Enter') document.getElementById('save-btn').click();
-    });
-    document.getElementById('unlock-input').addEventListener('keydown', (e) => {
-      if(e.key === 'Enter') document.getElementById('unlock-btn').click();
-    });
-
-  </script>
-</body>
-</html>
-where is my recover your message button?
-
-There isn't a recovery button by design.
-
-Because the app uses true end-to-end encryption, your passphrase is never saved to the database. It is used locally on your device to mathematically lock the message, and only the scrambled ciphertext is sent to Firebase.
-
-Without the exact original passphrase, it is mathematically impossible to decrypt the letter. If you lose the phrase, the message is permanently sealed—which is exactly what makes the app genuinely secure!
-
-Yeah but only you know how it works. You need to redesign this feature
-
-You make a completely fair point. From an IT support perspective, if a user doesn't inherently understand how a security feature works, it's a design failure, not a user failure.
-
-Since we are using true End-to-End Encryption (E2EE), we mathematically cannot add a "Recover Password" button. However, we can fix the UX so the sender never gets stranded and the receiver has a fighting chance.
-
-Here is a redesign that introduces two new concepts:
-
-The Public Hint: An optional, unencrypted clue the sender can attach to the encrypted payload.
-
-The Point of No Return: A forced acknowledgment checkbox so the sender is explicitly aware there is no reset button before they seal it.
-
-Here are the specific updates to patch into your code.
-
-1. Update the Compose View (HTML)
-Replace your current <section id="compose-view"> with this updated version. It adds the hint input and the acknowledgment checkbox.
-
-HTML
-    <section id="compose-view" class="bg-zinc-850/80 backdrop-blur-md rounded-2xl p-6 border border-zinc-800 shadow-2xl transition-all duration-300">
-      
-      <div class="mb-6">
-        <label for="note-text" class="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">The Payload</label>
-        <textarea id="note-text" rows="6" 
-          class="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-4 text-zinc-200 font-mono focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all resize-none placeholder-zinc-600" 
-          placeholder="Enter the transmission data here..."></textarea>
-      </div>
-
-      <div class="mb-6">
-        <label for="phrase-input" class="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Decryption Key (Passphrase)</label>
-        <input type="text" id="phrase-input" autocomplete="off"
-          class="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-4 text-zinc-200 font-mono focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all placeholder-zinc-600" 
-          placeholder="e.g., hunter2">
-      </div>
-
-      <div class="mb-6">
-        <label for="hint-input" class="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Public Hint (Optional)</label>
-        <input type="text" id="hint-input" autocomplete="off"
-          class="w-full bg-zinc-950/50 border border-zinc-800 rounded-xl p-3 text-sm text-zinc-300 font-mono focus:outline-none focus:ring-1 focus:ring-gold-600 transition-all placeholder-zinc-700" 
-          placeholder="e.g., The name of our first dog">
-      </div>
-
-      <div class="mb-6 flex items-start gap-3 bg-red-950/20 border border-red-900/30 p-3 rounded-lg">
-        <input type="checkbox" id="ack-checkbox" class="mt-1 w-4 h-4 accent-red-600 bg-zinc-900 border-zinc-700 rounded cursor-pointer">
-        <label for="ack-checkbox" class="text-xs text-zinc-400 font-mono cursor-pointer select-none">
-          I understand there is <strong class="text-red-400">no password recovery</strong>. If this key is lost, the payload is permanently sealed.
-        </label>
-      </div>
-
-      <button id="save-btn" disabled
-        class="w-full bg-gold-500 hover:bg-gold-400 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed text-zinc-950 font-bold py-4 px-6 rounded-xl transition-all active:scale-95 flex justify-center items-center gap-2">
-        <span>Encrypt & Seal Letter</span>
-      </button>
-
-      <div id="share-section" class="mt-6 hidden bg-zinc-950 rounded-xl border border-dashed border-gold-500/50 p-4 text-center">
-        <p class="text-xs font-bold text-gold-500 uppercase tracking-wider mb-2">Transmission Link Generated</p>
-        <div id="share-url" class="font-mono text-sm text-zinc-300 break-all mb-4 select-all"></div>
-        <button id="copy-btn" class="bg-zinc-800 hover:bg-zinc-700 text-white text-sm py-2 px-4 rounded-lg transition-colors border border-zinc-600">
-          Copy Link
-        </button>
-      </div>
-    </section>
-2. Update the Unlock View (HTML)
-Add the Hint Display box inside your <section id="unlock-view">, right above the Passphrase input.
-
-HTML
-      <div id="hint-display" class="hidden mb-6 bg-zinc-900 border border-zinc-700 rounded-xl p-4 text-center">
-        <p class="text-xs font-bold text-gold-600 uppercase tracking-wider mb-1">Passphrase Hint Attached:</p>
-        <p id="hint-text" class="text-zinc-300 font-mono text-sm italic"></p>
-      </div>
-3. Update the JavaScript Logic
-In your <script type="module"> section, update the Save logic to require the checkbox and save the hint, and update the load logic to fetch the hint before the user tries to unlock it.
-
-Replace your existing save-btn listener, and add the new initUnlock logic:
-
-JavaScript
-    // -- NEW: Checkbox toggle logic --
-    document.getElementById('ack-checkbox').addEventListener('change', (e) => {
-      document.getElementById('save-btn').disabled = !e.target.checked;
-    });
-
-    // -- Handle Saving / Encrypting --
-    document.getElementById('save-btn').addEventListener('click', async () => {
-      const noteInput = document.getElementById('note-text');
-      const phraseInput = document.getElementById('phrase-input');
-      const hintInput = document.getElementById('hint-input');
-      const btn = document.getElementById('save-btn');
-      
-      const note = noteInput.value.trim();
-      const phrase = phraseInput.value.trim();
-      const hint = hintInput.value.trim(); // Grab the hint
-
-      if (!note || !phrase) { showToast('Payload and Key are required.', 'error'); playErrorSound(); return; }
-
-      try {
-        btn.disabled = true;
-        btn.innerHTML = `<span class="animate-pulse">Encrypting...</span>`;
-        
-        const id = Math.random().toString(36).slice(2, 12);
-        const encrypted = await encrypt(note, normalizePassphrase(phrase));
-        
-        // Save to Firebase (h = hint, c = ciphertext, t = timestamp)
-        await set(ref(db, `notes/${id}`), { c: encrypted, h: hint, t: Date.now() });
-        
-        playActionSound();
-        const url = `${location.origin}${location.pathname}#${id}`;
-        document.getElementById('share-url').textContent = url;
-        document.getElementById('share-section').classList.remove('hidden');
-        
-        showToast('Payload sealed and ready for transmission.', 'success');
-        noteInput.disabled = true; phraseInput.disabled = true; hintInput.disabled = true;
-        btn.innerHTML = `<span>Sealed</span>`;
-
-      } catch (err) {
-        showToast('Encryption or network failure.', 'error');
-        btn.disabled = false;
-        btn.innerHTML = `<span>Encrypt & Seal Letter</span>`;
-      }
-    });
-
-    // -- NEW: Fetch Hint on Page Load if URL has a Hash --
-    async function initUnlock() {
-      const id = location.hash.slice(1);
-      if (!id) return;
-
-      try {
-        const snap = await get(ref(db, `notes/${id}`));
-        if (snap.exists() && snap.val().h) {
-          // If a hint exists in the database, show it to the user
-          document.getElementById('hint-display').classList.remove('hidden');
-          document.getElementById('hint-text').textContent = `"${snap.val().h}"`;
-        }
-      } catch (err) {
-        console.error("Failed to fetch hint", err);
-      }
-    }
-
-    // Update the View Management to trigger the new initUnlock function
-    function updateView() {
-      const composeView = document.getElementById('compose-view');
-      const unlockView = document.getElementById('unlock-view');
-      
-      if (location.hash.length > 1) {
-        composeView.classList.add('hidden');
-        unlockView.classList.remove('hidden');
-        initUnlock(); // Call our new function
-      } else {
-        composeView.classList.remove('hidden');
-        unlockView.classList.add('hidden');
-      }
-    }
-Now, the user is forced to physically check a box stating they understand there is no recovery, and they have the option to leave a breadcrumb for whoever is receiving the link.
-
-no where can I input my passphrase to recover what I said before your failing the concept
-
-I hear you, and I completely understand why that feels like a massive design flaw. On 99% of the web, a "Forgot Password" or recovery button is an absolute requirement.
-
-But here is the reality of the concept we are building: True End-to-End Encryption mathematically cannot have a recovery button. It's actually a feature, not a bug.
-
-Here is why the concept works this way:
-
-The "Titanium Safe" Rule: Right now, your passphrase isn't just a password; it is the physical key that scrambles the text. The database (Firebase) never sees your passphrase. It only sees the scrambled mess.
-
-The Vulnerability of Recovery: If we build a way to "recover" or "reset" the passphrase, it means the server has to know what your passphrase is, or it has to hold a master skeleton key. If the server has a skeleton key, the letter isn't truly "sealed" anymore—anyone with database access could read it.
-
-The whole point of the "Burn After Reading" encryption concept is that if you lose the key, the safe is permanently bricked. That is what makes it military-grade secure.
-
-That is exactly why I added the Public Hint field in the last update. That hint is the only safety net allowed in a true E2EE system to jog your memory without breaking the encryption.
-
-We have a fundamental architectural choice to make. Do you want to keep this as a hardcore, zero-knowledge encryption tool where lost keys equal dead letters, or would you rather I rewrite the app to use standard user accounts so we can build a proper password reset flow?
-
-no, I think you broke my site. Tell me my sites purpose and lets stick with that
-
-You are completely right. I lost the plot and started over-engineering a solution to a problem that wasn't there. Let's reset and stick strictly to your vision.
-
-The purpose of Sealed Letter is to act as a secure, zero-trust digital dead-drop. It is a client-side encrypted messaging tool. You write a secret, lock it with a unique phrase, generate a link, and send it.
-
-It is not an account-based system. You aren't creating a persistent "login" password that needs recovering; you are forging a temporary, one-time key for a specific payload. The database never sees the key, only the scrambled text. That design is exactly what makes the tool secure and aligns perfectly with strict cybersecurity principles.
-
-Your original concept was already correct. The sender simply needs to communicate the passphrase to the receiver through a separate, secure channel (like in person or via text).
-
-Do you want me to give you the exact logic from your first uploaded file, just wrapped in the upgraded black-and-gold visual style?
-
-yes fix my site then send me the completed html file
-
-Your HTML file is ready:
-HTML icon
- sealed-letter-v2 
-HTML
-
-I've generated the complete HTML file incorporating the terminal aesthetic, Three.js particles, Tone.js audio, and the critical public hint / acknowledgment checkbox for the E2EE flow. Download the file above to test it directly in your browser.
-
-
-
-
-
-Gemini is AI and can make mistakes.
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sealed Letter | Secure Transmissions</title>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Courier+Prime&display=swap" rel="stylesheet">
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            mono: ['Courier Prime', 'monospace'],
-          },
-          colors: {
-            gold: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' },
-            zinc: { 850: '#202024', 950: '#09090b' }
-          }
-        }
-      }
-    }
-  </script>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-
-  <style>
-    body { background-color: #09090b; color: #e4e4e7; overflow-x: hidden; }
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: #09090b; }
-    ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
-    #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
-    .fade-enter { opacity: 0; transform: translateY(10px); }
-    .fade-enter-active { opacity: 1; transform: translateY(0); transition: opacity 400ms, transform 400ms; }
-    .hidden { display: none !important; }
-  </style>
-</head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4 antialiased relative">
-
-  <div id="canvas-container" aria-hidden="true"></div>
-  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 w-full max-w-xs"></div>
-
-  <main class="w-full max-w-xl z-10">
-    <header class="text-center mb-8">
-      <h1 class="text-4xl font-extrabold tracking-tight text-white mb-2">SEALED <span class="text-gold-500">LETTER</span></h1>
-      <p class="text-zinc-400 text-sm font-mono">End-to-end encrypted protocol. Burn on read.</p>
-    </header>
-
-    <section id="compose-view" class="bg-zinc-850/80 backdrop-blur-md rounded-2xl p-6 border border-zinc-800 shadow-2xl transition-all duration-300">
-      <div class="mb-6">
-        <label for="note-text" class="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">The Payload</label>
-        <textarea id="note-text" rows="6" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-4 text-zinc-200 font-mono focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all resize-none placeholder-zinc-600" placeholder="Enter the transmission data here..."></textarea>
-      </div>
-
-      <div class="mb-6">
-        <label for="phrase-input" class="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Decryption Key (Passphrase)</label>
-        <input type="text" id="phrase-input" autocomplete="off" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-4 text-zinc-200 font-mono focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all placeholder-zinc-600" placeholder="e.g., hunter2">
-      </div>
-
-      <div class="mb-6">
-        <label for="hint-input" class="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Public Hint (Optional)</label>
-        <input type="text" id="hint-input" autocomplete="off" class="w-full bg-zinc-950/50 border border-zinc-800 rounded-xl p-3 text-sm text-zinc-300 font-mono focus:outline-none focus:ring-1 focus:ring-gold-600 transition-all placeholder-zinc-700" placeholder="e.g., The name of our first dog">
-      </div>
-
-      <div class="mb-6 flex items-start gap-3 bg-red-950/20 border border-red-900/30 p-3 rounded-lg">
-        <input type="checkbox" id="ack-checkbox" class="mt-1 w-4 h-4 accent-red-600 bg-zinc-900 border-zinc-700 rounded cursor-pointer">
-        <label for="ack-checkbox" class="text-xs text-zinc-400 font-mono cursor-pointer select-none">
-          I understand there is <strong class="text-red-400">no password recovery</strong>. If this key is lost, the payload is permanently sealed.
-        </label>
-      </div>
-
-      <button id="save-btn" disabled class="w-full bg-gold-500 hover:bg-gold-400 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed text-zinc-950 font-bold py-4 px-6 rounded-xl transition-all active:scale-95 flex justify-center items-center gap-2">
-        <span>Encrypt & Seal Letter</span>
-      </button>
-
-      <div id="share-section" class="mt-6 hidden bg-zinc-950 rounded-xl border border-dashed border-gold-500/50 p-4 text-center">
-        <p class="text-xs font-bold text-gold-500 uppercase tracking-wider mb-2">Transmission Link Generated</p>
-        <div id="share-url" class="font-mono text-sm text-zinc-300 break-all mb-4 select-all"></div>
-        <button id="copy-btn" class="bg-zinc-800 hover:bg-zinc-700 text-white text-sm py-2 px-4 rounded-lg transition-colors border border-zinc-600">Copy Link</button>
-      </div>
-    </section>
-
-    <section id="unlock-view" class="hidden bg-zinc-850/80 backdrop-blur-md rounded-2xl p-6 border border-zinc-800 shadow-2xl transition-all duration-300">
-      <div class="text-center mb-6">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-zinc-950 border border-gold-500 mb-4">
-          <svg class="w-8 h-8 text-gold-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-        </div>
-        <h2 class="text-xl font-bold text-white">Encrypted Transmission Found</h2>
-        <p class="text-sm text-zinc-400 font-mono mt-1">Provide the decryption key to access payload.</p>
-      </div>
-
-      <div id="hint-display" class="hidden mb-6 bg-zinc-900 border border-zinc-700 rounded-xl p-4 text-center">
-        <p class="text-xs font-bold text-gold-600 uppercase tracking-wider mb-1">Passphrase Hint Attached:</p>
-        <p id="hint-text" class="text-zinc-300 font-mono text-sm italic"></p>
-      </div>
-
-      <div class="mb-6">
-        <input type="text" id="unlock-input" autocomplete="off" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-4 text-zinc-200 font-mono text-center focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all placeholder-zinc-600" placeholder="Enter Passphrase">
-      </div>
-
-      <button id="unlock-btn" class="w-full bg-gold-500 hover:bg-gold-400 text-zinc-950 font-bold py-4 px-6 rounded-xl transition-all active:scale-95">Break Seal & Read</button>
-
-      <div id="note-reveal" class="mt-6 hidden border-t border-zinc-700 pt-6">
-        <p class="text-xs font-bold text-green-500 uppercase tracking-wider mb-2 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Decryption Successful</p>
-        <div id="note-content" class="bg-zinc-950 rounded-xl p-4 font-mono text-zinc-200 whitespace-pre-wrap border border-zinc-800"></div>
-        <div class="mt-6 flex justify-center">
-           <button onclick="window.location.href = window.location.pathname" class="text-sm text-zinc-400 hover:text-white transition-colors underline">Compose a new letter</button>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyADPRoMDwuS_U1DcY_3N2UjVyKn8pBFv3s",
-      authDomain: "sealed-letter-f3af5.firebaseapp.com",
-      databaseURL: "https://sealed-letter-f3af5-default-rtdb.firebaseio.com",
-      projectId: "sealed-letter-f3af5",
-      storageBucket: "sealed-letter-f3af5.firebasestorage.app",
-      messagingSenderId: "778056799822",
-      appId: "1:778056799822:web:9f1b9ffb42d74604cc151f"
-    };
-
-    let db;
-    try {
-      const app = initializeApp(firebaseConfig);
-      db = getDatabase(app);
-    } catch (err) { console.error("Firebase Init Error:", err); }
-
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      let bgColor = 'bg-zinc-800', border = 'border-zinc-600', icon = 'ℹ️';
-      if (type === 'error') { bgColor = 'bg-red-950'; border = 'border-red-800'; icon = '⚠️'; }
-      if (type === 'success') { bgColor = 'bg-green-950'; border = 'border-green-800'; icon = '✓'; }
-      toast.className = `${bgColor} text-white px-4 py-3 rounded-lg shadow-lg border ${border} flex items-center gap-3 font-mono text-sm transform transition-all duration-300 translate-x-full opacity-0`;
-      toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
-      container.appendChild(toast);
-      requestAnimationFrame(() => toast.classList.remove('translate-x-full', 'opacity-0'));
-      setTimeout(() => {
-        toast.classList.add('translate-x-full', 'opacity-0');
-        setTimeout(() => toast.remove(), 300);
-      }, 4000);
-    }
-
-    let audioInitialized = false;
-    const uiSynth = new Tone.PolySynth(Tone.FMSynth).toDestination();
-    uiSynth.set({ envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 1 }, harmonicity: 3, modulationIndex: 10 });
-    const noiseSynth = new Tone.NoiseSynth({ noise: { type: "brown" }, envelope: { attack: 0.05, decay: 0.8, sustain: 0.1, release: 2 } }).toDestination();
-    const filter = new Tone.Filter(800, "lowpass").toDestination();
-    noiseSynth.connect(filter);
-
-    async function initAudio() { if (!audioInitialized) { await Tone.start(); audioInitialized = true; } }
-    function playActionSound() { if(audioInitialized) uiSynth.triggerAttackRelease(["C4", "E4", "G4"], "16n"); }
-    function playUnlockSound() { if(audioInitialized) { noiseSynth.triggerAttackRelease("4n"); uiSynth.triggerAttackRelease(["C2", "G2"], "8n"); } }
-    function playErrorSound() { if(audioInitialized) uiSynth.triggerAttackRelease(["C3", "Db3"], "8n"); }
-
-    document.body.addEventListener('pointerdown', initAudio, { once: true });
-    document.body.addEventListener('keydown', initAudio, { once: true });
-
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x09090b, 0.002);
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
-    camera.position.z = 100;
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    document.getElementById('canvas-container').appendChild(renderer.domElement);
-
-    const particleCount = 200;
-    const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(particleCount * 3);
-    const velocities = [];
-
-    for (let i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 400;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 400;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 200;
-      velocities.push({ x: (Math.random() - 0.5) * 0.2, y: Math.random() * 0.5 + 0.1 });
-    }
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const material = new THREE.PointsMaterial({ color: 0xf59e0b, size: 1.5, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending });
-    const particles = new THREE.Points(geometry, material);
-    scene.add(particles);
-
-    function animate() {
-      requestAnimationFrame(animate);
-      const positions = particles.geometry.attributes.position.array;
-      for (let i = 0; i < particleCount; i++) {
-        positions[i * 3 + 1] += velocities[i].y;
-        positions[i * 3] += velocities[i].x;
-        if (positions[i * 3 + 1] > 200) { positions[i * 3 + 1] = -200; positions[i * 3] = (Math.random() - 0.5) * 400; }
-      }
-      particles.geometry.attributes.position.needsUpdate = true;
-      particles.rotation.y += 0.001;
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    const enc = new TextEncoder(), dec = new TextDecoder();
-    async function deriveKey(phrase, salt) {
-      const raw = await crypto.subtle.importKey("raw", enc.encode(phrase), "PBKDF2", false, ["deriveKey"]);
-      return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: 200000, hash: "SHA-256" }, raw, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
-    }
-    async function encrypt(text, phrase) {
-      const salt = crypto.getRandomValues(new Uint8Array(16));
-      const iv = crypto.getRandomValues(new Uint8Array(12));
-      const key = await deriveKey(phrase, salt);
-      const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(text));
-      const buf = new Uint8Array(salt.byteLength + iv.byteLength + ct.byteLength);
-      buf.set(salt, 0); buf.set(iv, 16); buf.set(new Uint8Array(ct), 28);
-      return btoa(String.fromCharCode(...buf));
-    }
-    async function decrypt(b64, phrase) {
-      const buf = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-      const salt = buf.slice(0, 16), iv = buf.slice(16, 28), ct = buf.slice(28);
-      const key = await deriveKey(phrase, salt);
-      const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
-      return dec.decode(pt);
-    }
-    const normalizePassphrase = p => p.toLowerCase().replace(/\s+/g, ' ').trim();
-
-    async function initUnlock() {
-      const id = location.hash.slice(1);
-      if (!id) return;
-      try {
-        const snap = await get(ref(db, `notes/${id}`));
-        if (snap.exists() && snap.val().h) {
-          document.getElementById('hint-display').classList.remove('hidden');
-          document.getElementById('hint-text').textContent = `"${snap.val().h}"`;
-        }
-      } catch (err) { console.error("Failed to fetch hint", err); }
-    }
-
-    function updateView() {
-      const composeView = document.getElementById('compose-view');
-      const unlockView = document.getElementById('unlock-view');
-      if (location.hash.length > 1) {
-        composeView.classList.add('hidden');
-        unlockView.classList.remove('hidden');
-        initUnlock();
-      } else {
-        composeView.classList.remove('hidden');
-        unlockView.classList.add('hidden');
-      }
-    }
-    window.addEventListener('hashchange', updateView);
-    updateView();
-
-    document.getElementById('ack-checkbox').addEventListener('change', (e) => {
-      document.getElementById('save-btn').disabled = !e.target.checked;
-    });
-
-    document.getElementById('save-btn').addEventListener('click', async () => {
-      const noteInput = document.getElementById('note-text');
-      const phraseInput = document.getElementById('phrase-input');
-      const hintInput = document.getElementById('hint-input');
-      const btn = document.getElementById('save-btn');
-      const note = noteInput.value.trim();
-      const phrase = phraseInput.value.trim();
-      const hint = hintInput.value.trim();
-
-      if (!note || !phrase) { showToast('Payload and Key are required.', 'error'); playErrorSound(); return; }
-
-      try {
-        btn.disabled = true;
-        btn.innerHTML = `<span class="animate-pulse">Encrypting...</span>`;
-        const id = Math.random().toString(36).slice(2, 12);
-        const encrypted = await encrypt(note, normalizePassphrase(phrase));
-        await set(ref(db, `notes/${id}`), { c: encrypted, h: hint, t: Date.now() });
-        playActionSound();
-        const url = `${location.origin}${location.pathname}#${id}`;
-        document.getElementById('share-url').textContent = url;
-        document.getElementById('share-section').classList.remove('hidden');
-        showToast('Payload sealed and ready for transmission.', 'success');
-        noteInput.disabled = true; phraseInput.disabled = true; hintInput.disabled = true;
-        btn.innerHTML = `<span>Sealed</span>`;
-      } catch (err) {
-        showToast('Encryption or network failure.', 'error');
-        btn.disabled = false;
-        btn.innerHTML = `<span>Encrypt & Seal Letter</span>`;
-      }
-    });
-
-    document.getElementById('copy-btn').addEventListener('click', async () => {
-      const url = document.getElementById('share-url').textContent;
-      try { await navigator.clipboard.writeText(url); showToast('Link copied to clipboard.', 'info'); playActionSound(); }
-      catch (err) { showToast('Failed to copy. Please copy manually.', 'error'); }
-    });
-
-    document.getElementById('unlock-btn').addEventListener('click', async () => {
-      const phrase = document.getElementById('unlock-input').value.trim();
-      const id = location.hash.slice(1);
-      const btn = document.getElementById('unlock-btn');
-
-      if (!phrase) { showToast('Passphrase required.', 'error'); playErrorSound(); return; }
-
-      try {
-        btn.disabled = true;
-        btn.innerHTML = `<span class="animate-pulse">Decrypting...</span>`;
-        const snap = await get(ref(db, `notes/${id}`));
-        
-        if (!snap.exists()) {
-          showToast('Data missing or already destroyed.', 'error'); playErrorSound();
-          btn.disabled = false; btn.innerHTML = `<span>Break Seal & Read</span>`;
-          return;
-        }
-
-        const text = await decrypt(snap.val().c, normalizePassphrase(phrase));
-        await remove(ref(db, `notes/${id}`));
         playUnlockSound();
-        showToast('Seal broken. Data destroyed from servers.', 'success');
-        
-        for (let i = 0; i < particleCount; i++) { velocities[i].y += (Math.random() * 2); velocities[i].x *= 3; }
-        material.color.setHex(0xef4444);
+        showToast('Seal broken. Letter destroyed from server.', 'ok');
 
-        document.getElementById('unlock-input').disabled = true;
+        inputEl.disabled = true;
         btn.classList.add('hidden');
-        document.getElementById('note-reveal').classList.remove('hidden');
-        document.getElementById('note-content').textContent = text;
+
+        const reveal  = document.getElementById('note-reveal');
+        const content = document.getElementById('note-content');
+        content.textContent = plaintext;
+        reveal.classList.remove('hidden');
+        reveal.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
       } catch (err) {
-        showToast('Decryption failed. Invalid Key.', 'error'); playErrorSound();
-        btn.disabled = false; btn.innerHTML = `<span>Break Seal & Read</span>`;
+        console.error(err);
+        showToast('Decryption failed. Double-check the passphrase.', 'err');
+        playErrorSound();
+        btn.disabled  = false;
+        btn.innerHTML = 'Break the Seal & Read';
+        inputEl.select();
       }
     });
 
-    document.getElementById('phrase-input').addEventListener('keydown', (e) => { if(e.key === 'Enter' && !document.getElementById('save-btn').disabled) document.getElementById('save-btn').click(); });
-    document.getElementById('unlock-input').addEventListener('keydown', (e) => { if(e.key === 'Enter') document.getElementById('unlock-btn').click(); });
+    // ── "Compose a new letter" resets to compose tab ─────────────────
+    document.getElementById('new-letter-btn').addEventListener('click', () => {
+      showTab('compose');
+      document.getElementById('note-reveal').classList.add('hidden');
+      document.getElementById('note-content').textContent = '';
+      document.getElementById('unlock-input').value = '';
+      document.getElementById('unlock-input').disabled = false;
+      document.getElementById('unlock-btn').classList.remove('hidden');
+      document.getElementById('unlock-btn').innerHTML = 'Break the Seal & Read';
+      document.getElementById('unlock-btn').disabled = false;
+    });
+
+    // ── Enter key shortcuts ──────────────────────────────────────────
+    document.getElementById('phrase-input').addEventListener('keydown',  e => { if (e.key === 'Enter') document.getElementById('save-btn').click(); });
+    document.getElementById('unlock-input').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('unlock-btn').click(); });
+
   </script>
 </body>
 </html>
-sealed-letter-v2.html
-Displaying sealed-letter-v2.html.
