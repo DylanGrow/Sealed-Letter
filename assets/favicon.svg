@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="wax" cx="50%" cy="35%">
+      <stop offset="0%" stop-color="#b52a2a"/>
+      <stop offset="100%" stop-color="#6d1111"/>
+    </radialGradient>
+  </defs>
+
+  <circle
+    cx="256"
+    cy="256"
+    r="220"
+    fill="url(#wax)"
+    stroke="#4d0b0b"
+    stroke-width="16"/>
+
+  <path
+    d="M176 224v-40c0-44 36-80 80-80s80 36 80 80v40"
+    fill="none"
+    stroke="#f4e8c8"
+    stroke-width="28"
+    stroke-linecap="round"/>
+
+  <rect
+    x="156"
+    y="224"
+    width="200"
+    height="160"
+    rx="24"
+    fill="#f4e8c8"/>
+
+  <circle
+    cx="256"
+    cy="292"
+    r="18"
+    fill="#6d1111"/>
+
+  <rect
+    x="248"
+    y="292"
+    width="16"
+    height="40"
+    rx="8"
+    fill="#6d1111"/>
+</svg>
